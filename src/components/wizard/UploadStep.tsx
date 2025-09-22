@@ -55,13 +55,23 @@ export const UploadStep = ({ onSubmit, mode }: UploadStepProps) => {
           
           <TabsContent value="url" className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Lovable Project URL</label>
+              <label className="text-sm font-medium">
+                {mode === 'export' ? 'Lovable Project URL' : 'Project URL'}
+              </label>
               <Input
-                placeholder="https://lovable.dev/projects/your-project-id"
+                placeholder={mode === 'export' 
+                  ? "https://lovable.dev/projects/your-project-id or https://yourproject.lovable.app"
+                  : "https://example.com or project URL"
+                }
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 className="h-12"
               />
+              {mode === 'export' && (
+                <p className="text-xs text-muted-foreground">
+                  💡 Tip: Any Lovable project URL works - published sites, staging URLs, or direct project links
+                </p>
+              )}
             </div>
             <Button 
               onClick={handleUrlSubmit} 

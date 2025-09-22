@@ -1,72 +1,48 @@
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Upload, Download, ArrowRight } from "lucide-react";
+import { Download, Upload, ArrowRight, Sparkles, RefreshCw } from "lucide-react";
+import { FlowType } from "@/types/project";
+import { IterationFlowStep } from "./wizard/IterationFlowStep";
 
 interface StartScreenProps {
-  onSelectFlow: (flow: 'export' | 'import') => void;
+  onSelectFlow: (flow: FlowType) => void;
 }
 
 export const StartScreen = ({ onSelectFlow }: StartScreenProps) => {
   return (
-    <Card className="w-full max-w-4xl mx-auto">
-      <CardHeader className="text-center">
-        <CardTitle className="text-3xl">Project Bridge MVP</CardTitle>
-        <CardDescription className="text-lg">
-          Export, refine, and re-import your Lovable projects with precision
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="p-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Export Project Button */}
-          <Card className="cursor-pointer transition-all hover:shadow-lg border-2 hover:border-primary">
-            <CardContent className="p-8 text-center">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                <Download className="w-8 h-8 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Export Project</h3>
-              <p className="text-muted-foreground mb-6">
-                Download your Lovable project as JSON, Markdown, or bundled UAP format for backup or collaboration.
-              </p>
-              <Button 
-                size="lg" 
-                className="w-full flex items-center gap-2"
-                onClick={() => onSelectFlow('export')}
-              >
-                Start Export
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </CardContent>
-          </Card>
+    <div className="space-y-8">
+      <div className="text-center">
+        <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          Project Bridge MVP
+        </h1>
+        <p className="text-2xl text-muted-foreground max-w-4xl mx-auto">
+          The easiest way to iterate on Lovable projects using AI. No code required.
+        </p>
+      </div>
 
-          {/* Import Project Button */}
-          <Card className="cursor-pointer transition-all hover:shadow-lg border-2 hover:border-primary">
-            <CardContent className="p-8 text-center">
-              <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-4">
-                <Upload className="w-8 h-8 text-success" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Import Project</h3>
-              <p className="text-muted-foreground mb-6">
-                Import a project from URL or file (JSON, ZIP, UAP) to create a new Lovable project.
-              </p>
-              <Button 
-                size="lg" 
-                variant="outline"
-                className="w-full flex items-center gap-2 border-success text-success hover:bg-success hover:text-white"
-                onClick={() => onSelectFlow('import')}
-              >
-                Start Import
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+      <IterationFlowStep 
+        onStartExport={() => onSelectFlow('export')}
+        onStartImport={() => onSelectFlow('import')}
+      />
 
-        <div className="mt-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            <strong>Recommended:</strong> Use .uap format for best compatibility and file sharing.
-          </p>
-        </div>
-      </CardContent>
-    </Card>
+      <div className="max-w-4xl mx-auto">
+        <Card className="bg-gradient-to-r from-indigo-50 to-cyan-50 border-indigo-200">
+          <CardContent className="p-8 text-center">
+            <div className="w-16 h-16 bg-indigo-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <RefreshCw className="w-8 h-8 text-white" />
+            </div>
+            <h3 className="text-xl font-semibold mb-3">🎯 Perfect for Non-Coders</h3>
+            <p className="text-muted-foreground mb-4">
+              Big buttons, clear steps, AI assistance - no technical knowledge required
+            </p>
+            <div className="flex flex-wrap justify-center gap-2 text-sm">
+              <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full">Simple Wizard</span>
+              <span className="px-3 py-1 bg-cyan-100 text-cyan-700 rounded-full">AI Powered</span>
+              <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full">No Code</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
