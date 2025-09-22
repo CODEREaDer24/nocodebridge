@@ -1,3 +1,4 @@
+import React from "react";
 import { ProjectWizard } from "@/components/ProjectWizard";
 
 const Index = () => {
