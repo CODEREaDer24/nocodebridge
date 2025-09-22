@@ -7,9 +7,10 @@ import { Upload, Link, FileText } from "lucide-react";
 
 interface UploadStepProps {
   onSubmit: (data: { type: 'url' | 'file'; value: string | File }) => void;
+  mode: 'export' | 'import';
 }
 
-export const UploadStep = ({ onSubmit }: UploadStepProps) => {
+export const UploadStep = ({ onSubmit, mode }: UploadStepProps) => {
   const [url, setUrl] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [activeTab, setActiveTab] = useState("url");
@@ -31,9 +32,12 @@ export const UploadStep = ({ onSubmit }: UploadStepProps) => {
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Import Your Project</CardTitle>
+        <CardTitle className="text-2xl">{mode === 'export' ? 'Analyze Your Project' : 'Import Your Project'}</CardTitle>
         <CardDescription>
-          Start by providing your Lovable project URL or uploading a project file
+          {mode === 'export' 
+            ? 'Start by providing your Lovable project URL or uploading a project file to analyze'
+            : 'Provide your project URL or upload a file (.json, .zip, or .uap) to import'
+          }
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -65,7 +69,7 @@ export const UploadStep = ({ onSubmit }: UploadStepProps) => {
               className="w-full h-12"
               size="lg"
             >
-              Analyze Project
+              {mode === 'export' ? 'Analyze Project' : 'Import Project'}
             </Button>
           </TabsContent>
           
@@ -77,11 +81,13 @@ export const UploadStep = ({ onSubmit }: UploadStepProps) => {
                 </div>
                 <div>
                   <p className="text-sm font-medium">Upload project file</p>
-                  <p className="text-xs text-muted-foreground">JSON or ZIP files supported</p>
+                  <p className="text-xs text-muted-foreground">
+                    {mode === 'import' ? 'JSON, ZIP, or UAP files supported' : 'JSON or ZIP files supported'}
+                  </p>
                 </div>
                 <input
                   type="file"
-                  accept=".json,.zip"
+                  accept={mode === 'import' ? ".json,.zip,.uap" : ".json,.zip"}
                   onChange={handleFileSelect}
                   className="hidden"
                   id="file-upload"

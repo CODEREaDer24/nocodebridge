@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 
 interface ExportStepProps {
   project: ProjectStructure;
-  onExport: (format: 'json' | 'zip' | 'markdown', data?: string) => void;
+  onExport: (format: 'json' | 'zip' | 'markdown' | 'uap', data?: string) => void;
 }
 
 export const ExportStep = ({ project, onExport }: ExportStepProps) => {
@@ -38,20 +38,20 @@ export const ExportStep = ({ project, onExport }: ExportStepProps) => {
 
   const exportOptions = [
     {
+      format: 'uap' as const,
+      title: 'UAP Bundle (Recommended)',
+      description: 'Universal App Package - best for sharing and importing',
+      icon: Package,
+      color: 'bg-primary',
+      benefits: ['Best compatibility', 'Complete bundle', 'Easy sharing', 'Perfect re-import']
+    },
+    {
       format: 'json' as const,
       title: 'JSON Export',
       description: 'Perfect for exact duplication and re-import',
       icon: FileJson,
-      color: 'bg-primary',
+      color: 'bg-secondary',
       benefits: ['Exact duplication', 'Perfect re-import', 'All data preserved']
-    },
-    {
-      format: 'zip' as const,
-      title: 'ZIP Package',
-      description: 'Bundled export with project files',
-      icon: Package,
-      color: 'bg-info',
-      benefits: ['Self-contained', 'Easy sharing', 'Includes metadata']
     },
     {
       format: 'markdown' as const,

@@ -47,7 +47,7 @@ export interface WorkflowInfo {
 export interface ExportRecord {
   id: string;
   projectId: string;
-  format: 'json' | 'zip' | 'markdown';
+  format: 'json' | 'zip' | 'markdown' | 'uap';
   createdAt: Date;
   size?: number;
 }
@@ -55,9 +55,10 @@ export interface ExportRecord {
 export interface ImportRecord {
   id: string;
   projectId: string;
-  source: 'json' | 'zip' | 'url';
+  source: 'json' | 'zip' | 'url' | 'uap';
   createdAt: Date;
   success: boolean;
 }
 
-export type WizardStep = 'input' | 'detect' | 'preview' | 'export' | 'import';
+export type WizardStep = 'start' | 'input' | 'detect' | 'preview' | 'export' | 'import' | 'import-preview';
+export type FlowType = 'export' | 'import';

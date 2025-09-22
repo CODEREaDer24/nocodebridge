@@ -21,49 +21,10 @@ export default function History() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
 
-  // Mock data
+  // Real data only - no mock/demo entries
   const records: HistoryRecord[] = [
-    {
-      id: '1',
-      projectName: 'E-commerce Dashboard',
-      type: 'export',
-      format: 'json',
-      timestamp: new Date('2024-01-15T10:30:00'),
-      size: '245 KB',
-      status: 'success'
-    },
-    {
-      id: '2',
-      projectName: 'Portfolio Website',
-      type: 'export',
-      format: 'markdown',
-      timestamp: new Date('2024-01-14T15:45:00'),
-      size: '89 KB',
-      status: 'success'
-    },
-    {
-      id: '3',
-      projectName: 'Task Manager App',
-      type: 'import',
-      timestamp: new Date('2024-01-13T09:15:00'),
-      status: 'success'
-    },
-    {
-      id: '4',
-      projectName: 'Blog Platform',
-      type: 'export',
-      format: 'zip',
-      timestamp: new Date('2024-01-12T14:20:00'),
-      size: '512 KB',
-      status: 'failed'
-    },
-    {
-      id: '5',
-      projectName: 'Social Media Tool',
-      type: 'import',
-      timestamp: new Date('2024-01-11T11:00:00'),
-      status: 'pending'
-    }
+    // This would be populated from actual export/import operations
+    // For now, it's empty until real operations are performed
   ];
 
   const filteredRecords = records.filter(record => {
@@ -84,7 +45,8 @@ export default function History() {
   const getFormatIcon = (format?: string) => {
     switch (format) {
       case 'json': return FileJson;
-      case 'zip': return Package;
+      case 'zip': 
+      case 'uap': return Package;
       case 'markdown': return FileText;
       default: return FileText;
     }

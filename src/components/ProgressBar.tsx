@@ -5,16 +5,32 @@ interface ProgressBarProps {
   currentStep: WizardStep;
 }
 
-const steps: { key: WizardStep; label: string }[] = [
-  { key: 'input', label: 'Input' },
-  { key: 'detect', label: 'Detect' },
-  { key: 'preview', label: 'Preview' },
-  { key: 'export', label: 'Export' },
-  { key: 'import', label: 'Import' },
-];
-
 export const ProgressBar = ({ currentStep }: ProgressBarProps) => {
+  const getStepsForCurrentFlow = () => {
+    if (currentStep === 'import-preview') {
+      return [
+        { key: 'input' as WizardStep, label: 'Input' },
+        { key: 'detect' as WizardStep, label: 'Detect' },
+        { key: 'import-preview' as WizardStep, label: 'Preview' },
+      ];
+    }
+    
+    return [
+      { key: 'input' as WizardStep, label: 'Input' },
+      { key: 'detect' as WizardStep, label: 'Detect' },
+      { key: 'preview' as WizardStep, label: 'Preview' },
+      { key: 'export' as WizardStep, label: 'Export' },
+      { key: 'import' as WizardStep, label: 'Import' },
+    ];
+  };
+
+  const steps = getStepsForCurrentFlow();
   const currentIndex = steps.findIndex(step => step.key === currentStep);
+
+  // Don't show progress bar for start step
+  if (currentStep === 'start') {
+    return null;
+  }
 
   return (
     <div className="w-full mb-8">
