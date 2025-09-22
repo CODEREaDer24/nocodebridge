@@ -60,5 +60,5 @@ export interface ImportRecord {
   success: boolean;
 }
 
-export type WizardStep = 'start' | 'input' | 'detect' | 'preview' | 'export' | 'import' | 'import-preview';
+export type WizardStep = 'start' | 'input' | 'detect' | 'preview' | 'export' | 'import' | 'import-preview' | 'ai-refinement' | 'export-prompt';
 export type FlowType = 'export' | 'import';

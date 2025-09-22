@@ -13,16 +13,17 @@ import {
   Workflow,
   AlertCircle,
   CheckCircle,
-  ExternalLink
+  ExternalLink,
+  ArrowRight
 } from "lucide-react";
 
 interface ImportPreviewStepProps {
   project: ProjectStructure;
-  onImport: () => void;
+  onNext: () => void;
   loading?: boolean;
 }
 
-export const ImportPreviewStep = ({ project, onImport, loading }: ImportPreviewStepProps) => {
+export const ImportPreviewStep = ({ project, onNext, loading }: ImportPreviewStepProps) => {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     pages: true,
     components: false,
@@ -215,7 +216,7 @@ export const ImportPreviewStep = ({ project, onImport, loading }: ImportPreviewS
         </Collapsible>
       </Card>
 
-      {/* Import Action */}
+      {/* Next Action */}
       <Card className="bg-gradient-to-r from-success/10 to-primary/10 border-success">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
@@ -224,29 +225,20 @@ export const ImportPreviewStep = ({ project, onImport, loading }: ImportPreviewS
                 <ExternalLink className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold">Import into NEW Project</h3>
+                <h3 className="text-lg font-semibold">Continue to AI Refinement</h3>
                 <p className="text-muted-foreground">
-                  This will create a completely new Lovable project with this structure
+                  Generate a Lovable-friendly prompt from this project structure
                 </p>
               </div>
             </div>
             <Button 
-              onClick={onImport}
+              onClick={onNext}
               disabled={loading}
               size="lg"
               className="flex items-center gap-2"
             >
-              {loading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                  Creating...
-                </>
-              ) : (
-                <>
-                  <ExternalLink className="w-4 h-4" />
-                  Import to Lovable
-                </>
-              )}
+              <ArrowRight className="w-4 h-4" />
+              Next: Refine with AI
             </Button>
           </div>
         </CardContent>

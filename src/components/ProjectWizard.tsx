@@ -9,6 +9,8 @@ import { PreviewStep } from "./wizard/PreviewStep";
 import { ExportStep } from "./wizard/ExportStep";
 import { ImportStep } from "./wizard/ImportStep";
 import { ImportPreviewStep } from "./wizard/ImportPreviewStep";
+import { AIRefinementStep } from "./wizard/AIRefinementStep";
+import { ExportPromptStep } from "./wizard/ExportPromptStep";
 import { ProjectStructure, WizardStep, FlowType } from "@/types/project";
 import { ChevronLeft, ArrowLeft, History as HistoryIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -20,6 +22,7 @@ export const ProjectWizard = () => {
   const [currentFlow, setCurrentFlow] = useState<FlowType>('export');
   const [project, setProject] = useState<ProjectStructure | null>(null);
   const [loading, setLoading] = useState(false);
+  const [aiGeneratedPrompt, setAiGeneratedPrompt] = useState("");
   const { toast } = useToast();
 
   // Listen for proceed-to-export event
@@ -168,19 +171,20 @@ export const ProjectWizard = () => {
     }
   };
 
-  const handleImport = () => {
-    setLoading(true);
-    // Simulate import process
-    setTimeout(() => {
-      setLoading(false);
-      toast({
-        title: "Import successful",
-        description: "Your project has been imported as a new Lovable project",
-      });
-      // Reset wizard
-      setCurrentStep('start');
-      setProject(null);
-    }, 3000);
+  const handleAIRefinement = (prompt: string) => {
+    setAiGeneratedPrompt(prompt);
+    setCurrentStep('export-prompt');
+  };
+
+  const handleFinishImport = () => {
+    toast({
+      title: "Import process completed",
+      description: "Your project prompt is ready to be used in Lovable",
+    });
+    // Reset wizard
+    setCurrentStep('start');
+    setProject(null);
+    setAiGeneratedPrompt("");
   };
 
   const handleImportFromJson = (jsonData: string) => {
@@ -195,11 +199,12 @@ export const ProjectWizard = () => {
     setCurrentStep('start');
     setProject(null);
     setCurrentFlow('export');
+    setAiGeneratedPrompt("");
   };
 
   const goBack = () => {
     const steps: WizardStep[] = ['start', 'input', 'detect', 'preview', 'export', 'import'];
-    const importSteps: WizardStep[] = ['start', 'input', 'detect', 'import-preview'];
+    const importSteps: WizardStep[] = ['start', 'input', 'detect', 'import-preview', 'ai-refinement', 'export-prompt'];
     
     const currentSteps = currentFlow === 'import' ? importSteps : steps;
     const currentIndex = currentSteps.indexOf(currentStep);
@@ -228,7 +233,11 @@ export const ProjectWizard = () => {
       case 'import':
         return <ImportStep onImport={handleImportFromJson} />;
       case 'import-preview':
-        return project ? <ImportPreviewStep project={project} onImport={handleImport} loading={loading} /> : null;
+        return project ? <ImportPreviewStep project={project} onNext={() => setCurrentStep('ai-refinement')} loading={loading} /> : null;
+      case 'ai-refinement':
+        return project ? <AIRefinementStep project={project} onNext={handleAIRefinement} /> : null;
+      case 'export-prompt':
+        return <ExportPromptStep prompt={aiGeneratedPrompt} onBack={() => setCurrentStep('ai-refinement')} onFinish={handleFinishImport} />;
     }
   };
 

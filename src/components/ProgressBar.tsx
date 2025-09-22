@@ -7,11 +7,13 @@ interface ProgressBarProps {
 
 export const ProgressBar = ({ currentStep }: ProgressBarProps) => {
   const getStepsForCurrentFlow = () => {
-    if (currentStep === 'import-preview') {
+    if (['import-preview', 'ai-refinement', 'export-prompt'].includes(currentStep)) {
       return [
         { key: 'input' as WizardStep, label: 'Input' },
         { key: 'detect' as WizardStep, label: 'Detect' },
         { key: 'import-preview' as WizardStep, label: 'Preview' },
+        { key: 'ai-refinement' as WizardStep, label: 'AI Refine' },
+        { key: 'export-prompt' as WizardStep, label: 'Export' },
       ];
     }
     
