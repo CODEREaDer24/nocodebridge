@@ -77,19 +77,19 @@ export const DetectionStep = ({ project, loading }: DetectionStepProps) => {
 
         <div className="grid grid-cols-2 gap-4">
           <div className="text-center p-4 bg-accent rounded-lg">
-            <div className="text-2xl font-bold text-primary">{project.pages.length}</div>
+            <div className="text-2xl font-bold text-primary">{project.pages?.length || 0}</div>
             <div className="text-sm text-muted-foreground">Pages</div>
           </div>
           <div className="text-center p-4 bg-accent rounded-lg">
-            <div className="text-2xl font-bold text-primary">{project.components.length}</div>
+            <div className="text-2xl font-bold text-primary">{project.components?.length || 0}</div>
             <div className="text-sm text-muted-foreground">Components</div>
           </div>
           <div className="text-center p-4 bg-accent rounded-lg">
-            <div className="text-2xl font-bold text-primary">{project.dataModels.length}</div>
+            <div className="text-2xl font-bold text-primary">{project.dataModels?.length || 0}</div>
             <div className="text-sm text-muted-foreground">Data Models</div>
           </div>
           <div className="text-center p-4 bg-accent rounded-lg">
-            <div className="text-2xl font-bold text-primary">{project.workflows.length}</div>
+            <div className="text-2xl font-bold text-primary">{project.workflows?.length || 0}</div>
             <div className="text-sm text-muted-foreground">Workflows</div>
           </div>
         </div>
