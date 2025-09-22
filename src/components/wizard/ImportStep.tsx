@@ -58,11 +58,11 @@ export const ImportStep = ({ onImport }: ImportStepProps) => {
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold mb-2">🚀 Ready to Build in Lovable?</h3>
                   <p className="text-sm text-muted-foreground mb-4">
-                    If you've refined your JSON with ChatGPT, drop it here to generate the perfect Lovable prompt.
+                    If you've refined your JSON with AI tools, drop it here to generate the perfect Lovable prompt.
                   </p>
                   <div className="space-y-3">
                     <Textarea
-                      placeholder="Paste your refined JSON from ChatGPT here..."
+                      placeholder="Paste your refined JSON from AI tools here..."
                       value={jsonInput}
                       onChange={(e) => setJsonInput(e.target.value)}
                       className="min-h-[120px] font-mono text-sm"

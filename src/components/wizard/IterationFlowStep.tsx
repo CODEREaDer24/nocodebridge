@@ -13,7 +13,7 @@ export const IterationFlowStep = ({ onStartExport, onStartImport }: IterationFlo
       <div className="text-center">
         <h2 className="text-3xl font-bold mb-4">🔄 Project Iteration Flow</h2>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-          Perfect your Lovable projects through an iterative cycle: Export → Refine with ChatGPT → Import back to Lovable
+          Perfect your Lovable projects through an iterative cycle: Export → Refine with AI → Import back to Lovable
         </p>
       </div>
 
@@ -41,7 +41,7 @@ export const IterationFlowStep = ({ onStartExport, onStartImport }: IterationFlo
               </div>
               <h3 className="font-semibold mb-2">2. Refine</h3>
               <p className="text-sm text-muted-foreground">
-                Use ChatGPT to improve, modify, or enhance your project structure
+                Use AI tools to improve, modify, or enhance your project structure
               </p>
             </div>
             
@@ -91,7 +91,7 @@ export const IterationFlowStep = ({ onStartExport, onStartImport }: IterationFlo
             </div>
             <h3 className="text-xl font-semibold mb-3">📥 Import Refined JSON</h3>
             <p className="text-muted-foreground mb-6">
-              Already have a refined JSON from ChatGPT? Import it to create your Lovable prompt.
+              Already have a refined JSON from AI tools? Import it to create your Lovable prompt.
             </p>
             <Button 
               onClick={onStartImport}
@@ -117,7 +117,7 @@ export const IterationFlowStep = ({ onStartExport, onStartImport }: IterationFlo
             </div>
             <div>
               <strong className="text-amber-800">AI-Powered Refinement:</strong>
-              <p className="text-amber-700">Use ChatGPT's intelligence to improve your projects</p>
+              <p className="text-amber-700">Use AI tools to improve your projects</p>
             </div>
             <div>
               <strong className="text-amber-800">Rapid Iteration:</strong>
