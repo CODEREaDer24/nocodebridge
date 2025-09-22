@@ -16,6 +16,7 @@ import { ChevronLeft, ArrowLeft, History as HistoryIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { parseProjectFile, generateProjectBundle } from "@/utils/fileHandling";
+import { analyzeProjectFromUrl } from "@/utils/projectAnalyzer";
 
 export const ProjectWizard = () => {
   const [currentStep, setCurrentStep] = useState<WizardStep>('start');
@@ -49,71 +50,16 @@ export const ProjectWizard = () => {
     try {
       let parsedProject: ProjectStructure | null = null;
 
-      if (data.type === 'file' && currentFlow === 'import') {
-        // Parse the uploaded file for import
+      if (data.type === 'file') {
+        // Parse the uploaded file
         parsedProject = await parseProjectFile(data.value as File);
         if (!parsedProject) {
           throw new Error('Unable to parse project file');
         }
       } else {
-        // Simulate project analysis for export or URL-based import
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // Mock project data based on input
-        parsedProject = {
-          id: `project_${Date.now()}`,
-          name: data.type === 'url' ? 'Lovable Project' : (data.value as File).name.replace(/\.(json|zip|uap)$/, ''),
-          url: data.type === 'url' ? data.value as string : undefined,
-          sourceType: 'lovable',
-          confidence: 0.95,
-          pages: [
-            { name: 'Home', path: '/', components: ['Header', 'Hero', 'Footer'] },
-            { name: 'About', path: '/about', components: ['Header', 'Content', 'Footer'] },
-            { name: 'Contact', path: '/contact', components: ['Header', 'ContactForm', 'Footer'] },
-          ],
-          components: [
-            { name: 'Header', type: 'layout', props: ['title', 'navigation'] },
-            { name: 'Hero', type: 'ui', props: ['heading', 'subtitle', 'cta'] },
-            { name: 'Footer', type: 'layout', props: ['links', 'copyright'] },
-            { name: 'ContactForm', type: 'ui', props: ['onSubmit', 'fields'] },
-            { name: 'Button', type: 'ui', props: ['variant', 'size', 'onClick'] },
-          ],
-          dataModels: [
-            {
-              name: 'User',
-              fields: [
-                { name: 'id', type: 'string', required: true },
-                { name: 'email', type: 'string', required: true },
-                { name: 'name', type: 'string', required: false },
-                { name: 'createdAt', type: 'Date', required: true },
-              ]
-            },
-            {
-              name: 'Contact',
-              fields: [
-                { name: 'id', type: 'string', required: true },
-                { name: 'name', type: 'string', required: true },
-                { name: 'email', type: 'string', required: true },
-                { name: 'message', type: 'text', required: true },
-              ]
-            }
-          ],
-          workflows: [
-            {
-              name: 'Contact Form Submission',
-              trigger: 'form.submit',
-              actions: ['validate', 'save', 'notify'],
-              description: 'Handles contact form submissions with validation and notifications'
-            },
-            {
-              name: 'User Registration',
-              trigger: 'user.register',
-              actions: ['validate', 'create', 'email'],
-              description: 'Creates new user accounts and sends welcome emails'
-            }
-          ],
-          createdAt: new Date(),
-        };
+        // Real project analysis for URL
+        const url = data.value as string;
+        parsedProject = await analyzeProjectFromUrl(url);
       }
       
       setProject(parsedProject);

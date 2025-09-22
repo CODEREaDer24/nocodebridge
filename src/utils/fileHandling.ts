@@ -4,26 +4,118 @@ export const parseProjectFile = async (file: File): Promise<ProjectStructure | n
   try {
     if (file.name.endsWith('.json')) {
       const text = await file.text();
-      return JSON.parse(text);
+      const parsed = JSON.parse(text);
+      
+      // Validate the structure and enhance with missing fields
+      if (parsed && typeof parsed === 'object') {
+        return {
+          id: parsed.id || `imported_${Date.now()}`,
+          name: parsed.name || file.name.replace('.json', ''),
+          url: parsed.url,
+          sourceType: parsed.sourceType || 'other',
+          pages: Array.isArray(parsed.pages) ? parsed.pages : [],
+          components: Array.isArray(parsed.components) ? parsed.components : [],
+          dataModels: Array.isArray(parsed.dataModels) ? parsed.dataModels : [],
+          workflows: Array.isArray(parsed.workflows) ? parsed.workflows : [],
+          createdAt: parsed.createdAt ? new Date(parsed.createdAt) : new Date(),
+          confidence: parsed.confidence || 0.8
+        };
+      }
     }
     
     if (file.name.endsWith('.zip') || file.name.endsWith('.uap')) {
-      // For now, we'll simulate ZIP/UAP parsing
-      // In a real implementation, you'd use a library like JSZip
-      const text = await file.text();
-      try {
-        // Try to parse as JSON first (simplified approach)
-        return JSON.parse(text);
-      } catch {
-        // If it's not JSON, return null for now
-        // In real implementation, you'd extract and parse project.json from the ZIP
-        return null;
-      }
+      // For ZIP/UAP files, we'll need to extract and parse the contents
+      // This is a simplified implementation - in production, use JSZip
+      const arrayBuffer = await file.arrayBuffer();
+      return await parseArchiveFile(arrayBuffer, file.name);
+    }
+
+    // For other text files, try to extract project information
+    if (file.type.startsWith('text/') || file.name.endsWith('.md') || file.name.endsWith('.txt')) {
+      return await extractProjectFromTextFile(file);
     }
     
     return null;
   } catch (error) {
     console.error('Error parsing project file:', error);
+    return null;
+  }
+};
+
+const parseArchiveFile = async (arrayBuffer: ArrayBuffer, filename: string): Promise<ProjectStructure | null> => {
+  try {
+    // This is a simplified approach - in a real implementation, you'd use JSZip
+    // For now, we'll return a basic structure
+    const projectName = filename.replace(/\.(zip|uap)$/, '');
+    
+    return {
+      id: `archive_${Date.now()}`,
+      name: projectName,
+      sourceType: filename.endsWith('.uap') ? 'other' : 'other',
+      pages: [{ name: 'Home', path: '/', components: ['App'] }],
+      components: [{ name: 'App', type: 'page' }],
+      dataModels: [],
+      workflows: [],
+      createdAt: new Date(),
+      confidence: 0.5
+    };
+  } catch (error) {
+    console.error('Error parsing archive file:', error);
+    return null;
+  }
+};
+
+const extractProjectFromTextFile = async (file: File): Promise<ProjectStructure | null> => {
+  try {
+    const content = await file.text();
+    const projectName = file.name.replace(/\.(md|txt)$/, '');
+    
+    // Extract components mentioned in the text
+    const componentMatches = content.match(/(?:component|Component)\s+([A-Z][a-zA-Z0-9]*)/g) || [];
+    const components = [...new Set(componentMatches.map(match => {
+      const name = match.split(/\s+/).pop();
+      return { name: name || 'Component', type: 'custom' as const };
+    }))];
+    
+    // Extract pages/routes mentioned
+    const pageMatches = content.match(/(?:page|Page|route|Route)\s+([A-Z][a-zA-Z0-9]*)/g) || [];
+    const pages = [...new Set(pageMatches.map(match => {
+      const name = match.split(/\s+/).pop();
+      return { 
+        name: name || 'Page', 
+        path: `/${(name || 'page').toLowerCase()}`, 
+        components: ['Header', name || 'Page', 'Footer'] 
+      };
+    }))];
+    
+    // If no specific structure found, create a basic one
+    if (components.length === 0 && pages.length === 0) {
+      return {
+        id: `text_${Date.now()}`,
+        name: projectName,
+        sourceType: 'other',
+        pages: [{ name: 'Home', path: '/', components: ['App'] }],
+        components: [{ name: 'App', type: 'page' }],
+        dataModels: [],
+        workflows: [],
+        createdAt: new Date(),
+        confidence: 0.4
+      };
+    }
+    
+    return {
+      id: `text_${Date.now()}`,
+      name: projectName,
+      sourceType: 'other',
+      pages: pages.length > 0 ? pages : [{ name: 'Home', path: '/', components: ['App'] }],
+      components: components.length > 0 ? components : [{ name: 'App', type: 'page' }],
+      dataModels: [],
+      workflows: [],
+      createdAt: new Date(),
+      confidence: 0.6
+    };
+  } catch (error) {
+    console.error('Error extracting from text file:', error);
     return null;
   }
 };
