@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ProgressBar } from "./ProgressBar";
@@ -21,6 +21,18 @@ export const ProjectWizard = () => {
   const [project, setProject] = useState<ProjectStructure | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+
+  // Listen for proceed-to-export event
+  React.useEffect(() => {
+    const handleProceedToExport = () => {
+      if (currentStep === 'preview') {
+        setCurrentStep('export');
+      }
+    };
+
+    window.addEventListener('proceed-to-export', handleProceedToExport);
+    return () => window.removeEventListener('proceed-to-export', handleProceedToExport);
+  }, [currentStep]);
 
   const handleFlowSelection = (flow: FlowType) => {
     setCurrentFlow(flow);

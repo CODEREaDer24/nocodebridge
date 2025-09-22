@@ -1,179 +1,238 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ProjectStructure } from "@/types/project";
-import { FileText, Component, Database, Workflow, ArrowRight } from "lucide-react";
+import { 
+  ChevronDown, 
+  ChevronRight, 
+  Globe, 
+  Component as ComponentIcon, 
+  Database, 
+  Workflow,
+  CheckCircle,
+  ArrowRight
+} from "lucide-react";
 
 interface PreviewStepProps {
   project: ProjectStructure;
 }
 
 export const PreviewStep = ({ project }: PreviewStepProps) => {
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    pages: true,
+    components: false,
+    dataModels: false,
+    workflows: false
+  });
+
+  const toggleSection = (section: string) => {
+    setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
   return (
-    <div className="w-full max-w-4xl mx-auto">
-      <Card className="mb-6">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Project Structure</CardTitle>
+    <div className="w-full max-w-4xl mx-auto space-y-6">
+      {/* Project Overview */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CheckCircle className="w-6 h-6 text-success" />
+            Project Analysis Complete: {project.name}
+          </CardTitle>
           <CardDescription>
-            Review your project details before exporting
+            Review the detected project structure before exporting
           </CardDescription>
         </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="text-center p-4 bg-accent rounded-lg">
+              <div className="text-2xl font-bold text-primary">{project.pages.length}</div>
+              <div className="text-sm text-muted-foreground">Pages</div>
+            </div>
+            <div className="text-center p-4 bg-accent rounded-lg">
+              <div className="text-2xl font-bold text-primary">{project.components.length}</div>
+              <div className="text-sm text-muted-foreground">Components</div>
+            </div>
+            <div className="text-center p-4 bg-accent rounded-lg">
+              <div className="text-2xl font-bold text-primary">{project.dataModels.length}</div>
+              <div className="text-sm text-muted-foreground">Data Models</div>
+            </div>
+            <div className="text-center p-4 bg-accent rounded-lg">
+              <div className="text-2xl font-bold text-primary">{project.workflows.length}</div>
+              <div className="text-sm text-muted-foreground">Workflows</div>
+            </div>
+          </div>
+        </CardContent>
       </Card>
 
-      <Tabs defaultValue="pages" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="pages" className="flex items-center gap-2">
-            <FileText className="w-4 h-4" />
-            Pages ({project.pages.length})
-          </TabsTrigger>
-          <TabsTrigger value="components" className="flex items-center gap-2">
-            <Component className="w-4 h-4" />
-            Components ({project.components.length})
-          </TabsTrigger>
-          <TabsTrigger value="data" className="flex items-center gap-2">
-            <Database className="w-4 h-4" />
-            Data Models ({project.dataModels.length})
-          </TabsTrigger>
-          <TabsTrigger value="workflows" className="flex items-center gap-2">
-            <Workflow className="w-4 h-4" />
-            Workflows ({project.workflows.length})
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="pages" className="space-y-4">
-          <div className="grid gap-4">
-            {project.pages.map((page, index) => (
-              <Card key={index}>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-semibold">{page.name}</h3>
-                      <p className="text-sm text-muted-foreground">{page.path}</p>
+      {/* Pages Section */}
+      <Card>
+        <Collapsible open={openSections.pages} onOpenChange={() => toggleSection('pages')}>
+          <CollapsibleTrigger asChild>
+            <CardHeader className="cursor-pointer hover:bg-accent/50 transition-colors">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Globe className="w-5 h-5 text-primary" />
+                  <CardTitle className="text-lg">Pages ({project.pages.length})</CardTitle>
+                </div>
+                {openSections.pages ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+              </div>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent>
+              <div className="space-y-3">
+                {project.pages.map((page, index) => (
+                  <div key={index} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-semibold">{page.name}</h4>
+                      <Badge variant="outline">{page.path}</Badge>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline">{page.components.length} components</Badge>
+                    <div className="text-sm text-muted-foreground">
+                      <strong>Components:</strong> {page.components.join(', ')}
                     </div>
                   </div>
-                  {page.components.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-1">
-                      {page.components.slice(0, 5).map((comp, compIndex) => (
-                        <Badge key={compIndex} variant="secondary" className="text-xs">
-                          {comp}
-                        </Badge>
-                      ))}
-                      {page.components.length > 5 && (
-                        <Badge variant="secondary" className="text-xs">
-                          +{page.components.length - 5} more
-                        </Badge>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
+                ))}
+              </div>
+            </CardContent>
+          </CollapsibleContent>
+        </Collapsible>
+      </Card>
 
-        <TabsContent value="components" className="space-y-4">
-          <div className="grid gap-4">
-            {project.components.map((component, index) => (
-              <Card key={index}>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-semibold">{component.name}</h3>
-                      <Badge variant="outline" className="mt-1 capitalize">
-                        {component.type}
-                      </Badge>
+      {/* Components Section */}
+      <Card>
+        <Collapsible open={openSections.components} onOpenChange={() => toggleSection('components')}>
+          <CollapsibleTrigger asChild>
+            <CardHeader className="cursor-pointer hover:bg-accent/50 transition-colors">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <ComponentIcon className="w-5 h-5 text-primary" />
+                  <CardTitle className="text-lg">Components ({project.components.length})</CardTitle>
+                </div>
+                {openSections.components ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+              </div>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent>
+              <div className="grid gap-3">
+                {project.components.map((component, index) => (
+                  <div key={index} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-semibold">{component.name}</h4>
+                      <Badge variant="secondary">{component.type}</Badge>
                     </div>
-                    <div className="text-right">
-                      {component.props && (
-                        <p className="text-sm text-muted-foreground">
-                          {component.props.length} props
-                        </p>
-                      )}
-                      {component.dependencies && (
-                        <p className="text-sm text-muted-foreground">
-                          {component.dependencies.length} dependencies
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="data" className="space-y-4">
-          <div className="grid gap-4">
-            {project.dataModels.map((model, index) => (
-              <Card key={index}>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-semibold">{model.name}</h3>
-                    <Badge variant="outline">{model.fields.length} fields</Badge>
-                  </div>
-                  <div className="space-y-2">
-                    {model.fields.slice(0, 4).map((field, fieldIndex) => (
-                      <div key={fieldIndex} className="flex items-center justify-between text-sm">
-                        <span className="font-medium">{field.name}</span>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="secondary" className="text-xs">{field.type}</Badge>
-                          {field.required && (
-                            <Badge variant="destructive" className="text-xs">Required</Badge>
-                          )}
-                        </div>
+                    {component.props && component.props.length > 0 && (
+                      <div className="text-sm text-muted-foreground">
+                        <strong>Props:</strong> {component.props.join(', ')}
                       </div>
-                    ))}
-                    {model.fields.length > 4 && (
-                      <p className="text-xs text-muted-foreground">
-                        +{model.fields.length - 4} more fields
-                      </p>
                     )}
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
+                ))}
+              </div>
+            </CardContent>
+          </CollapsibleContent>
+        </Collapsible>
+      </Card>
 
-        <TabsContent value="workflows" className="space-y-4">
-          <div className="grid gap-4">
-            {project.workflows.map((workflow, index) => (
-              <Card key={index}>
-                <CardContent className="p-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-semibold">{workflow.name}</h3>
-                      <Badge variant="outline">{workflow.actions.length} actions</Badge>
+      {/* Data Models Section */}
+      <Card>
+        <Collapsible open={openSections.dataModels} onOpenChange={() => toggleSection('dataModels')}>
+          <CollapsibleTrigger asChild>
+            <CardHeader className="cursor-pointer hover:bg-accent/50 transition-colors">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Database className="w-5 h-5 text-primary" />
+                  <CardTitle className="text-lg">Data Models ({project.dataModels.length})</CardTitle>
+                </div>
+                {openSections.dataModels ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+              </div>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent>
+              <div className="space-y-4">
+                {project.dataModels.map((model, index) => (
+                  <div key={index} className="border rounded-lg p-4">
+                    <h4 className="font-semibold mb-3">{model.name}</h4>
+                    <div className="space-y-2">
+                      {model.fields.map((field, fieldIndex) => (
+                        <div key={fieldIndex} className="flex items-center justify-between text-sm">
+                          <span className="font-medium">{field.name}</span>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">{field.type}</Badge>
+                            {field.required && <Badge variant="destructive" className="text-xs">Required</Badge>}
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Badge variant="outline" className="text-xs">{workflow.trigger}</Badge>
-                      <ArrowRight className="w-3 h-3 text-muted-foreground" />
-                      <div className="flex gap-1">
-                        {workflow.actions.slice(0, 3).map((action, actionIndex) => (
-                          <Badge key={actionIndex} variant="secondary" className="text-xs">
-                            {action}
-                          </Badge>
-                        ))}
-                        {workflow.actions.length > 3 && (
-                          <Badge variant="secondary" className="text-xs">
-                            +{workflow.actions.length - 3}
-                          </Badge>
-                        )}
-                      </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </CollapsibleContent>
+        </Collapsible>
+      </Card>
+
+      {/* Workflows Section */}
+      <Card>
+        <Collapsible open={openSections.workflows} onOpenChange={() => toggleSection('workflows')}>
+          <CollapsibleTrigger asChild>
+            <CardHeader className="cursor-pointer hover:bg-accent/50 transition-colors">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Workflow className="w-5 h-5 text-primary" />
+                  <CardTitle className="text-lg">Workflows ({project.workflows.length})</CardTitle>
+                </div>
+                {openSections.workflows ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+              </div>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent>
+              <div className="space-y-4">
+                {project.workflows.map((workflow, index) => (
+                  <div key={index} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-semibold">{workflow.name}</h4>
+                      <Badge variant="outline">{workflow.trigger}</Badge>
+                    </div>
+                    <div className="text-sm text-muted-foreground mb-2">
+                      <strong>Actions:</strong> {workflow.actions.join(' → ')}
                     </div>
                     {workflow.description && (
                       <p className="text-sm text-muted-foreground">{workflow.description}</p>
                     )}
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                ))}
+              </div>
+            </CardContent>
+          </CollapsibleContent>
+        </Collapsible>
+      </Card>
+
+      {/* Continue to Export */}
+      <Card className="bg-gradient-to-r from-primary/10 to-secondary/10 border-primary">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Ready to Export</h3>
+              <p className="text-muted-foreground">
+                Choose your export format and download your project
+              </p>
+            </div>
+            <Button 
+              size="lg"
+              onClick={() => window.dispatchEvent(new CustomEvent('proceed-to-export'))}
+              className="flex items-center gap-2"
+            >
+              Continue to Export
+              <ArrowRight className="w-4 h-4" />
+            </Button>
           </div>
-        </TabsContent>
-      </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 };
