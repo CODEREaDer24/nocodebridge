@@ -47,7 +47,7 @@ export interface WorkflowInfo {
 export interface ExportRecord {
   id: string;
   projectId: string;
-  format: 'json' | 'zip' | 'markdown' | 'uap';
+  format: 'json' | 'zip' | 'markdown' | 'uap' | 'ai-collaboration';
   createdAt: Date;
   size?: number;
 }

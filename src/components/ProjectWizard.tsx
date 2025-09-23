@@ -82,7 +82,7 @@ export const ProjectWizard = () => {
     }
   };
 
-  const handleExport = (format: 'json' | 'zip' | 'markdown' | 'uap', refinementData?: string) => {
+  const handleExport = (format: 'json' | 'zip' | 'markdown' | 'uap' | 'ai-collaboration', refinementData?: string) => {
     if (!project) return;
 
     try {

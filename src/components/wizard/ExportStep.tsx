@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 
 interface ExportStepProps {
   project: ProjectStructure;
-  onExport: (format: 'json' | 'zip' | 'markdown' | 'uap', data?: string) => void;
+  onExport: (format: 'json' | 'zip' | 'markdown' | 'uap' | 'ai-collaboration', data?: string) => void;
 }
 
 export const ExportStep = ({ project, onExport }: ExportStepProps) => {
@@ -37,6 +37,15 @@ export const ExportStep = ({ project, onExport }: ExportStepProps) => {
   };
 
   const exportOptions = [
+    {
+      format: 'ai-collaboration' as const,
+      title: 'AI Collaboration Package',
+      description: 'Complete runnable source code for ChatGPT collaboration',
+      icon: FileText,
+      color: 'bg-gradient-to-r from-purple-500 to-pink-500',
+      benefits: ['Ready for ChatGPT', 'Complete source code', 'Instant collaboration', 'No-code friendly'],
+      disabled: false
+    },
     {
       format: 'json' as const,
       title: 'JSON Export',
