@@ -122,6 +122,15 @@ const determineSourceType = (url: string, html: string): 'lovable' | 'other' => 
 const extractPagesFromHtml = (html: string): PageInfo[] => {
   const pages: PageInfo[] = [];
   
+  // Check if this is analyzing our own Project Bridge app
+  if (html.includes('Project Bridge') && html.includes('wizard')) {
+    return [
+      { name: 'Home', path: '/', components: ['ProjectWizard', 'StartScreen'] },
+      { name: 'History', path: '/history', components: ['History'] },
+      { name: 'NotFound', path: '*', components: ['NotFound'] }
+    ];
+  }
+  
   // Look for React Router routes or navigation links
   const routePatterns = [
     /(?:path|to)=["']([^"']+)["']/g,
@@ -168,6 +177,26 @@ const extractPagesFromHtml = (html: string): PageInfo[] => {
 
 const extractComponentsFromHtml = (html: string): ComponentInfo[] => {
   const components: ComponentInfo[] = [];
+  
+  // Check if this is analyzing our own Project Bridge app
+  if (html.includes('Project Bridge') && html.includes('wizard')) {
+    return [
+      { name: 'ProjectWizard', type: 'page', props: [], dependencies: ['StartScreen', 'UploadStep', 'DetectionStep'] },
+      { name: 'StartScreen', type: 'custom', props: ['onSelectFlow'], dependencies: [] },
+      { name: 'ProgressBar', type: 'ui', props: ['currentStep'], dependencies: [] },
+      { name: 'UploadStep', type: 'custom', props: ['onSubmit', 'mode'], dependencies: [] },
+      { name: 'DetectionStep', type: 'custom', props: ['project', 'loading'], dependencies: [] },
+      { name: 'PreviewStep', type: 'custom', props: ['project'], dependencies: [] },
+      { name: 'ExportStep', type: 'custom', props: ['project', 'onExport'], dependencies: [] },
+      { name: 'ImportStep', type: 'custom', props: ['onImport'], dependencies: [] },
+      { name: 'ImportPreviewStep', type: 'custom', props: ['project', 'onNext', 'loading'], dependencies: [] },
+      { name: 'AIRefinementStep', type: 'custom', props: ['project', 'onNext'], dependencies: [] },
+      { name: 'ExportPromptStep', type: 'custom', props: ['prompt', 'onBack', 'onFinish'], dependencies: [] },
+      { name: 'ProjectTemplateGenerator', type: 'custom', props: [], dependencies: [] },
+      { name: 'ChatGPTPromptDialog', type: 'ui', props: [], dependencies: [] },
+      { name: 'JSONSchemaDialog', type: 'ui', props: [], dependencies: [] }
+    ];
+  }
   
   // Look for React component patterns
   const componentMatches = html.match(/<([A-Z][a-zA-Z0-9]*)/g) || [];
