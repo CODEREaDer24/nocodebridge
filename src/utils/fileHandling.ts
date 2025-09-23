@@ -146,11 +146,31 @@ export const generateProjectBundle = (
         mimeType: 'text/markdown'
       };
       
-    case 'uap':
     case 'zip':
-      // For UAP/ZIP, we'll create a JSON bundle with metadata
-      // In a real implementation, this would create an actual ZIP file
-      const bundleData = {
+      // For ZIP, create a comprehensive bundle with all project data
+      const zipBundleData = {
+        'project.json': project,
+        'documentation.md': generateMarkdownContent(project, refinementData),
+        'README.md': generateReadmeContent(project),
+        'structure.txt': generateProjectStructure(project),
+        'meta.json': {
+          exportedAt: new Date().toISOString(),
+          format: format,
+          version: '1.0.0',
+          refinementInstructions: refinementData || null,
+          totalPages: project.pages.length,
+          totalComponents: project.components.length
+        }
+      };
+      return {
+        data: JSON.stringify(zipBundleData, null, 2),
+        filename: `${safeName}_complete_${timestamp}.zip`,
+        mimeType: 'application/zip'
+      };
+      
+    case 'uap':
+      // For UAP, we'll create a JSON bundle with metadata (disabled for now)
+      const uapBundleData = {
         'project.json': project,
         'project.md': generateMarkdownContent(project, refinementData),
         'meta.json': {
@@ -161,9 +181,9 @@ export const generateProjectBundle = (
         }
       };
       return {
-        data: JSON.stringify(bundleData, null, 2),
+        data: JSON.stringify(uapBundleData, null, 2),
         filename: `${safeName}_${timestamp}.${format}`,
-        mimeType: format === 'uap' ? 'application/uap' : 'application/zip'
+        mimeType: 'application/uap'
       };
       
     default:
@@ -214,5 +234,51 @@ ${refinementData ? `\n## Refinement Instructions\n${refinementData}\n` : ''}
 
 ---
 *Exported from Project Bridge MVP*
+`;
+};
+
+const generateReadmeContent = (project: ProjectStructure): string => {
+  return `# ${project.name}
+
+## Overview
+This project was exported from Project Bridge MVP and contains ${project.pages.length} pages and ${project.components.length} components.
+
+## Quick Start
+1. Import the \`project.json\` file into your development environment
+2. Review the \`documentation.md\` for detailed project structure
+3. Check \`structure.txt\` for a quick overview of the project hierarchy
+
+## Project Structure
+- **Pages**: ${project.pages.length} total
+- **Components**: ${project.components.length} total
+- **Data Models**: ${project.dataModels.length} total
+- **Workflows**: ${project.workflows.length} total
+
+## Files Included
+- \`project.json\` - Complete project data
+- \`documentation.md\` - Detailed documentation
+- \`README.md\` - This file
+- \`structure.txt\` - Project structure overview
+- \`meta.json\` - Export metadata
+
+Generated on: ${new Date().toISOString()}
+`;
+};
+
+const generateProjectStructure = (project: ProjectStructure): string => {
+  return `${project.name}/
+├── Pages (${project.pages.length})
+${project.pages.map(page => `│   ├── ${page.name} (${page.path})`).join('\n')}
+├── Components (${project.components.length})
+${project.components.map(comp => `│   ├── ${comp.name} (${comp.type})`).join('\n')}
+├── Data Models (${project.dataModels.length})
+${project.dataModels.map(model => `│   ├── ${model.name}`).join('\n')}
+└── Workflows (${project.workflows.length})
+${project.workflows.map(workflow => `    ├── ${workflow.name}`).join('\n')}
+
+Export Summary:
+- Source: ${project.sourceType}
+- Confidence: ${Math.round((project.confidence || 0) * 100)}%
+- Exported: ${new Date().toISOString()}
 `;
 };

@@ -38,28 +38,40 @@ export const ExportStep = ({ project, onExport }: ExportStepProps) => {
 
   const exportOptions = [
     {
-      format: 'uap' as const,
-      title: 'UAP Bundle (Recommended)',
-      description: 'Universal App Package - best for sharing and importing',
-      icon: Package,
-      color: 'bg-primary',
-      benefits: ['Best compatibility', 'Complete bundle', 'Easy sharing', 'Perfect re-import']
-    },
-    {
       format: 'json' as const,
       title: 'JSON Export',
       description: 'Perfect for exact duplication and re-import',
       icon: FileJson,
+      color: 'bg-primary',
+      benefits: ['Exact duplication', 'Perfect re-import', 'All data preserved'],
+      disabled: false
+    },
+    {
+      format: 'zip' as const,
+      title: 'ZIP Bundle',
+      description: 'Complete app bundle with all files and documentation',
+      icon: Package,
       color: 'bg-secondary',
-      benefits: ['Exact duplication', 'Perfect re-import', 'All data preserved']
+      benefits: ['Complete bundle', 'All project files', 'Easy sharing', 'Organized structure'],
+      disabled: false
     },
     {
       format: 'markdown' as const,
       title: 'Markdown Documentation',
       description: 'Human and AI-readable format',
       icon: FileText,
-      color: 'bg-success',
-      benefits: ['AI collaboration', 'Human readable', 'Version control friendly']
+      color: 'bg-accent',
+      benefits: ['AI collaboration', 'Human readable', 'Version control friendly'],
+      disabled: false
+    },
+    {
+      format: 'uap' as const,
+      title: 'UAP Bundle (Coming Soon)',
+      description: 'Universal App Package - premium format for advanced workflows',
+      icon: Package,
+      color: 'bg-muted',
+      benefits: ['Advanced features', 'Enhanced compatibility', 'Premium format'],
+      disabled: true
     }
   ];
 
@@ -95,20 +107,26 @@ export const ExportStep = ({ project, onExport }: ExportStepProps) => {
       {/* Export Options */}
       <div className="grid gap-4">
         {exportOptions.map((option) => (
-          <Card key={option.format} className="relative overflow-hidden">
+          <Card key={option.format} className={`relative overflow-hidden ${option.disabled ? 'opacity-60' : ''}`}>
             <div className={`absolute left-0 top-0 bottom-0 w-1 ${option.color}`} />
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-4">
-                  <div className={`p-3 rounded-lg ${option.color} text-white`}>
+                  <div className={`p-3 rounded-lg ${option.color} ${option.disabled ? 'text-muted-foreground' : 'text-white'}`}>
                     <option.icon className="w-6 h-6" />
                   </div>
                   <div className="space-y-2">
-                    <h3 className="text-lg font-semibold">{option.title}</h3>
+                    <h3 className={`text-lg font-semibold ${option.disabled ? 'text-muted-foreground' : ''}`}>
+                      {option.title}
+                    </h3>
                     <p className="text-muted-foreground">{option.description}</p>
                     <div className="flex flex-wrap gap-1">
                       {option.benefits.map((benefit, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
+                        <Badge 
+                          key={index} 
+                          variant={option.disabled ? "outline" : "secondary"} 
+                          className={`text-xs ${option.disabled ? 'text-muted-foreground border-muted' : ''}`}
+                        >
                           {benefit}
                         </Badge>
                       ))}
@@ -116,8 +134,9 @@ export const ExportStep = ({ project, onExport }: ExportStepProps) => {
                   </div>
                 </div>
                 <Button 
-                  onClick={() => onExport(option.format, refinementText || undefined)}
+                  onClick={() => option.disabled ? undefined : onExport(option.format, refinementText || undefined)}
                   className="flex items-center gap-2"
+                  disabled={option.disabled}
                 >
                   <Download className="w-4 h-4" />
                   Export {option.format.toUpperCase()}
