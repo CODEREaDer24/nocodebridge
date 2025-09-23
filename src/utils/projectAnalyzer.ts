@@ -131,23 +131,72 @@ const extractPagesFromHtml = (html: string): PageInfo[] => {
     ];
   }
   
-  // Look for React Router routes or navigation links
-  const routePatterns = [
-    /(?:path|to)=["']([^"']+)["']/g,
-    /<a[^>]+href=["']([^"'#][^"']*)["']/g,
-    /Route[^>]+path=["']([^"']+)["']/g
-  ];
-  
   const foundRoutes = new Set<string>();
   
-  routePatterns.forEach(pattern => {
-    let match;
-    while ((match = pattern.exec(html)) !== null) {
-      const route = match[1];
-      if (route && route.startsWith('/') && !route.includes('.') && !route.startsWith('//')) {
+  // Strategy 1: Look for navigation links in the HTML
+  const linkMatches = html.match(/<a[^>]+href=["']([^"'#][^"']*)["']/gi) || [];
+  linkMatches.forEach(link => {
+    const hrefMatch = link.match(/href=["']([^"'#][^"']*)["']/i);
+    if (hrefMatch) {
+      const href = hrefMatch[1];
+      if (href.startsWith('/') && !href.includes('.') && !href.startsWith('//') && href.length > 1) {
+        foundRoutes.add(href);
+      }
+    }
+  });
+  
+  // Strategy 2: Look for React Router patterns in script tags
+  const scriptContent = html.match(/<script[^>]*>[\s\S]*?<\/script>/gi)?.join(' ') || '';
+  
+  // Look for path definitions in router config
+  const pathMatches = scriptContent.match(/["']path["']\s*:\s*["']([^"']+)["']/gi) || [];
+  pathMatches.forEach(match => {
+    const pathMatch = match.match(/["']([^"']+)["']$/);
+    if (pathMatch) {
+      const path = pathMatch[1];
+      if (path.startsWith('/')) {
+        foundRoutes.add(path);
+      }
+    }
+  });
+  
+  // Look for route patterns
+  const routeMatches = scriptContent.match(/route[^"']*["']([^"']+)["']/gi) || [];
+  routeMatches.forEach(match => {
+    const routeMatch = match.match(/["']([^"']+)["']$/);
+    if (routeMatch) {
+      const route = routeMatch[1];
+      if (route.startsWith('/')) {
         foundRoutes.add(route);
       }
     }
+  });
+  
+  // Strategy 3: Analyze page structure and meta tags
+  const titleTag = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+  const metaDescriptions = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["']/gi) || [];
+  
+  // Strategy 4: Look for common SPA patterns
+  if (html.includes('spa') || html.includes('single-page') || scriptContent.includes('router')) {
+    // Common SPA routes
+    const commonRoutes = ['/about', '/contact', '/services', '/products', '/blog', '/dashboard', '/profile'];
+    commonRoutes.forEach(route => {
+      if (html.toLowerCase().includes(route.slice(1)) || scriptContent.toLowerCase().includes(route)) {
+        foundRoutes.add(route);
+      }
+    });
+  }
+  
+  // Strategy 5: Analyze breadcrumbs and navigation structures
+  const breadcrumbMatches = html.match(/breadcrumb[^>]*>[\s\S]*?<\/[^>]*>/gi) || [];
+  breadcrumbMatches.forEach(breadcrumb => {
+    const links = breadcrumb.match(/href=["']([^"']+)["']/gi) || [];
+    links.forEach(link => {
+      const hrefMatch = link.match(/href=["']([^"']+)["']/);
+      if (hrefMatch && hrefMatch[1].startsWith('/')) {
+        foundRoutes.add(hrefMatch[1]);
+      }
+    });
   });
 
   foundRoutes.forEach(route => {
@@ -163,12 +212,26 @@ const extractPagesFromHtml = (html: string): PageInfo[] => {
     });
   });
 
-  // If no routes found, add default home page
-  if (pages.length === 0) {
-    pages.push({
+  // Always ensure we have a home page
+  if (!foundRoutes.has('/')) {
+    pages.unshift({
       name: 'Home',
       path: '/',
       components: extractComponentsOnPage(html, '/')
+    });
+  }
+
+  // If still no additional pages found, analyze content for potential pages
+  if (pages.length === 1) {
+    const potentialPages = ['about', 'contact', 'services', 'products', 'blog', 'portfolio'];
+    potentialPages.forEach(pageName => {
+      if (html.toLowerCase().includes(pageName)) {
+        pages.push({
+          name: pageName.charAt(0).toUpperCase() + pageName.slice(1),
+          path: `/${pageName}`,
+          components: [pageName.charAt(0).toUpperCase() + pageName.slice(1) + 'Page', 'Header', 'Footer']
+        });
+      }
     });
   }
 
@@ -198,39 +261,100 @@ const extractComponentsFromHtml = (html: string): ComponentInfo[] => {
     ];
   }
   
-  // Look for React component patterns
-  const componentMatches = html.match(/<([A-Z][a-zA-Z0-9]*)/g) || [];
-  const uniqueComponents = [...new Set(componentMatches.map(match => match.slice(1)))];
+  // Multiple strategies to extract components from different types of apps
+  const foundComponents = new Set<string>();
   
-  uniqueComponents.forEach(componentName => {
+  // Strategy 1: Look for React component patterns in source (JSX)
+  const jsxComponents = html.match(/<([A-Z][a-zA-Z0-9]*)/g) || [];
+  jsxComponents.forEach(match => foundComponents.add(match.slice(1)));
+  
+  // Strategy 2: Look for compiled React components in script bundles
+  const scriptTags = html.match(/<script[^>]*>[\s\S]*?<\/script>/gi) || [];
+  scriptTags.forEach(script => {
+    // Look for React component signatures in minified code
+    const componentMatches = script.match(/function\s+([A-Z][a-zA-Z0-9]*)\s*\(/g) || [];
+    componentMatches.forEach(match => {
+      const name = match.match(/function\s+([A-Z][a-zA-Z0-9]*)/)?.[1];
+      if (name) foundComponents.add(name);
+    });
+    
+    // Look for class components
+    const classMatches = script.match(/class\s+([A-Z][a-zA-Z0-9]*)/g) || [];
+    classMatches.forEach(match => {
+      const name = match.match(/class\s+([A-Z][a-zA-Z0-9]*)/)?.[1];
+      if (name) foundComponents.add(name);
+    });
+    
+    // Look for modern component patterns (const ComponentName = )
+    const constMatches = script.match(/const\s+([A-Z][a-zA-Z0-9]*)\s*=/g) || [];
+    constMatches.forEach(match => {
+      const name = match.match(/const\s+([A-Z][a-zA-Z0-9]*)/)?.[1];
+      if (name) foundComponents.add(name);
+    });
+  });
+  
+  // Strategy 3: Analyze DOM structure to infer components
+  const htmlStructure = html.replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<style[\s\S]*?<\/style>/gi, '');
+  
+  // Look for semantic HTML that suggests components
+  const semanticElements = [
+    { pattern: /<header[^>]*>/gi, component: 'Header', type: 'layout' as const },
+    { pattern: /<nav[^>]*>/gi, component: 'Navigation', type: 'layout' as const },
+    { pattern: /<main[^>]*>/gi, component: 'Main', type: 'layout' as const },
+    { pattern: /<aside[^>]*>/gi, component: 'Sidebar', type: 'layout' as const },
+    { pattern: /<footer[^>]*>/gi, component: 'Footer', type: 'layout' as const },
+    { pattern: /<form[^>]*>/gi, component: 'Form', type: 'ui' as const },
+    { pattern: /<section[^>]*class="[^"]*hero[^"]*"/gi, component: 'Hero', type: 'custom' as const },
+    { pattern: /<div[^>]*class="[^"]*card[^"]*"/gi, component: 'Card', type: 'ui' as const },
+    { pattern: /<div[^>]*class="[^"]*modal[^"]*"/gi, component: 'Modal', type: 'ui' as const },
+    { pattern: /<button[^>]*>/gi, component: 'Button', type: 'ui' as const }
+  ];
+  
+  semanticElements.forEach(({ pattern, component, type }) => {
+    if (pattern.test(htmlStructure)) {
+      foundComponents.add(component);
+    }
+  });
+  
+  // Strategy 4: Check for framework-specific patterns
+  if (html.includes('react') || html.includes('React')) {
+    foundComponents.add('App');
+  }
+  
+  if (html.includes('router') || html.includes('Router')) {
+    foundComponents.add('Router');
+  }
+  
+  // Convert to ComponentInfo objects
+  foundComponents.forEach(componentName => {
     // Determine component type based on name patterns
     let type: ComponentInfo['type'] = 'custom';
-    if (['Header', 'Footer', 'Layout', 'Sidebar', 'Navigation', 'Nav'].some(layout => 
+    if (['Header', 'Footer', 'Layout', 'Sidebar', 'Navigation', 'Nav', 'Main'].some(layout => 
         componentName.toLowerCase().includes(layout.toLowerCase()))) {
       type = 'layout';
-    } else if (['Button', 'Input', 'Card', 'Modal', 'Dialog', 'Form'].some(ui => 
+    } else if (['Button', 'Input', 'Card', 'Modal', 'Dialog', 'Form', 'Select', 'Checkbox'].some(ui => 
         componentName.toLowerCase().includes(ui.toLowerCase()))) {
       type = 'ui';
-    } else if (['Page', 'Home', 'About', 'Contact', 'Dashboard'].some(page => 
+    } else if (['Page', 'Home', 'About', 'Contact', 'Dashboard', 'App', 'Index'].some(page => 
         componentName.toLowerCase().includes(page.toLowerCase()))) {
       type = 'page';
     }
     
-    // Extract potential props from the HTML
-    const propPattern = new RegExp(`<${componentName}[^>]*>`, 'g');
-    const usages = html.match(propPattern) || [];
-    const props = extractPropsFromUsages(usages);
-    
     components.push({
       name: componentName,
       type,
-      props: props.length > 0 ? props : undefined
+      props: extractPropsFromComponentName(componentName, html)
     });
   });
   
   // Ensure we have at least basic components
   if (components.length === 0) {
-    components.push({ name: 'App', type: 'page' });
+    components.push(
+      { name: 'App', type: 'page' },
+      { name: 'Header', type: 'layout' },
+      { name: 'Main', type: 'layout' },
+      { name: 'Footer', type: 'layout' }
+    );
   }
   
   return components;
@@ -273,6 +397,22 @@ const extractPropsFromUsages = (usages: string[]): string[] => {
   });
   
   return Array.from(props);
+};
+
+const extractPropsFromComponentName = (componentName: string, html: string): string[] => {
+  // Look for component usage patterns and extract common props
+  const commonProps: Record<string, string[]> = {
+    'Button': ['onClick', 'disabled', 'type', 'variant'],
+    'Input': ['value', 'onChange', 'placeholder', 'type'],
+    'Form': ['onSubmit', 'method', 'action'],
+    'Modal': ['isOpen', 'onClose', 'title'],
+    'Card': ['title', 'content', 'image'],
+    'Header': ['title', 'navigation'],
+    'Footer': ['links', 'copyright'],
+    'Navigation': ['items', 'active']
+  };
+  
+  return commonProps[componentName] || [];
 };
 
 const extractDataModelsFromHtml = (html: string): DataModelInfo[] => {
