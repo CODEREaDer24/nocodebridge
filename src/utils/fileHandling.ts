@@ -1,37 +1,20 @@
-import { ProjectStructure } from "@/types/project";
+import { ProjectStructure } from '@/types/project';
 
 export const parseProjectFile = async (file: File): Promise<ProjectStructure | null> => {
   try {
-    if (file.name.endsWith('.json')) {
+    const filename = file.name.toLowerCase();
+    
+    if (filename.endsWith('.json')) {
       const text = await file.text();
-      const parsed = JSON.parse(text);
-      
-      // Validate the structure and enhance with missing fields
-      if (parsed && typeof parsed === 'object') {
-        return {
-          id: parsed.id || `imported_${Date.now()}`,
-          name: parsed.name || file.name.replace('.json', ''),
-          url: parsed.url,
-          sourceType: parsed.sourceType || 'other',
-          pages: Array.isArray(parsed.pages) ? parsed.pages : [],
-          components: Array.isArray(parsed.components) ? parsed.components : [],
-          dataModels: Array.isArray(parsed.dataModels) ? parsed.dataModels : [],
-          workflows: Array.isArray(parsed.workflows) ? parsed.workflows : [],
-          createdAt: parsed.createdAt ? new Date(parsed.createdAt) : new Date(),
-          confidence: parsed.confidence || 0.8
-        };
-      }
+      return JSON.parse(text) as ProjectStructure;
     }
     
-    if (file.name.endsWith('.zip') || file.name.endsWith('.uap')) {
-      // For ZIP/UAP files, we'll need to extract and parse the contents
-      // This is a simplified implementation - in production, use JSZip
+    if (filename.endsWith('.zip') || filename.endsWith('.uap')) {
       const arrayBuffer = await file.arrayBuffer();
-      return await parseArchiveFile(arrayBuffer, file.name);
+      return await parseArchiveFile(arrayBuffer, filename);
     }
-
-    // For other text files, try to extract project information
-    if (file.type.startsWith('text/') || file.name.endsWith('.md') || file.name.endsWith('.txt')) {
+    
+    if (filename.endsWith('.txt') || filename.endsWith('.md')) {
       return await extractProjectFromTextFile(file);
     }
     
@@ -42,77 +25,39 @@ export const parseProjectFile = async (file: File): Promise<ProjectStructure | n
   }
 };
 
-const parseArchiveFile = async (arrayBuffer: ArrayBuffer, filename: string): Promise<ProjectStructure | null> => {
-  try {
-    // This is a simplified approach - in a real implementation, you'd use JSZip
-    // For now, we'll return a basic structure
-    const projectName = filename.replace(/\.(zip|uap)$/, '');
-    
-    return {
-      id: `archive_${Date.now()}`,
-      name: projectName,
-      sourceType: filename.endsWith('.uap') ? 'other' : 'other',
-      pages: [{ name: 'Home', path: '/', components: ['App'] }],
-      components: [{ name: 'App', type: 'page' }],
-      dataModels: [],
-      workflows: [],
-      createdAt: new Date(),
-      confidence: 0.5
-    };
-  } catch (error) {
-    console.error('Error parsing archive file:', error);
-    return null;
-  }
-};
-
 const extractProjectFromTextFile = async (file: File): Promise<ProjectStructure | null> => {
   try {
-    const content = await file.text();
-    const projectName = file.name.replace(/\.(md|txt)$/, '');
+    const text = await file.text();
     
-    // Extract components mentioned in the text
-    const componentMatches = content.match(/(?:component|Component)\s+([A-Z][a-zA-Z0-9]*)/g) || [];
-    const components = [...new Set(componentMatches.map(match => {
-      const name = match.split(/\s+/).pop();
-      return { name: name || 'Component', type: 'custom' as const };
-    }))];
+    // Simple extraction logic - look for patterns in the text
+    const lines = text.split('\n');
+    const pages: string[] = [];
+    const components: string[] = [];
     
-    // Extract pages/routes mentioned
-    const pageMatches = content.match(/(?:page|Page|route|Route)\s+([A-Z][a-zA-Z0-9]*)/g) || [];
-    const pages = [...new Set(pageMatches.map(match => {
-      const name = match.split(/\s+/).pop();
-      return { 
-        name: name || 'Page', 
-        path: `/${(name || 'page').toLowerCase()}`, 
-        components: ['Header', name || 'Page', 'Footer'] 
-      };
-    }))];
-    
-    // If no specific structure found, create a basic one
-    if (components.length === 0 && pages.length === 0) {
-      return {
-        id: `text_${Date.now()}`,
-        name: projectName,
-        sourceType: 'other',
-        pages: [{ name: 'Home', path: '/', components: ['App'] }],
-        components: [{ name: 'App', type: 'page' }],
-        dataModels: [],
-        workflows: [],
-        createdAt: new Date(),
-        confidence: 0.4
-      };
-    }
+    lines.forEach(line => {
+      // Look for component mentions
+      if (line.includes('component') || line.includes('Component')) {
+        const match = line.match(/(\w+(?:Component|component))/i);
+        if (match) components.push(match[1]);
+      }
+      
+      // Look for page mentions
+      if (line.includes('page') || line.includes('Page')) {
+        const match = line.match(/(\w+(?:Page|page))/i);
+        if (match) pages.push(match[1]);
+      }
+    });
     
     return {
-      id: `text_${Date.now()}`,
-      name: projectName,
+      id: `text-${Date.now()}`,
+      name: file.name.replace(/\.[^/.]+$/, ""),
       sourceType: 'other',
-      pages: pages.length > 0 ? pages : [{ name: 'Home', path: '/', components: ['App'] }],
-      components: components.length > 0 ? components : [{ name: 'App', type: 'page' }],
+      pages: pages.map(name => ({ name, path: `/${name.toLowerCase()}`, components: [] })),
+      components: components.map(name => ({ name, type: 'custom' as const, props: [], dependencies: [] })),
       dataModels: [],
       workflows: [],
       createdAt: new Date(),
-      confidence: 0.6
+      confidence: 0.3
     };
   } catch (error) {
     console.error('Error extracting from text file:', error);
@@ -120,47 +65,43 @@ const extractProjectFromTextFile = async (file: File): Promise<ProjectStructure 
   }
 };
 
+const parseArchiveFile = async (arrayBuffer: ArrayBuffer, filename: string): Promise<ProjectStructure | null> => {
+  // This would require a ZIP parsing library
+  // For now, return null - this is a placeholder
+  console.log('Archive parsing not implemented yet for:', filename);
+  return null;
+};
+
 export const generateProjectBundle = (
   project: ProjectStructure, 
   format: 'json' | 'zip' | 'markdown' | 'uap' | 'ai-collaboration',
   refinementData?: string
 ): { data: string; filename: string; mimeType: string } => {
-  const timestamp = new Date().toISOString().slice(0, 19).replace(/[:]/g, '-');
-  const safeName = project.name.replace(/[^a-zA-Z0-9]/g, '_');
-
+  const timestamp = new Date().toISOString().split('T')[0];
+  const safeName = project.name.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+  
   switch (format) {
     case 'json':
-      const jsonData = refinementData 
-        ? { ...project, refinementInstructions: refinementData }
-        : project;
       return {
-        data: JSON.stringify(jsonData, null, 2),
-        filename: `${safeName}_${timestamp}.json`,
+        data: JSON.stringify(project, null, 2),
+        filename: `${safeName}_export_${timestamp}.json`,
         mimeType: 'application/json'
       };
       
     case 'markdown':
       return {
         data: generateMarkdownContent(project, refinementData),
-        filename: `${safeName}_${timestamp}.md`,
+        filename: `${safeName}_documentation_${timestamp}.md`,
         mimeType: 'text/markdown'
       };
       
     case 'zip':
-      // For ZIP, create a comprehensive bundle with all project data
+      // For ZIP, we'll create a JSON bundle with multiple files (simplified)
       const zipBundleData = {
         'project.json': project,
-        'documentation.md': generateMarkdownContent(project, refinementData),
         'README.md': generateReadmeContent(project),
         'structure.txt': generateProjectStructure(project),
-        'meta.json': {
-          exportedAt: new Date().toISOString(),
-          format: format,
-          version: '1.0.0',
-          refinementInstructions: refinementData || null,
-          totalPages: project.pages.length,
-          totalComponents: project.components.length
-        }
+        'documentation.md': generateMarkdownContent(project, refinementData)
       };
       return {
         data: JSON.stringify(zipBundleData, null, 2),
@@ -180,17 +121,17 @@ export const generateProjectBundle = (
       const uapBundleData = {
         'project.json': project,
         'project.md': generateMarkdownContent(project, refinementData),
-        'meta.json': {
-          exportedAt: new Date().toISOString(),
-          format: format,
-          version: '1.0.0',
-          refinementInstructions: refinementData || null
+        'metadata.json': {
+          format: 'uap',
+          version: '1.0',
+          created: new Date().toISOString(),
+          generator: 'project-bridge-mvp'
         }
       };
       return {
         data: JSON.stringify(uapBundleData, null, 2),
-        filename: `${safeName}_${timestamp}.${format}`,
-        mimeType: 'application/uap'
+        filename: `${safeName}_uap_${timestamp}.uap`,
+        mimeType: 'application/octet-stream'
       };
       
     default:
@@ -238,49 +179,46 @@ ${project.workflows.map(workflow => `
 `).join('')}
 
 ${refinementData ? `\n## Refinement Instructions\n${refinementData}\n` : ''}
-
----
-*Exported from Project Bridge MVP*
 `;
 };
 
 const generateReadmeContent = (project: ProjectStructure): string => {
   return `# ${project.name}
 
+This project was exported from ${project.sourceType} on ${new Date().toISOString()}.
+
 ## Overview
-This project was exported from Project Bridge MVP and contains ${project.pages.length} pages and ${project.components.length} components.
+- **Pages**: ${project.pages.length}
+- **Components**: ${project.components.length}
+- **Data Models**: ${project.dataModels.length}
+- **Workflows**: ${project.workflows.length}
 
-## Quick Start
-1. Import the \`project.json\` file into your development environment
-2. Review the \`documentation.md\` for detailed project structure
-3. Check \`structure.txt\` for a quick overview of the project hierarchy
+## Structure
+${project.pages.map(page => `- **${page.name}** (${page.path})`).join('\n')}
 
-## Project Structure
-- **Pages**: ${project.pages.length} total
-- **Components**: ${project.components.length} total
-- **Data Models**: ${project.dataModels.length} total
-- **Workflows**: ${project.workflows.length} total
+## Getting Started
+1. Install dependencies: \`npm install\`
+2. Start development server: \`npm run dev\`
+3. Build for production: \`npm run build\`
 
-## Files Included
-- \`project.json\` - Complete project data
-- \`documentation.md\` - Detailed documentation
-- \`README.md\` - This file
-- \`structure.txt\` - Project structure overview
-- \`meta.json\` - Export metadata
-
-Generated on: ${new Date().toISOString()}
+Generated by Project Bridge MVP
 `;
 };
 
 const generateProjectStructure = (project: ProjectStructure): string => {
-  return `${project.name}/
-├── Pages (${project.pages.length})
-${project.pages.map(page => `│   ├── ${page.name} (${page.path})`).join('\n')}
-├── Components (${project.components.length})
-${project.components.map(comp => `│   ├── ${comp.name} (${comp.type})`).join('\n')}
-├── Data Models (${project.dataModels.length})
-${project.dataModels.map(model => `│   ├── ${model.name}`).join('\n')}
-└── Workflows (${project.workflows.length})
+  return `Project Structure for ${project.name}
+Generated: ${new Date().toISOString()}
+
+Pages (${project.pages.length}):
+${project.pages.map(page => `    ├── ${page.name} (${page.path})`).join('\n')}
+
+Components (${project.components.length}):
+${project.components.map(comp => `    ├── ${comp.name} [${comp.type}]`).join('\n')}
+
+Data Models (${project.dataModels.length}):
+${project.dataModels.map(model => `    ├── ${model.name}`).join('\n')}
+
+Workflows (${project.workflows.length}):
 ${project.workflows.map(workflow => `    ├── ${workflow.name}`).join('\n')}
 
 Export Summary:
@@ -291,81 +229,292 @@ Export Summary:
 };
 
 const generateAICollaborationPackage = (project: ProjectStructure, refinementData?: string): string => {
-  return `# ${project.name} - Complete Source Code for AI Collaboration
+  return `# ${project.name} - COMPLETE SOURCE CODE FOR CHATGPT
 
-## 🤖 AI Collaboration Instructions
+## 🤖 INSTRUCTIONS FOR CHATGPT
 
-**This package contains complete, runnable source code designed for ChatGPT collaboration.**
+**YOU ARE NOW RECEIVING A COMPLETE REACT APPLICATION WITH FULL SOURCE CODE.**
 
-### How to use with ChatGPT:
-1. Copy this entire markdown file
-2. Paste it into ChatGPT with a message like: "Here's my React app. I want to [describe your goal]"
-3. ChatGPT can now see your complete app structure and help you iterate
+This markdown contains EVERYTHING needed to understand and modify this app:
+- ✅ Complete project structure and all source code
+- ✅ All components with full implementations  
+- ✅ All pages with routing setup
+- ✅ Complete configuration files (package.json, tailwind, etc.)
+- ✅ Data models and TypeScript types
+- ✅ Ready-to-run React + TypeScript + Tailwind application
 
-${refinementData ? `### Special Instructions:\n${refinementData}\n` : ''}
+**WHEN USER ASKS YOU TO MODIFY THIS PROJECT:**
+1. Always provide complete, ready-to-use code files
+2. Include proper imports and exports
+3. Use the existing design system (semantic Tailwind classes)
+4. Maintain the project structure shown below
+5. Test your code logic before responding
 
 ---
 
-## 📁 Complete Project Structure
+## 🚀 PROJECT OVERVIEW
+
+**Project Name**: ${project.name}
+**Type**: ${project.sourceType} React Application  
+**Created**: ${project.createdAt.toISOString()}
+**Analysis Confidence**: ${Math.round((project.confidence || 0) * 100)}%
+
+### Technology Stack
+- **Framework**: React 18 + TypeScript
+- **Build**: Vite (fast HMR, optimized builds)
+- **Styling**: Tailwind CSS with semantic design system
+- **Routing**: React Router v6
+- **Components**: Custom + Radix UI primitives
+- **Icons**: Lucide React
+
+---
+
+## 🎨 DESIGN SYSTEM (CRITICAL!)
+
+**IMPORTANT: This app uses semantic color tokens. NEVER use direct colors like bg-white, text-black!**
+
+### Correct Tailwind Classes to Use:
+\`\`\`css
+/* Backgrounds */
+bg-background           /* Main app background */
+bg-card                /* Card/panel backgrounds */
+bg-muted               /* Muted/subtle backgrounds */
+bg-primary             /* Primary brand color */
+bg-secondary           /* Secondary color */
+
+/* Text Colors */
+text-foreground        /* Main text color */
+text-muted-foreground  /* Subtle/secondary text */
+text-primary-foreground /* Text on primary backgrounds */
+text-card-foreground   /* Text on card backgrounds */
+
+/* Borders & Interactive */
+border-border          /* Standard borders */
+border-input          /* Input field borders */
+hover:bg-accent       /* Hover states */
+focus:ring-ring       /* Focus outlines */
+\`\`\`
+
+### Available UI Components:
+- Button (variants: default, destructive, outline, secondary, ghost, link)
+- Card, CardHeader, CardTitle, CardContent
+- Input, Textarea, Label, Select
+- Dialog, AlertDialog, Toast
+- Progress, Badge, Avatar
+- And many more Radix UI components
+
+---
+
+## 📁 COMPLETE PROJECT STRUCTURE
 
 \`\`\`
 ${project.name}/
 ├── src/
 │   ├── components/
-${project.components.map(comp => `│   │   └── ${comp.name}.tsx`).join('\n')}
+${project.components.map(c => `│   │   ├── ${c.name}.tsx`).join('\n')}
 │   ├── pages/
-${project.pages.map(page => `│   │   └── ${page.name}.tsx`).join('\n')}
+${project.pages.map(p => `│   │   ├── ${p.name}.tsx`).join('\n')}
+│   ├── lib/
+│   │   └── utils.ts
 │   ├── types/
-│   │   └── index.ts
-│   ├── utils/
-│   │   └── index.ts
-│   ├── App.tsx
-│   ├── main.tsx
-│   └── index.css
+│   ├── hooks/
+│   └── main.tsx
+├── public/
 ├── package.json
-├── vite.config.ts
 ├── tailwind.config.ts
-└── tsconfig.json
+├── tsconfig.json
+└── vite.config.ts
 \`\`\`
 
 ---
 
-## 🚀 Generated Source Code Files
+## 🧩 COMPLETE COMPONENT IMPLEMENTATIONS
+
+${project.components.map(component => `
+### ${component.name}
+- **Type**: ${component.type}
+- **Props**: ${component.props?.join(', ') || 'None specified'}
+- **Dependencies**: ${component.dependencies?.join(', ') || 'None'}
+
+\`\`\`tsx
+// src/components/${component.name}.tsx
+import React from 'react';
+import { cn } from '@/lib/utils';
+${component.dependencies?.map(dep => `import { ${dep} } from '@/components/ui/${dep.toLowerCase()}';`).join('\n') || ''}
+
+interface ${component.name}Props {
+  className?: string;
+${component.props?.map(prop => `  ${prop}: any;`).join('\n') || '  children?: React.ReactNode;'}
+}
+
+export const ${component.name}: React.FC<${component.name}Props> = ({
+  className,
+  ${component.props?.join(', ') || 'children'},
+  ...props
+}) => {
+  return (
+    <div 
+      className={cn(
+        "flex flex-col space-y-4 p-6 rounded-lg border bg-card text-card-foreground shadow-sm",
+        className
+      )}
+      {...props}
+    >
+      <div className="space-y-2">
+        <h3 className="text-lg font-semibold leading-none tracking-tight">
+          ${component.name}
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          ${component.type === 'ui' ? 'UI Component' : 'Custom component'}
+        </p>
+      </div>
+      <div className="flex-1">
+        {${component.props?.includes('children') ? 'children' : `/* ${component.name} content */`}}
+      </div>
+    </div>
+  );
+};
+
+export default ${component.name};
+\`\`\`
+`).join('\n')}
+
+---
+
+## 📄 COMPLETE PAGE IMPLEMENTATIONS
+
+${project.pages.map(page => `
+### ${page.name} Page
+- **Route**: ${page.path}
+- **Components Used**: ${page.components.join(', ') || 'None'}
+
+\`\`\`tsx
+// src/pages/${page.name}.tsx
+import React from 'react';
+${page.components.map(comp => `import { ${comp} } from '@/components/${comp}';`).join('\n')}
+
+const ${page.name}: React.FC = () => {
+  return (
+    <div className="min-h-screen bg-background">
+      <main className="container mx-auto py-8">
+        <div className="space-y-8">
+          {/* Page Header */}
+          <header className="space-y-4">
+            <h1 className="text-4xl font-bold tracking-tight text-foreground">
+              ${page.name}
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-2xl">
+              Welcome to the ${page.name.toLowerCase()} page.
+            </p>
+          </header>
+          
+          {/* Page Content */}
+          <div className="grid gap-6">
+${page.components.map(comp => `            <${comp} />`).join('\n')}
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default ${page.name};
+\`\`\`
+`).join('\n')}
+
+---
+
+## 🗂️ DATA MODELS & TYPES
+
+${project.dataModels.map(model => `
+### ${model.name}
+${model.fields.map(field => `- **${field.name}**: ${field.type}${field.required ? ' (required)' : ''}${field.description ? ` - ${field.description}` : ''}`).join('\n')}
+
+\`\`\`typescript
+// src/types/${model.name.toLowerCase()}.ts
+export interface ${model.name} {
+${model.fields.map(field => `  ${field.name}${field.required ? '' : '?'}: ${field.type};${field.description ? ` // ${field.description}` : ''}`).join('\n')}
+}
+
+export type Create${model.name}Data = Omit<${model.name}, 'id' | 'createdAt' | 'updatedAt'>;
+export type Update${model.name}Data = Partial<Create${model.name}Data>;
+\`\`\`
+`).join('\n')}
+
+---
+
+## ⚡ WORKFLOWS & BUSINESS LOGIC
+
+${project.workflows.map(workflow => `
+### ${workflow.name}
+- **Trigger**: ${workflow.trigger}
+- **Actions**: ${workflow.actions.join(', ')}
+${workflow.description ? `- **Description**: ${workflow.description}` : ''}
+
+\`\`\`typescript
+// src/utils/${workflow.name.toLowerCase().replace(/\s+/g, '-')}.ts
+export const ${workflow.name.replace(/\s+/g, '')}Workflow = {
+  name: '${workflow.name}',
+  trigger: '${workflow.trigger}',
+  actions: [${workflow.actions.map(a => `'${a}'`).join(', ')}],
+  ${workflow.description ? `description: '${workflow.description}',` : ''}
+  
+  async execute(payload: any) {
+    console.log('Executing workflow: ${workflow.name}');
+    ${workflow.actions.map(action => `
+    // Action: ${action}
+    console.log('Running action: ${action}');`).join('')}
+    
+    return { success: true, data: payload };
+  }
+};
+\`\`\`
+`).join('\n')}
+
+---
+
+## 🛠️ COMPLETE CONFIGURATION FILES
 
 ### package.json
 \`\`\`json
 {
-  "name": "${project.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}",
+  "name": "${project.name.toLowerCase().replace(/\s+/g, '-')}",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.8.1",
-    "lucide-react": "^0.263.1",
-    "clsx": "^2.0.0",
-    "tailwind-merge": "^1.14.0"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.30.1",
+    "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-dialog": "^1.1.14",
+    "@radix-ui/react-toast": "^1.2.14",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.462.0",
+    "tailwind-merge": "^2.6.0",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
-    "@types/react": "^18.2.15",
-    "@types/react-dom": "^18.2.7",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
-    "@vitejs/plugin-react": "^4.0.3",
-    "autoprefixer": "^10.4.14",
-    "eslint": "^8.45.0",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.3",
-    "postcss": "^8.4.27",
-    "tailwindcss": "^3.3.3",
-    "typescript": "^5.0.2",
-    "vite": "^4.4.5"
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@typescript-eslint/eslint-plugin": "^8.15.0",
+    "@typescript-eslint/parser": "^8.15.0",
+    "@vitejs/plugin-react": "^4.3.3",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.15.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.14",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.15",
+    "typescript": "~5.6.2",
+    "vite": "^6.0.1"
   }
 }
 \`\`\`
@@ -387,23 +536,43 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 )
 \`\`\`
 
-### src/App.tsx
+### src/App.tsx  
 \`\`\`tsx
+import React from 'react'
 import { Routes, Route } from 'react-router-dom'
-${project.pages.map(page => `import ${page.name} from './pages/${page.name}'`).join('\n')}
+import { Toaster } from 'sonner'
+${project.pages.map(page => `import ${page.name} from '@/pages/${page.name}'`).join('\n')}
 
 function App() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background font-sans antialiased">
       <Routes>
 ${project.pages.map(page => `        <Route path="${page.path}" element={<${page.name} />} />`).join('\n')}
-        <Route path="*" element={<div className="flex items-center justify-center min-h-screen">404 - Page Not Found</div>} />
+        <Route path="*" element={
+          <div className="flex items-center justify-center min-h-screen">
+            <div className="text-center space-y-4">
+              <h1 className="text-2xl font-bold text-foreground">404 - Page Not Found</h1>
+              <p className="text-muted-foreground">The page you're looking for doesn't exist.</p>
+            </div>
+          </div>
+        } />
       </Routes>
+      <Toaster />
     </div>
   )
 }
 
 export default App
+\`\`\`
+
+### src/lib/utils.ts
+\`\`\`typescript
+import { type ClassValue, clsx } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
 \`\`\`
 
 ### src/index.css
@@ -420,7 +589,7 @@ export default App
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 221.2 83.2% 53.3%;
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96%;
     --secondary-foreground: 222.2 84% 4.9%;
@@ -432,7 +601,7 @@ export default App
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 221.2 83.2% 53.3%;
     --radius: 0.5rem;
   }
 
@@ -443,8 +612,8 @@ export default App
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 84% 4.9%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
@@ -455,7 +624,7 @@ export default App
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --ring: 224.3 76.3% 94.1%;
   }
 }
 
@@ -469,130 +638,9 @@ export default App
 }
 \`\`\`
 
-${project.pages.map(page => `
-### src/pages/${page.name}.tsx
-\`\`\`tsx
-import React from 'react'
-${page.components.filter(comp => comp !== page.name).map(comp => 
-  `import ${comp} from '../components/${comp}'`
-).join('\n')}
-
-const ${page.name} = () => {
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <header className="mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-2">${page.name}</h1>
-          <p className="text-muted-foreground">Welcome to the ${page.name.toLowerCase()} page</p>
-        </header>
-        
-        <main className="space-y-8">
-          ${page.components.filter(comp => comp !== page.name).map(comp => 
-            `<${comp} />`
-          ).join('\n          ')}
-          
-          <section className="bg-card p-6 rounded-lg border">
-            <h2 className="text-2xl font-semibold mb-4">Page Content</h2>
-            <p className="text-muted-foreground">
-              This is the main content area for ${page.name}. 
-              Add your specific content and functionality here.
-            </p>
-          </section>
-        </main>
-      </div>
-    </div>
-  )
-}
-
-export default ${page.name}
-\`\`\`
-`).join('')}
-
-${project.components.map(comp => `
-### src/components/${comp.name}.tsx
-\`\`\`tsx
-import React from 'react'
-
-interface ${comp.name}Props {
-  ${comp.props?.map(prop => `${prop}?: string`).join('\n  ') || 'className?: string'}
-}
-
-const ${comp.name}: React.FC<${comp.name}Props> = ({ 
-  ${comp.props?.join(', ') || 'className'}
-}) => {
-  return (
-    <div className={\`${comp.type === 'ui' ? 'inline-flex items-center' : 'w-full'} \${className}\`}>
-      <div className="${comp.type === 'ui' ? 'p-2 border rounded' : 'space-y-4'}">
-        <h3 className="font-medium">${comp.name}</h3>
-        <p className="text-sm text-muted-foreground">
-          ${comp.type === 'ui' ? 'UI Component' : 'Custom Component'} - ${comp.name}
-        </p>
-        ${comp.type === 'layout' ? `
-        <div className="grid gap-4">
-          {/* Layout content goes here */}
-        </div>` : ''}
-      </div>
-    </div>
-  )
-}
-
-export default ${comp.name}
-\`\`\`
-`).join('')}
-
-### src/types/index.ts
-\`\`\`typescript
-${project.dataModels.map(model => `
-export interface ${model.name} {
-${model.fields.map(field => `  ${field.name}${field.required ? '' : '?'}: ${field.type};`).join('\n')}
-}
-`).join('')}
-
-export interface ApiResponse<T> {
-  data: T;
-  status: 'success' | 'error';
-  message?: string;
-}
-\`\`\`
-
-### src/utils/index.ts
-\`\`\`typescript
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
-
-${project.workflows.map(workflow => `
-// ${workflow.name} workflow
-export const ${workflow.name.toLowerCase().replace(/[^a-z0-9]/g, '')} = {
-  trigger: "${workflow.trigger}",
-  actions: [${workflow.actions.map(action => `"${action}"`).join(', ')}],
-  description: "${workflow.description || 'No description'}"
-};
-`).join('')}
-\`\`\`
-
-### vite.config.ts
-\`\`\`typescript
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import path from 'path'
-
-export default defineConfig({
-  plugins: [react()],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-  },
-})
-\`\`\`
-
 ### tailwind.config.ts
 \`\`\`typescript
-import type { Config } from 'tailwindcss'
+import type { Config } from "tailwindcss"
 
 const config: Config = {
   darkMode: ["class"],
@@ -651,12 +699,46 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      keyframes: {
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],
 }
 
 export default config
+\`\`\`
+
+### vite.config.ts
+\`\`\`typescript
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import path from 'path'
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+  server: {
+    port: 5173,
+    host: true
+  }
+})
 \`\`\`
 
 ### tsconfig.json
@@ -690,30 +772,42 @@ export default config
 
 ---
 
-## 📊 Project Analysis Summary
+## 📊 PROJECT ANALYSIS SUMMARY
 
 - **Total Pages**: ${project.pages.length}
-- **Total Components**: ${project.components.length}
+- **Total Components**: ${project.components.length}  
 - **Data Models**: ${project.dataModels.length}
 - **Workflows**: ${project.workflows.length}
 - **Source Type**: ${project.sourceType}
 - **Analysis Confidence**: ${Math.round((project.confidence || 0) * 100)}%
 
-## 🎯 Ready for ChatGPT Collaboration
+---
 
-This complete source code package is now ready for ChatGPT collaboration! ChatGPT can:
+## 🎯 CHATGPT COLLABORATION READY!
 
-✅ **Understand your entire app structure**
-✅ **Modify existing components**
-✅ **Add new features**
-✅ **Fix bugs and issues**
-✅ **Suggest improvements**
-✅ **Help with testing and deployment**
+This complete package contains everything needed to understand and modify this React application. 
 
-Simply copy this entire markdown file and paste it into ChatGPT with your specific request!
+**WHAT YOU CAN DO WITH THIS:**
+✅ **Add new features** - Create new components and pages
+✅ **Modify existing code** - Update any component or page
+✅ **Fix bugs** - Debug and resolve issues  
+✅ **Improve performance** - Optimize code and add best practices
+✅ **Add integrations** - Connect APIs, databases, etc.
+✅ **Style changes** - Modify design using the Tailwind system
+✅ **Add routing** - Create new routes and navigation
+✅ **Database operations** - Add data persistence
+
+**REMEMBER TO:**
+- Use the semantic color system (bg-background, text-foreground, etc.)
+- Import components from the correct paths (@/components/ui/*)
+- Follow the existing file structure
+- Include proper TypeScript types
+- Test your code thoroughly
+
+${refinementData ? `\n---\n\n## 🔧 REFINEMENT INSTRUCTIONS\n\n${refinementData}\n` : ''}
 
 ---
 
-*Generated by Project Bridge MVP - ${new Date().toISOString()}*
-`;
+*Generated by ${project.name} - ${new Date().toISOString()}*
+*This package contains the complete, production-ready source code for ChatGPT collaboration.*`;
 };
