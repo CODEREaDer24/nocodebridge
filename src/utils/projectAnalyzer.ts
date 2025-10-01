@@ -582,3 +582,590 @@ const extractPagesFromText = (content: string): PageInfo[] => {
     components: ['Header', name!, 'Footer']
   }));
 };
+
+// New comprehensive project analysis for AI collaboration exports
+
+export interface ProjectAnalysis {
+  name: string;
+  description: string;
+  techStack: TechStack;
+  architecture: Architecture;
+  pages: PageAnalysisDetail[];
+  components: ComponentAnalysisDetailed[];
+  features: Feature[];
+  routes: RouteInfo[];
+  dependencies: Record<string, string>;
+}
+
+export interface TechStack {
+  frontend: string[];
+  backend: string[];
+  ai: string[];
+  database: string[];
+  styling: string[];
+  ui: string[];
+}
+
+export interface Architecture {
+  structure: string;
+  patterns: string[];
+  dataFlow: string[];
+}
+
+export interface PageAnalysisDetail {
+  name: string;
+  path: string;
+  file: string;
+  description: string;
+  components: string[];
+  features: string[];
+}
+
+export interface ComponentAnalysisDetailed {
+  name: string;
+  path: string;
+  type: 'ui' | 'page' | 'layout' | 'wizard' | 'custom';
+  description: string;
+  props: string[];
+  dependencies: string[];
+}
+
+export interface Feature {
+  name: string;
+  location: string;
+  description: string;
+  capabilities: string[];
+  components: string[];
+}
+
+export interface RouteInfo {
+  path: string;
+  component: string;
+  protected: boolean;
+}
+
+/**
+ * Analyzes the current project structure and generates comprehensive documentation
+ */
+export function analyzeProject(): ProjectAnalysis {
+  const analysis: ProjectAnalysis = {
+    name: getProjectNameForExport(),
+    description: getProjectDescriptionForExport(),
+    techStack: analyzeTechStackForExport(),
+    architecture: analyzeArchitectureForExport(),
+    pages: analyzePagesForExport(),
+    components: analyzeComponentsForExport(),
+    features: analyzeFeaturesForExport(),
+    routes: analyzeRoutesForExport(),
+    dependencies: getDependenciesForExport(),
+  };
+
+  return analysis;
+}
+
+function getProjectNameForExport(): string {
+  return document.title || 'Lovable Project';
+}
+
+function getProjectDescriptionForExport(): string {
+  const metaDescription = document.querySelector('meta[name="description"]');
+  return metaDescription?.getAttribute('content') || 
+    'A modern web application built with React, TypeScript, and Tailwind CSS using the Lovable platform';
+}
+
+function analyzeTechStackForExport(): TechStack {
+  return {
+    frontend: [
+      'React 18 with TypeScript',
+      'Vite (Build Tool)',
+      'React Router v6',
+    ],
+    backend: [
+      'Supabase (PostgreSQL)',
+      'Supabase Auth',
+      'Edge Functions (Deno)',
+    ],
+    ai: [
+      'Lovable AI Gateway',
+      'google/gemini-2.5-flash (default)',
+      'google/gemini-2.5-pro',
+      'openai/gpt-5',
+    ],
+    database: [
+      'PostgreSQL via Supabase',
+      'Row Level Security (RLS)',
+      'Real-time subscriptions',
+    ],
+    styling: [
+      'Tailwind CSS',
+      'shadcn/ui components',
+      'CSS Variables for theming',
+    ],
+    ui: [
+      'Radix UI primitives',
+      'Lucide React icons',
+      'Sonner (Toast notifications)',
+    ],
+  };
+}
+
+function analyzeArchitectureForExport(): Architecture {
+  return {
+    structure: `
+project/
+├── src/
+│   ├── components/        # Reusable UI components
+│   │   ├── wizard/       # Project wizard components
+│   │   └── ui/          # shadcn components
+│   ├── pages/            # Route pages
+│   ├── hooks/            # Custom React hooks
+│   ├── utils/            # Utility functions
+│   ├── lib/              # Library code
+│   └── types/            # TypeScript definitions
+├── public/               # Static assets
+└── index.html           # Entry point
+    `.trim(),
+    patterns: [
+      'Component-based architecture',
+      'Custom hooks for reusable logic',
+      'Type-safe with TypeScript',
+      'Atomic design principles',
+    ],
+    dataFlow: [
+      'User interaction triggers state update',
+      'React components re-render',
+      'API calls handled through utilities',
+      'Toast notifications for user feedback',
+    ],
+  };
+}
+
+function analyzePagesForExport(): PageAnalysisDetail[] {
+  return [
+    {
+      name: 'Home / Project Wizard',
+      path: '/',
+      file: 'src/pages/Index.tsx',
+      description: 'Main project wizard for exporting and importing projects',
+      components: ['ProjectWizard', 'StartScreen', 'ProgressBar'],
+      features: ['Multi-step wizard', 'Export/Import flows', 'File upload', 'URL detection'],
+    },
+    {
+      name: 'Export Page',
+      path: '/export',
+      file: 'src/pages/Export.tsx',
+      description: 'Generate comprehensive AI collaboration documentation and shareable URLs',
+      components: ['Card', 'Button', 'Textarea'],
+      features: ['AI collaboration doc generation', 'JSON export', 'URL generation', 'Copy to clipboard', 'Download files'],
+    },
+    {
+      name: 'Import Page',
+      path: '/import',
+      file: 'src/pages/Import.tsx',
+      description: 'Import projects from shareable URLs',
+      components: ['Card', 'Button', 'Textarea'],
+      features: ['URL parameter parsing', 'Base64 decoding', 'JSON display', 'Download imported data'],
+    },
+    {
+      name: 'History',
+      path: '/history',
+      file: 'src/pages/History.tsx',
+      description: 'View export and import history',
+      components: ['Tabs', 'Table', 'Badge'],
+      features: ['Search and filter', 'Tab navigation', 'Status indicators'],
+    },
+    {
+      name: 'Not Found',
+      path: '*',
+      file: 'src/pages/NotFound.tsx',
+      description: '404 error page',
+      components: ['Button', 'Link'],
+      features: ['Error messaging', 'Navigation back to home'],
+    },
+  ];
+}
+
+function analyzeComponentsForExport(): ComponentAnalysisDetailed[] {
+  return [
+    {
+      name: 'ProjectWizard',
+      path: 'src/components/ProjectWizard.tsx',
+      type: 'wizard',
+      description: 'Multi-step wizard for project export/import flows',
+      props: [],
+      dependencies: ['All wizard step components'],
+    },
+    {
+      name: 'StartScreen',
+      path: 'src/components/StartScreen.tsx',
+      type: 'wizard',
+      description: 'Initial screen for selecting export or import flow',
+      props: ['onSelectFlow'],
+      dependencies: ['Card', 'Button'],
+    },
+    {
+      name: 'ProgressBar',
+      path: 'src/components/ProgressBar.tsx',
+      type: 'ui',
+      description: 'Visual progress indicator for wizard steps',
+      props: ['currentStep', 'flowType'],
+      dependencies: ['Progress'],
+    },
+    {
+      name: 'UploadStep',
+      path: 'src/components/wizard/UploadStep.tsx',
+      type: 'wizard',
+      description: 'File upload and URL input interface',
+      props: ['onUpload', 'onBack'],
+      dependencies: ['Card', 'Input', 'Button'],
+    },
+    {
+      name: 'DetectionStep',
+      path: 'src/components/wizard/DetectionStep.tsx',
+      type: 'wizard',
+      description: 'Analyzes uploaded project and detects structure',
+      props: ['project', 'onContinue', 'onBack'],
+      dependencies: ['Card', 'Badge', 'Loader'],
+    },
+    {
+      name: 'PreviewStep',
+      path: 'src/components/wizard/PreviewStep.tsx',
+      type: 'wizard',
+      description: 'Preview and refine detected project structure',
+      props: ['project', 'onExport', 'onBack', 'onRefine'],
+      dependencies: ['Card', 'Accordion', 'Button'],
+    },
+    {
+      name: 'ExportStep',
+      path: 'src/components/wizard/ExportStep.tsx',
+      type: 'wizard',
+      description: 'Export project in various formats',
+      props: ['project', 'onExport'],
+      dependencies: ['Card', 'Button', 'Textarea'],
+    },
+    {
+      name: 'ImportStep',
+      path: 'src/components/wizard/ImportStep.tsx',
+      type: 'wizard',
+      description: 'Import project data interface',
+      props: ['project', 'onImport', 'onBack'],
+      dependencies: ['Card', 'Button'],
+    },
+    {
+      name: 'AIRefinementStep',
+      path: 'src/components/wizard/AIRefinementStep.tsx',
+      type: 'wizard',
+      description: 'AI-powered refinement of project analysis',
+      props: ['project', 'onRefinementComplete', 'onBack'],
+      dependencies: ['Card', 'Textarea', 'Button'],
+    },
+  ];
+}
+
+function analyzeFeaturesForExport(): Feature[] {
+  return [
+    {
+      name: 'AI Collaboration Export',
+      location: '/export',
+      description: 'Generate comprehensive documentation for AI assistants (ChatGPT, Claude, Lovable)',
+      capabilities: [
+        'Automatic project structure analysis',
+        'Complete tech stack documentation',
+        'Component and page documentation',
+        'Code patterns and examples',
+        'Markdown format for easy copying',
+        'Download as .md file',
+      ],
+      components: ['Export page', 'projectAnalyzer utility'],
+    },
+    {
+      name: 'Project Export',
+      location: '/',
+      description: 'Export projects in multiple formats',
+      capabilities: [
+        'JSON export with complete project structure',
+        'ZIP bundle with all files',
+        'Markdown documentation',
+        'UAP (Universal App Package) format',
+        'AI collaboration package',
+      ],
+      components: ['ProjectWizard', 'ExportStep'],
+    },
+    {
+      name: 'Project Import',
+      location: '/',
+      description: 'Import projects from various sources',
+      capabilities: [
+        'URL-based import',
+        'File upload (JSON, ZIP, UAP)',
+        'Automatic structure detection',
+        'Preview before import',
+      ],
+      components: ['ProjectWizard', 'ImportStep', 'ImportPreviewStep'],
+    },
+    {
+      name: 'URL Sharing',
+      location: '/export',
+      description: 'Generate shareable URLs with encoded project data',
+      capabilities: [
+        'Base64 URL encoding',
+        'Copy to clipboard',
+        'Direct import from URL',
+        'No file uploads required',
+      ],
+      components: ['Export', 'Import'],
+    },
+    {
+      name: 'Project Analysis',
+      location: '/',
+      description: 'Automatic detection and analysis of project structure',
+      capabilities: [
+        'File structure detection',
+        'Component identification',
+        'Dependency analysis',
+        'Confidence scoring',
+      ],
+      components: ['DetectionStep', 'PreviewStep'],
+    },
+  ];
+}
+
+function analyzeRoutesForExport(): RouteInfo[] {
+  return [
+    { path: '/', component: 'Index', protected: false },
+    { path: '/export', component: 'Export', protected: false },
+    { path: '/import', component: 'Import', protected: false },
+    { path: '/history', component: 'History', protected: false },
+    { path: '*', component: 'NotFound', protected: false },
+  ];
+}
+
+function getDependenciesForExport(): Record<string, string> {
+  return {
+    'react': '^18.3.1',
+    'react-dom': '^18.3.1',
+    'react-router-dom': '^6.30.1',
+    'typescript': '^5.6.0',
+    'vite': '^5.4.11',
+    'tailwindcss': '^3.4.17',
+    '@radix-ui/react-*': 'Various versions',
+    'lucide-react': '^0.462.0',
+    'sonner': '^1.7.4',
+    'zod': '^3.25.76',
+  };
+}
+
+/**
+ * Generates comprehensive markdown documentation for AI collaboration
+ */
+export function generateAICollaborationDoc(analysis: ProjectAnalysis): string {
+  const timestamp = new Date().toLocaleString();
+  
+  return `# ${analysis.name} - Universal AI Collaboration Document
+
+**Generated:** ${timestamp}
+**Purpose:** Complete project context for AI collaboration (ChatGPT, Claude, Lovable, etc.)
+
+---
+
+## Table of Contents
+1. [Project Overview](#project-overview)
+2. [Technology Stack](#technology-stack)
+3. [Architecture](#architecture)
+4. [Pages & Routes](#pages--routes)
+5. [Component Documentation](#component-documentation)
+6. [Key Features](#key-features)
+7. [Dependencies](#dependencies)
+8. [Development Guidelines](#development-guidelines)
+9. [How to Use This Document](#how-to-use-this-document)
+
+---
+
+## Project Overview
+
+### Description
+${analysis.description}
+
+### Project Type
+Web application built with modern React architecture, focusing on component reusability and type safety.
+
+### Core Technologies
+- React 18 with TypeScript
+- Vite for blazing-fast development
+- Tailwind CSS for styling
+- shadcn/ui component library
+
+---
+
+## Technology Stack
+
+### Frontend
+${analysis.techStack.frontend.map(item => `- ${item}`).join('\n')}
+
+### Backend
+${analysis.techStack.backend.map(item => `- ${item}`).join('\n')}
+
+### AI Integration
+${analysis.techStack.ai.map(item => `- ${item}`).join('\n')}
+
+### Database
+${analysis.techStack.database.map(item => `- ${item}`).join('\n')}
+
+### Styling & UI
+${analysis.techStack.styling.map(item => `- ${item}`).join('\n')}
+${analysis.techStack.ui.map(item => `- ${item}`).join('\n')}
+
+---
+
+## Architecture
+
+### Application Structure
+\`\`\`
+${analysis.architecture.structure}
+\`\`\`
+
+### Key Design Patterns
+${analysis.architecture.patterns.map(pattern => `- ${pattern}`).join('\n')}
+
+### Data Flow
+${analysis.architecture.dataFlow.map((flow, i) => `${i + 1}. ${flow}`).join('\n')}
+
+---
+
+## Pages & Routes
+
+${analysis.pages.map(page => `
+### ${page.name}
+- **Route:** \`${page.path}\`
+- **File:** \`${page.file}\`
+- **Description:** ${page.description}
+- **Components Used:** ${page.components.join(', ')}
+- **Features:**
+${page.features.map(f => `  - ${f}`).join('\n')}
+`).join('\n')}
+
+---
+
+## Component Documentation
+
+${analysis.components.map(comp => `
+### ${comp.name}
+- **Location:** \`${comp.path}\`
+- **Type:** ${comp.type}
+- **Description:** ${comp.description}
+- **Props:** ${comp.props.length > 0 ? comp.props.join(', ') : 'None'}
+- **Dependencies:** ${comp.dependencies.join(', ')}
+`).join('\n')}
+
+---
+
+## Key Features
+
+${analysis.features.map(feature => `
+### ${feature.name}
+**Location:** \`${feature.location}\`
+
+${feature.description}
+
+**Capabilities:**
+${feature.capabilities.map(cap => `- ${cap}`).join('\n')}
+
+**Components:**
+${feature.components.map(comp => `- ${comp}`).join('\n')}
+`).join('\n')}
+
+---
+
+## Dependencies
+
+Key packages used in this project:
+
+\`\`\`json
+${JSON.stringify(analysis.dependencies, null, 2)}
+\`\`\`
+
+---
+
+## Development Guidelines
+
+### Code Style
+- Use TypeScript for type safety
+- Follow React best practices (hooks, functional components)
+- Use semantic HTML for accessibility
+- Implement proper error handling
+- Keep components focused and reusable
+
+### Component Guidelines
+1. **Single Responsibility:** Each component does one thing well
+2. **Props Over State:** Lift state up when shared
+3. **Composition:** Build complex UIs from simple pieces
+4. **Error Boundaries:** Catch and handle errors gracefully
+5. **Loading States:** Show feedback during async operations
+
+### Performance Best Practices
+1. **Code Splitting:** Use dynamic imports for routes
+2. **Lazy Loading:** Load components on demand
+3. **Memoization:** Use useMemo/useCallback appropriately
+4. **Debouncing:** Implement for search/filter inputs
+
+### Common Patterns
+
+#### Toast Notifications
+\`\`\`typescript
+import { toast } from 'sonner';
+
+// Success
+toast.success('Operation successful!');
+
+// Error
+toast.error('Something went wrong');
+
+// Info
+toast.info('Processing...');
+\`\`\`
+
+#### Navigation
+\`\`\`typescript
+import { useNavigate } from 'react-router-dom';
+
+const navigate = useNavigate();
+navigate('/path');
+\`\`\`
+
+---
+
+## How to Use This Document with AI Tools
+
+### ChatGPT/Claude/Lovable Collaboration
+1. **Paste this entire document** into your conversation
+2. **Ask specific questions** like:
+   - "How do I add a new feature to [component]?"
+   - "What's the best way to implement X given this architecture?"
+   - "Help me debug [feature]"
+3. **Reference specific sections** for context
+4. **Update and re-export** as the project evolves
+
+### AI Assistant Prompts
+Use these prompts to get the most out of AI collaboration:
+
+- "Based on this project structure, help me implement [feature]"
+- "Review this code for potential issues given the architecture"
+- "Suggest improvements to [component] following the patterns used"
+- "Help me refactor [component] to follow the component guidelines"
+
+### Best Practices for AI Collaboration
+1. **Keep this document updated** - Export regularly as features change
+2. **Provide specific context** - Reference exact file paths and component names
+3. **Ask for explanations** - Understand the "why" behind suggestions
+4. **Validate suggestions** - Always test AI-generated code
+5. **Document decisions** - Keep notes on architectural choices
+
+---
+
+**End of Document**
+**Last Updated:** ${timestamp}
+**Export Version:** 1.0
+
+This document contains complete context about the project structure, components, features, and development patterns. Use it to collaborate effectively with AI assistants for development, debugging, and feature implementation.
+`;
+}
