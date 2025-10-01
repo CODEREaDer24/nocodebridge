@@ -6,7 +6,8 @@ export const parseProjectFile = async (file: File): Promise<ProjectStructure | n
     
     if (filename.endsWith('.json')) {
       const text = await file.text();
-      return JSON.parse(text) as ProjectStructure;
+      const parsed = JSON.parse(text);
+      return normalizeProjectStructure(parsed);
     }
     
     if (filename.endsWith('.zip') || filename.endsWith('.uap')) {
@@ -23,6 +24,21 @@ export const parseProjectFile = async (file: File): Promise<ProjectStructure | n
     console.error('Error parsing project file:', error);
     return null;
   }
+};
+
+const normalizeProjectStructure = (data: any): ProjectStructure => {
+  return {
+    id: data.id || `project-${Date.now()}`,
+    name: data.name || 'Untitled Project',
+    url: data.url,
+    sourceType: data.sourceType || 'other',
+    pages: Array.isArray(data.pages) ? data.pages : [],
+    components: Array.isArray(data.components) ? data.components : [],
+    dataModels: Array.isArray(data.dataModels) ? data.dataModels : [],
+    workflows: Array.isArray(data.workflows) ? data.workflows : [],
+    createdAt: data.createdAt ? new Date(data.createdAt) : new Date(),
+    confidence: data.confidence || 0.5
+  };
 };
 
 const extractProjectFromTextFile = async (file: File): Promise<ProjectStructure | null> => {
