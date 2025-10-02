@@ -3,13 +3,15 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Copy, Download } from "lucide-react";
+import { Copy, Download, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { analyzeProject, ProjectAnalysis } from "@/utils/projectAnalyzer";
+import { useNavigate } from "react-router-dom";
 
 const OutputDemo = () => {
   const [analysis, setAnalysis] = useState<ProjectAnalysis | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Generate real analysis on mount
@@ -110,10 +112,22 @@ const OutputDemo = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex items-center gap-4 mb-6">
+          <Button 
+            onClick={() => navigate('/')} 
+            variant="outline" 
+            size="sm"
+            className="gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Home
+          </Button>
+        </div>
+        
         <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold">Analysis Output Demo</h1>
+          <h1 className="text-4xl font-bold">Live Project Analysis</h1>
           <p className="text-muted-foreground">
-            See exactly what nocodebridge outputs when analyzing and exporting to Lovable
+            Real-time analysis of this application's structure, components, and features
           </p>
         </div>
 
