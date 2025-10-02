@@ -3,25 +3,28 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Copy, Download, ArrowLeft } from "lucide-react";
+import { Copy, Download, ArrowLeft, FileJson, FileText, Archive } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { analyzeProject, ProjectAnalysis } from "@/utils/projectAnalyzer";
 import { convertProjectToAnalysis } from "@/utils/projectToAnalysis";
 import { ProjectStructure } from "@/types/project";
 import { useNavigate } from "react-router-dom";
+import { downloadAICollabJSON, downloadAICollabMarkdown, downloadAICollabZIP } from "@/utils/aiCollabExport";
 
 const OutputDemo = () => {
   const [analysis, setAnalysis] = useState<ProjectAnalysis | null>(null);
+  const [storedProject, setStoredProject] = useState<ProjectStructure | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
     // Check if there's an analyzed project from the wizard
-    const storedProject = localStorage.getItem('analyzed-project');
+    const storedProjectStr = localStorage.getItem('analyzed-project');
     
-    if (storedProject) {
+    if (storedProjectStr) {
       try {
-        const project: ProjectStructure = JSON.parse(storedProject);
+        const project: ProjectStructure = JSON.parse(storedProjectStr);
+        setStoredProject(project);
         const convertedAnalysis = convertProjectToAnalysis(project);
         setAnalysis(convertedAnalysis);
       } catch (error) {
@@ -60,6 +63,45 @@ const OutputDemo = () => {
       title: "Downloaded!",
       description: "Analysis JSON saved to your device",
     });
+  };
+
+  const handleDownloadAICollabJSON = () => {
+    if (!storedProject) {
+      toast({ 
+        title: "Not available", 
+        description: "AI Collab export only available for analyzed projects",
+        variant: "destructive"
+      });
+      return;
+    }
+    downloadAICollabJSON(storedProject);
+    toast({ title: "Downloaded", description: "AI Collab JSON downloaded successfully" });
+  };
+
+  const handleDownloadAICollabMarkdown = () => {
+    if (!storedProject) {
+      toast({ 
+        title: "Not available", 
+        description: "AI Collab export only available for analyzed projects",
+        variant: "destructive"
+      });
+      return;
+    }
+    downloadAICollabMarkdown(storedProject);
+    toast({ title: "Downloaded", description: "AI Collab Markdown downloaded successfully" });
+  };
+
+  const handleDownloadAICollabZIP = async () => {
+    if (!storedProject) {
+      toast({ 
+        title: "Not available", 
+        description: "AI Collab export only available for analyzed projects",
+        variant: "destructive"
+      });
+      return;
+    }
+    await downloadAICollabZIP(storedProject);
+    toast({ title: "Downloaded", description: "AI Collab ZIP bundle downloaded successfully" });
   };
 
   const generateLovableTemplate = () => {
@@ -206,6 +248,61 @@ const OutputDemo = () => {
                     </Button>
                   </div>
                 </div>
+
+                {/* AI Collaboration Export - Only show for analyzed projects */}
+                {storedProject && (
+                  <Card className="bg-gradient-to-r from-blue-600/10 to-cyan-600/10 border-blue-500/50">
+                    <div className="p-6 space-y-4">
+                      <div>
+                        <h3 className="text-lg font-semibold flex items-center gap-2 mb-2">
+                          <Archive className="w-5 h-5" />
+                          AI Collaboration Export
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Download complete project data for AI collaboration and ideation
+                        </p>
+                      </div>
+                      
+                      <div className="grid sm:grid-cols-3 gap-3">
+                        <Button 
+                          onClick={handleDownloadAICollabJSON}
+                          variant="outline"
+                          size="sm"
+                          className="w-full justify-start border-blue-500/50 hover:bg-blue-500/10"
+                        >
+                          <FileJson className="w-4 h-4 mr-2" />
+                          AI Collab JSON
+                        </Button>
+                        
+                        <Button 
+                          onClick={handleDownloadAICollabMarkdown}
+                          variant="outline"
+                          size="sm"
+                          className="w-full justify-start border-blue-500/50 hover:bg-blue-500/10"
+                        >
+                          <FileText className="w-4 h-4 mr-2" />
+                          AI Collab Markdown
+                        </Button>
+                        
+                        <Button 
+                          onClick={handleDownloadAICollabZIP}
+                          variant="outline"
+                          size="sm"
+                          className="w-full justify-start border-blue-500/50 hover:bg-blue-500/10"
+                        >
+                          <Archive className="w-4 h-4 mr-2" />
+                          AI Collab ZIP
+                        </Button>
+                      </div>
+                      
+                      <div className="p-3 bg-blue-950/20 rounded-lg border border-blue-500/30">
+                        <p className="text-xs text-muted-foreground">
+                          💡 <strong>UAP (Universal App Profile)</strong> coming soon - standardized format for cross-platform compatibility
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                )}
 
                 {/* Source Information */}
                 <div className="space-y-3">

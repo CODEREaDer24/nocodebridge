@@ -16,6 +16,9 @@ import {
   BarChart
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { downloadAICollabJSON, downloadAICollabMarkdown, downloadAICollabZIP } from "@/utils/aiCollabExport";
+import { FileJson, FileText, Archive } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface PreviewStepProps {
   project: ProjectStructure;
@@ -23,6 +26,7 @@ interface PreviewStepProps {
 
 export const PreviewStep = ({ project }: PreviewStepProps) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     pages: true,
     components: false,
@@ -32,6 +36,21 @@ export const PreviewStep = ({ project }: PreviewStepProps) => {
 
   const toggleSection = (section: string) => {
     setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  const handleDownloadJSON = () => {
+    downloadAICollabJSON(project);
+    toast({ title: "Downloaded", description: "AI Collab JSON downloaded successfully" });
+  };
+
+  const handleDownloadMarkdown = () => {
+    downloadAICollabMarkdown(project);
+    toast({ title: "Downloaded", description: "AI Collab Markdown downloaded successfully" });
+  };
+
+  const handleDownloadZIP = async () => {
+    await downloadAICollabZIP(project);
+    toast({ title: "Downloaded", description: "AI Collab ZIP bundle downloaded successfully" });
   };
 
   return (
@@ -213,6 +232,58 @@ export const PreviewStep = ({ project }: PreviewStepProps) => {
             </CardContent>
           </CollapsibleContent>
         </Collapsible>
+      </Card>
+
+      {/* AI Collab Export Downloads */}
+      <Card className="bg-gradient-to-r from-blue-600/10 to-cyan-600/10 border-blue-500/50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Archive className="w-5 h-5" />
+            AI Collaboration Export
+          </CardTitle>
+          <CardDescription>
+            Download complete project data for AI collaboration and ideation
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3">
+            <Button 
+              onClick={handleDownloadJSON}
+              variant="outline"
+              className="w-full justify-start border-blue-500/50 hover:bg-blue-500/10"
+            >
+              <FileJson className="w-4 h-4 mr-2" />
+              AI Collab JSON
+              <Badge variant="secondary" className="ml-auto">Machine-readable</Badge>
+            </Button>
+            
+            <Button 
+              onClick={handleDownloadMarkdown}
+              variant="outline"
+              className="w-full justify-start border-blue-500/50 hover:bg-blue-500/10"
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              AI Collab Markdown
+              <Badge variant="secondary" className="ml-auto">Human-readable</Badge>
+            </Button>
+            
+            <Button 
+              onClick={handleDownloadZIP}
+              variant="outline"
+              className="w-full justify-start border-blue-500/50 hover:bg-blue-500/10"
+            >
+              <Archive className="w-4 h-4 mr-2" />
+              AI Collab ZIP Bundle
+              <Badge variant="secondary" className="ml-auto">Both formats</Badge>
+            </Button>
+          </div>
+          
+          <div className="mt-4 p-3 bg-blue-950/20 rounded-lg border border-blue-500/30">
+            <p className="text-xs text-muted-foreground">
+              💡 <strong>UAP (Universal App Profile)</strong> coming soon - standardized format for cross-platform compatibility
+            </p>
+          </div>
+        </CardContent>
       </Card>
 
       {/* Continue to Export */}
