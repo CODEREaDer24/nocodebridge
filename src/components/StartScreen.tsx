@@ -136,9 +136,9 @@ export const StartScreen = ({ onSelectFlow }: StartScreenProps) => {
               Works with Multiple No-Code Builders
             </h3>
             <div className="flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">
-              <span className="px-4 py-2 bg-accent rounded-full">Builder Platform A</span>
-              <span className="px-4 py-2 bg-accent rounded-full">Builder Platform B</span>
-              <span className="px-4 py-2 bg-accent rounded-full">Builder Platform C</span>
+              <span className="px-4 py-2 bg-accent rounded-full">Lovable</span>
+              <span className="px-4 py-2 bg-accent rounded-full">Webflow</span>
+              <span className="px-4 py-2 bg-accent rounded-full">Bubble</span>
               <span className="px-4 py-2 bg-accent rounded-full">And More</span>
             </div>
           </CardContent>
