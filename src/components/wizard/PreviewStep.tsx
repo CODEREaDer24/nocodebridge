@@ -12,14 +12,17 @@ import {
   Database, 
   Workflow,
   CheckCircle,
-  ArrowRight
+  ArrowRight,
+  BarChart
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface PreviewStepProps {
   project: ProjectStructure;
 }
 
 export const PreviewStep = ({ project }: PreviewStepProps) => {
+  const navigate = useNavigate();
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     pages: true,
     components: false,
@@ -213,26 +216,51 @@ export const PreviewStep = ({ project }: PreviewStepProps) => {
       </Card>
 
       {/* Continue to Export */}
-      <Card className="bg-gradient-to-r from-primary/10 to-secondary/10 border-primary">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold mb-2">Ready to Export</h3>
-              <p className="text-muted-foreground">
-                Choose your export format and download your project
-              </p>
+      <div className="grid md:grid-cols-2 gap-4">
+        <Card className="bg-gradient-to-r from-purple-600/10 to-pink-600/10 border-purple-500/50">
+          <CardContent className="p-6">
+            <div className="flex flex-col gap-4">
+              <div>
+                <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                  <BarChart className="w-5 h-5" />
+                  View Live Analysis
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  See detailed analysis output with all components and features
+                </p>
+              </div>
+              <Button 
+                variant="outline"
+                onClick={() => navigate('/output-demo')}
+                className="w-full border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white"
+              >
+                View Analysis
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
             </div>
-            <Button 
-              size="lg"
-              onClick={() => window.dispatchEvent(new CustomEvent('proceed-to-export'))}
-              className="flex items-center gap-2"
-            >
-              Continue to Export
-              <ArrowRight className="w-4 h-4" />
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-r from-primary/10 to-secondary/10 border-primary">
+          <CardContent className="p-6">
+            <div className="flex flex-col gap-4">
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Ready to Export</h3>
+                <p className="text-sm text-muted-foreground">
+                  Choose your export format and download your project
+                </p>
+              </div>
+              <Button 
+                onClick={() => window.dispatchEvent(new CustomEvent('proceed-to-export'))}
+                className="w-full"
+              >
+                Continue to Export
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
