@@ -75,28 +75,62 @@ const OutputDemo = () => {
   const generateAIPrompt = () => {
     if (!analysis) return "";
     
-    let prompt = `Create a ${analysis.name} application with the following structure:\n\n`;
-    prompt += `${analysis.description}\n\n`;
+    let prompt = `# Project Context: ${analysis.name}\n\n`;
+    prompt += `I'm working on an application called "${analysis.name}". Here's the complete context to help you understand the codebase and collaborate effectively:\n\n`;
+    
+    prompt += `## Overview\n${analysis.description}\n\n`;
     
     prompt += `## Tech Stack\n`;
-    prompt += `Frontend: ${analysis.techStack.frontend.join(', ')}\n`;
-    prompt += `Backend: ${analysis.techStack.backend.join(', ')}\n`;
-    prompt += `Styling: ${analysis.techStack.styling.join(', ')}\n\n`;
+    prompt += `- **Frontend**: ${analysis.techStack.frontend.join(', ')}\n`;
+    prompt += `- **Backend**: ${analysis.techStack.backend.join(', ')}\n`;
+    prompt += `- **Styling**: ${analysis.techStack.styling.join(', ')}\n`;
+    prompt += `- **UI Components**: ${analysis.techStack.ui.join(', ')}\n\n`;
     
-    prompt += `## Pages (${analysis.pages.length})\n`;
+    prompt += `## Pages & Routes (${analysis.pages.length} total)\n`;
     analysis.pages.forEach(page => {
-      prompt += `- ${page.name} (${page.path}): ${page.description}\n`;
+      prompt += `### ${page.name} - \`${page.path}\`\n`;
+      prompt += `${page.description}\n`;
+      if (page.features.length > 0) {
+        prompt += `Features: ${page.features.join(', ')}\n`;
+      }
+      prompt += `\n`;
     });
     
-    prompt += `\n## Components (${analysis.components.length})\n`;
-    analysis.components.forEach(comp => {
-      prompt += `- ${comp.name} (${comp.type}): ${comp.description}\n`;
+    prompt += `## Components (${analysis.components.length} total)\n`;
+    const componentsByType = analysis.components.reduce((acc, comp) => {
+      if (!acc[comp.type]) acc[comp.type] = [];
+      acc[comp.type].push(comp);
+      return acc;
+    }, {} as Record<string, typeof analysis.components>);
+    
+    Object.entries(componentsByType).forEach(([type, comps]) => {
+      prompt += `### ${type.toUpperCase()} Components (${comps.length})\n`;
+      comps.slice(0, 5).forEach(comp => {
+        prompt += `- **${comp.name}**: ${comp.description}\n`;
+      });
+      if (comps.length > 5) {
+        prompt += `- ...and ${comps.length - 5} more ${type} components\n`;
+      }
+      prompt += `\n`;
     });
     
-    prompt += `\n## Features (${analysis.features.length})\n`;
+    prompt += `## Key Features (${analysis.features.length} total)\n`;
     analysis.features.forEach(feature => {
-      prompt += `- ${feature.name}: ${feature.description}\n`;
+      prompt += `### ${feature.name}\n`;
+      prompt += `${feature.description}\n`;
+      prompt += `Location: ${feature.location}\n`;
+      prompt += `Capabilities: ${feature.capabilities.join(', ')}\n\n`;
     });
+    
+    prompt += `## How to help me\n`;
+    prompt += `You now have complete context about this project. You can help me by:\n`;
+    prompt += `- Answering questions about the codebase structure\n`;
+    prompt += `- Suggesting improvements or refactoring\n`;
+    prompt += `- Helping debug issues in specific components or pages\n`;
+    prompt += `- Adding new features while maintaining consistency\n`;
+    prompt += `- Reviewing code and providing feedback\n\n`;
+    
+    prompt += `What would you like to know or work on?`;
     
     return prompt;
   };
