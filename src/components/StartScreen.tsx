@@ -1,7 +1,8 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, Upload, ArrowRight, Sparkles, Zap } from "lucide-react";
+import { Download, Upload, ArrowRight, Sparkles, Zap, FileText } from "lucide-react";
 import { FlowType } from "@/types/project";
+import { Link } from "react-router-dom";
 
 interface StartScreenProps {
   onSelectFlow: (flow: FlowType) => void;
@@ -106,6 +107,27 @@ export const StartScreen = ({ onSelectFlow }: StartScreenProps) => {
             </CardContent>
           </Card>
         </div>
+
+        {/* View Analysis Output */}
+        <Card className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 border-purple-500/50 max-w-4xl mx-auto">
+          <CardContent className="p-6 text-center">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <FileText className="w-6 h-6 text-purple-400" />
+              <h3 className="text-lg font-semibold text-foreground">
+                See Analysis Output Demo
+              </h3>
+            </div>
+            <p className="text-muted-foreground mb-4">
+              View real-time analysis of this project - pages, components, data models, and user flows
+            </p>
+            <Link to="/output-demo">
+              <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+                View Live Analysis
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
 
         {/* Supported Platforms */}
         <Card className="bg-card border-border max-w-4xl mx-auto">
