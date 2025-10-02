@@ -172,22 +172,7 @@ const extractPagesFromHtml = (html: string): PageInfo[] => {
     }
   });
   
-  // Strategy 3: Analyze page structure and meta tags
-  const titleTag = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-  const metaDescriptions = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["']/gi) || [];
-  
-  // Strategy 4: Look for common SPA patterns
-  if (html.includes('spa') || html.includes('single-page') || scriptContent.includes('router')) {
-    // Common SPA routes
-    const commonRoutes = ['/about', '/contact', '/services', '/products', '/blog', '/dashboard', '/profile'];
-    commonRoutes.forEach(route => {
-      if (html.toLowerCase().includes(route.slice(1)) || scriptContent.toLowerCase().includes(route)) {
-        foundRoutes.add(route);
-      }
-    });
-  }
-  
-  // Strategy 5: Analyze breadcrumbs and navigation structures
+  // Strategy 3: Analyze breadcrumbs and navigation structures (more reliable than guessing)
   const breadcrumbMatches = html.match(/breadcrumb[^>]*>[\s\S]*?<\/[^>]*>/gi) || [];
   breadcrumbMatches.forEach(breadcrumb => {
     const links = breadcrumb.match(/href=["']([^"']+)["']/gi) || [];
