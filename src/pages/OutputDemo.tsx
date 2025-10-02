@@ -29,16 +29,13 @@ const OutputDemo = () => {
         setAnalysis(convertedAnalysis);
       } catch (error) {
         console.error('Failed to parse stored project:', error);
-        // Fallback to current app analysis
-        const result = analyzeProject();
-        setAnalysis(result);
+        navigate('/');
       }
     } else {
-      // No stored project, analyze current app
-      const result = analyzeProject();
-      setAnalysis(result);
+      // No stored project, redirect to home
+      navigate('/');
     }
-  }, []);
+  }, [navigate]);
 
   const copyJson = async () => {
     if (!analysis) return;
