@@ -223,15 +223,19 @@ export const PreviewStep = ({ project }: PreviewStepProps) => {
               <div>
                 <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
                   <BarChart className="w-5 h-5" />
-                  View Live Analysis
+                  View Full Analysis
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  See detailed analysis output with all components and features
+                  See detailed analysis output of the analyzed project
                 </p>
               </div>
               <Button 
                 variant="outline"
-                onClick={() => navigate('/output-demo')}
+                onClick={() => {
+                  // Store project in localStorage and navigate
+                  localStorage.setItem('analyzed-project', JSON.stringify(project));
+                  navigate('/output-demo');
+                }}
                 className="w-full border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white"
               >
                 View Analysis

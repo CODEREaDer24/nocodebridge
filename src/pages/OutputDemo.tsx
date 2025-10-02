@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Copy, Download, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { analyzeProject, ProjectAnalysis } from "@/utils/projectAnalyzer";
+import { convertProjectToAnalysis } from "@/utils/projectToAnalysis";
+import { ProjectStructure } from "@/types/project";
 import { useNavigate } from "react-router-dom";
 
 const OutputDemo = () => {
@@ -14,9 +16,25 @@ const OutputDemo = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Generate real analysis on mount
-    const projectAnalysis = analyzeProject();
-    setAnalysis(projectAnalysis);
+    // Check if there's an analyzed project from the wizard
+    const storedProject = localStorage.getItem('analyzed-project');
+    
+    if (storedProject) {
+      try {
+        const project: ProjectStructure = JSON.parse(storedProject);
+        const convertedAnalysis = convertProjectToAnalysis(project);
+        setAnalysis(convertedAnalysis);
+      } catch (error) {
+        console.error('Failed to parse stored project:', error);
+        // Fallback to current app analysis
+        const result = analyzeProject();
+        setAnalysis(result);
+      }
+    } else {
+      // No stored project, analyze current app
+      const result = analyzeProject();
+      setAnalysis(result);
+    }
   }, []);
 
   const copyJson = async () => {
@@ -193,10 +211,21 @@ const OutputDemo = () => {
                 <div className="space-y-3">
                   <h3 className="text-lg font-semibold">Source Information</h3>
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
-                      current_project
-                    </Badge>
-                    <Badge variant="outline">live_analysis</Badge>
+                    {localStorage.getItem('analyzed-project') ? (
+                      <>
+                        <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 border-blue-500/20">
+                          analyzed_project
+                        </Badge>
+                        <Badge variant="outline">from_wizard</Badge>
+                      </>
+                    ) : (
+                      <>
+                        <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
+                          current_project
+                        </Badge>
+                        <Badge variant="outline">live_analysis</Badge>
+                      </>
+                    )}
                   </div>
                   <p className="text-sm text-muted-foreground">
                     {analysis.description}
