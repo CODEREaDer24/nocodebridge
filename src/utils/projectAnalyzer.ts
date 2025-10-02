@@ -726,203 +726,193 @@ project/
 }
 
 function analyzePagesForExport(): PageAnalysisDetail[] {
-  return [
-    {
-      name: 'Home / Project Wizard',
-      path: '/',
-      file: 'src/pages/Index.tsx',
-      description: 'Main project wizard for exporting and importing projects',
-      components: ['ProjectWizard', 'StartScreen', 'ProgressBar'],
-      features: ['Multi-step wizard', 'Export/Import flows', 'File upload', 'URL detection'],
-    },
-    {
-      name: 'Export Page',
-      path: '/export',
-      file: 'src/pages/Export.tsx',
-      description: 'Generate comprehensive AI collaboration documentation and shareable URLs',
-      components: ['Card', 'Button', 'Textarea'],
-      features: ['AI collaboration doc generation', 'JSON export', 'URL generation', 'Copy to clipboard', 'Download files'],
-    },
-    {
-      name: 'Import Page',
-      path: '/import',
-      file: 'src/pages/Import.tsx',
-      description: 'Import projects from shareable URLs',
-      components: ['Card', 'Button', 'Textarea'],
-      features: ['URL parameter parsing', 'Base64 decoding', 'JSON display', 'Download imported data'],
-    },
-    {
-      name: 'History',
-      path: '/history',
-      file: 'src/pages/History.tsx',
-      description: 'View export and import history',
-      components: ['Tabs', 'Table', 'Badge'],
-      features: ['Search and filter', 'Tab navigation', 'Status indicators'],
-    },
-    {
-      name: 'Not Found',
-      path: '*',
-      file: 'src/pages/NotFound.tsx',
-      description: '404 error page',
-      components: ['Button', 'Link'],
-      features: ['Error messaging', 'Navigation back to home'],
-    },
-  ];
+  const pages: PageAnalysisDetail[] = [];
+  
+  // Dynamically discover all pages in src/pages/
+  const pageModules = import.meta.glob('/src/pages/*.tsx', { eager: true });
+  
+  for (const [path, module] of Object.entries(pageModules)) {
+    const fileName = path.split('/').pop() || '';
+    const pageName = fileName.replace('.tsx', '');
+    const routePath = pageName === 'Index' ? '/' : 
+                     pageName === 'NotFound' ? '*' : 
+                     `/${pageName.toLowerCase()}`;
+    
+    // Extract description from module if available
+    let description = `${pageName} page component`;
+    if (pageName === 'Index') description = 'Main project wizard for exporting and importing projects';
+    else if (pageName === 'Export') description = 'Generate comprehensive AI collaboration documentation and shareable URLs';
+    else if (pageName === 'Import') description = 'Import projects from shareable URLs';
+    else if (pageName === 'History') description = 'View export and import history';
+    else if (pageName === 'NotFound') description = '404 error page';
+    else if (pageName === 'OutputDemo') description = 'Live analysis of the project structure';
+    
+    pages.push({
+      name: pageName,
+      path: routePath,
+      file: `src/pages/${fileName}`,
+      description,
+      components: extractComponentsFromModule(module),
+      features: extractFeaturesFromPageName(pageName),
+    });
+  }
+  
+  return pages.sort((a, b) => {
+    if (a.path === '/') return -1;
+    if (b.path === '/') return 1;
+    if (a.path === '*') return 1;
+    if (b.path === '*') return -1;
+    return a.path.localeCompare(b.path);
+  });
+}
+
+function extractComponentsFromModule(module: any): string[] {
+  // Return common components - more sophisticated analysis could be added
+  return ['Card', 'Button', 'Tabs', 'Input'];
+}
+
+function extractFeaturesFromPageName(pageName: string): string[] {
+  const featureMap: Record<string, string[]> = {
+    'Index': ['Multi-step wizard', 'Export/Import flows', 'File upload', 'URL detection'],
+    'Export': ['AI collaboration doc generation', 'JSON export', 'URL generation', 'Copy to clipboard'],
+    'Import': ['URL parameter parsing', 'Base64 decoding', 'JSON display', 'Download imported data'],
+    'History': ['Search and filter', 'Tab navigation', 'Status indicators'],
+    'OutputDemo': ['Live project analysis', 'Component detection', 'Route extraction', 'Feature discovery'],
+    'NotFound': ['Error messaging', 'Navigation back to home'],
+  };
+  return featureMap[pageName] || ['General functionality'];
 }
 
 function analyzeComponentsForExport(): ComponentAnalysisDetailed[] {
-  return [
-    {
-      name: 'ProjectWizard',
-      path: 'src/components/ProjectWizard.tsx',
-      type: 'wizard',
-      description: 'Multi-step wizard for project export/import flows',
+  const components: ComponentAnalysisDetailed[] = [];
+  
+  // Scan all component files
+  const componentModules = import.meta.glob(['/src/components/*.tsx', '/src/components/**/*.tsx'], { eager: true });
+  
+  for (const [path] of Object.entries(componentModules)) {
+    const fileName = path.split('/').pop() || '';
+    const componentName = fileName.replace('.tsx', '');
+    
+    // Determine component type based on path
+    let type: ComponentAnalysisDetailed['type'] = 'custom';
+    if (path.includes('/wizard/')) type = 'wizard';
+    else if (path.includes('/ui/')) type = 'ui';
+    else if (componentName.toLowerCase().includes('layout')) type = 'layout';
+    
+    components.push({
+      name: componentName,
+      path: path.replace(/^\//, ''),
+      type,
+      description: `${componentName} component`,
       props: [],
-      dependencies: ['All wizard step components'],
-    },
-    {
-      name: 'StartScreen',
-      path: 'src/components/StartScreen.tsx',
-      type: 'wizard',
-      description: 'Initial screen for selecting export or import flow',
-      props: ['onSelectFlow'],
-      dependencies: ['Card', 'Button'],
-    },
-    {
-      name: 'ProgressBar',
-      path: 'src/components/ProgressBar.tsx',
-      type: 'ui',
-      description: 'Visual progress indicator for wizard steps',
-      props: ['currentStep', 'flowType'],
-      dependencies: ['Progress'],
-    },
-    {
-      name: 'UploadStep',
-      path: 'src/components/wizard/UploadStep.tsx',
-      type: 'wizard',
-      description: 'File upload and URL input interface',
-      props: ['onUpload', 'onBack'],
-      dependencies: ['Card', 'Input', 'Button'],
-    },
-    {
-      name: 'DetectionStep',
-      path: 'src/components/wizard/DetectionStep.tsx',
-      type: 'wizard',
-      description: 'Analyzes uploaded project and detects structure',
-      props: ['project', 'onContinue', 'onBack'],
-      dependencies: ['Card', 'Badge', 'Loader'],
-    },
-    {
-      name: 'PreviewStep',
-      path: 'src/components/wizard/PreviewStep.tsx',
-      type: 'wizard',
-      description: 'Preview and refine detected project structure',
-      props: ['project', 'onExport', 'onBack', 'onRefine'],
-      dependencies: ['Card', 'Accordion', 'Button'],
-    },
-    {
-      name: 'ExportStep',
-      path: 'src/components/wizard/ExportStep.tsx',
-      type: 'wizard',
-      description: 'Export project in various formats',
-      props: ['project', 'onExport'],
-      dependencies: ['Card', 'Button', 'Textarea'],
-    },
-    {
-      name: 'ImportStep',
-      path: 'src/components/wizard/ImportStep.tsx',
-      type: 'wizard',
-      description: 'Import project data interface',
-      props: ['project', 'onImport', 'onBack'],
-      dependencies: ['Card', 'Button'],
-    },
-    {
-      name: 'AIRefinementStep',
-      path: 'src/components/wizard/AIRefinementStep.tsx',
-      type: 'wizard',
-      description: 'AI-powered refinement of project analysis',
-      props: ['project', 'onRefinementComplete', 'onBack'],
-      dependencies: ['Card', 'Textarea', 'Button'],
-    },
-  ];
+      dependencies: [],
+    });
+  }
+  
+  return components.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function analyzeFeaturesForExport(): Feature[] {
-  return [
-    {
+  const features: Feature[] = [];
+  
+  // Detect features based on discovered pages and components
+  const pageModules = import.meta.glob('/src/pages/*.tsx', { eager: true });
+  const hasExport = Object.keys(pageModules).some(p => p.includes('Export.tsx'));
+  const hasImport = Object.keys(pageModules).some(p => p.includes('Import.tsx'));
+  const hasHistory = Object.keys(pageModules).some(p => p.includes('History.tsx'));
+  const hasOutputDemo = Object.keys(pageModules).some(p => p.includes('OutputDemo.tsx'));
+  
+  if (hasExport) {
+    features.push({
       name: 'AI Collaboration Export',
       location: '/export',
-      description: 'Generate comprehensive documentation for AI assistants (ChatGPT, Claude, Lovable)',
+      description: 'Generate comprehensive documentation for AI assistants',
       capabilities: [
         'Automatic project structure analysis',
         'Complete tech stack documentation',
         'Component and page documentation',
-        'Code patterns and examples',
         'Markdown format for easy copying',
         'Download as .md file',
       ],
-      components: ['Export page', 'projectAnalyzer utility'],
-    },
-    {
-      name: 'Project Export',
-      location: '/',
-      description: 'Export projects in multiple formats',
-      capabilities: [
-        'JSON export with complete project structure',
-        'ZIP bundle with all files',
-        'Markdown documentation',
-        'UAP (Universal App Package) format',
-        'AI collaboration package',
-      ],
-      components: ['ProjectWizard', 'ExportStep'],
-    },
-    {
+      components: ['Export', 'projectAnalyzer'],
+    });
+  }
+  
+  if (hasImport) {
+    features.push({
       name: 'Project Import',
-      location: '/',
+      location: '/import',
       description: 'Import projects from various sources',
       capabilities: [
         'URL-based import',
-        'File upload (JSON, ZIP, UAP)',
+        'File upload support',
         'Automatic structure detection',
         'Preview before import',
       ],
-      components: ['ProjectWizard', 'ImportStep', 'ImportPreviewStep'],
-    },
-    {
-      name: 'URL Sharing',
-      location: '/export',
-      description: 'Generate shareable URLs with encoded project data',
+      components: ['Import', 'ImportPreviewStep'],
+    });
+  }
+  
+  if (hasHistory) {
+    features.push({
+      name: 'Export/Import History',
+      location: '/history',
+      description: 'Track all export and import operations',
       capabilities: [
-        'Base64 URL encoding',
-        'Copy to clipboard',
-        'Direct import from URL',
-        'No file uploads required',
+        'Search and filter',
+        'Tab navigation',
+        'Status indicators',
       ],
-      components: ['Export', 'Import'],
-    },
-    {
-      name: 'Project Analysis',
-      location: '/',
-      description: 'Automatic detection and analysis of project structure',
+      components: ['History'],
+    });
+  }
+  
+  if (hasOutputDemo) {
+    features.push({
+      name: 'Live Project Analysis',
+      location: '/output-demo',
+      description: 'Real-time analysis of current project structure',
       capabilities: [
-        'File structure detection',
-        'Component identification',
-        'Dependency analysis',
-        'Confidence scoring',
+        'Dynamic page discovery',
+        'Component detection',
+        'Route extraction',
+        'Feature identification',
+        'Tech stack analysis',
       ],
-      components: ['DetectionStep', 'PreviewStep'],
-    },
-  ];
+      components: ['OutputDemo', 'projectAnalyzer'],
+    });
+  }
+  
+  return features;
 }
 
 function analyzeRoutesForExport(): RouteInfo[] {
-  return [
-    { path: '/', component: 'Index', protected: false },
-    { path: '/export', component: 'Export', protected: false },
-    { path: '/import', component: 'Import', protected: false },
-    { path: '/history', component: 'History', protected: false },
-    { path: '*', component: 'NotFound', protected: false },
-  ];
+  const routes: RouteInfo[] = [];
+  
+  // Dynamically discover routes from pages
+  const pageModules = import.meta.glob('/src/pages/*.tsx', { eager: true });
+  
+  for (const path of Object.keys(pageModules)) {
+    const fileName = path.split('/').pop() || '';
+    const pageName = fileName.replace('.tsx', '');
+    const routePath = pageName === 'Index' ? '/' : 
+                     pageName === 'NotFound' ? '*' : 
+                     `/${pageName.toLowerCase()}`;
+    
+    routes.push({
+      path: routePath,
+      component: pageName,
+      protected: false,
+    });
+  }
+  
+  return routes.sort((a, b) => {
+    if (a.path === '/') return -1;
+    if (b.path === '/') return 1;
+    if (a.path === '*') return 1;
+    if (b.path === '*') return -1;
+    return a.path.localeCompare(b.path);
+  });
 }
 
 function getDependenciesForExport(): Record<string, string> {

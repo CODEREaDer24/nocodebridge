@@ -104,7 +104,7 @@ const OutputDemo = () => {
   if (!analysis) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Analyzing project...</p>
+        <p className="text-muted-foreground">Loading analysis...</p>
       </div>
     );
   }
