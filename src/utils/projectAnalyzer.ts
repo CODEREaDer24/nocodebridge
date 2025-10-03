@@ -88,9 +88,25 @@ const basicUrlAnalysis = async (url: string): Promise<ProjectStructure> => {
 };
 
 const extractProjectName = (html: string, urlObj: URL): string => {
-  // Try to extract from title tag
+  // For Lovable projects, extract from URL path
+  if (urlObj.hostname.includes('lovable')) {
+    const pathParts = urlObj.pathname.split('/').filter(Boolean);
+    if (pathParts.length >= 2 && pathParts[0] === 'projects') {
+      // Extract project ID and use it as name for now
+      const projectId = pathParts[1];
+      return `Project ${projectId.substring(0, 8)}`;
+    }
+  }
+  
+  // Try to extract from main heading
+  const h1Match = html.match(/<h1[^>]*>([^<]+)<\/h1>/i);
+  if (h1Match && h1Match[1].trim() && h1Match[1].trim() !== 'Lovable') {
+    return h1Match[1].trim();
+  }
+  
+  // Try to extract from title tag (but skip generic "Lovable")
   const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-  if (titleMatch) {
+  if (titleMatch && titleMatch[1].trim() !== 'Lovable') {
     return titleMatch[1]
       .replace(/\s*-\s*.*$/, '')
       .replace(/\s*\|\s*.*$/, '')
@@ -99,7 +115,7 @@ const extractProjectName = (html: string, urlObj: URL): string => {
   
   // Try meta og:title
   const ogTitleMatch = html.match(/<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["']/i);
-  if (ogTitleMatch) {
+  if (ogTitleMatch && ogTitleMatch[1].trim() !== 'Lovable') {
     return ogTitleMatch[1].trim();
   }
   
