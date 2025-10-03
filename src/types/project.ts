@@ -1,13 +1,15 @@
 export interface ProjectStructure {
   id: string;
   name: string;
-  url?: string;
-  sourceType: 'lovable' | 'other';
+  appName?: string; // 👈 root-level app name for UAP/exports
+  url?: string;     // 👈 optional source URL (web apps, repos, etc.)
+  sourceType: 'lovable' | 'web' | 'other';
   pages: PageInfo[];
   components: ComponentInfo[];
   dataModels: DataModelInfo[];
   workflows: WorkflowInfo[];
-  createdAt: Date;
+  endpoints?: EndpointInfo[];
+  createdAt?: Date;
   confidence?: number;
 }
 
@@ -44,6 +46,12 @@ export interface WorkflowInfo {
   description?: string;
 }
 
+export interface EndpointInfo {
+  path: string;
+  method: string;
+  usage?: string;
+}
+
 export interface ExportRecord {
   id: string;
   projectId: string;
@@ -51,14 +59,3 @@ export interface ExportRecord {
   createdAt: Date;
   size?: number;
 }
-
-export interface ImportRecord {
-  id: string;
-  projectId: string;
-  source: 'json' | 'zip' | 'url' | 'uap';
-  createdAt: Date;
-  success: boolean;
-}
-
-export type WizardStep = 'start' | 'input' | 'detect' | 'preview' | 'export' | 'import' | 'import-preview' | 'ai-refinement' | 'export-prompt';
-export type FlowType = 'export' | 'import';
