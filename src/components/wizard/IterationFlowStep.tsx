@@ -1,131 +1,100 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, RefreshCw, Download, Upload, MessageSquare } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ProjectStructure } from "@/types/project";
+import { FileJson, Package, FileText, Network } from "lucide-react";
 
 interface IterationFlowStepProps {
-  onStartExport: () => void;
-  onStartImport: () => void;
+  project: ProjectStructure;
+  onStartExport: (format: "json" | "zip" | "markdown" | "uap" | "ai-collaboration") => void;
+  onStartImport?: () => void;
 }
 
-export const IterationFlowStep = ({ onStartExport, onStartImport }: IterationFlowStepProps) => {
+export const IterationFlowStep = ({ project, onStartExport }: IterationFlowStepProps) => {
+  const [activeTab, setActiveTab] = useState("export");
+
+  const exportOptions = [
+    {
+      format: "json" as const,
+      title: "JSON Export",
+      description: "Exact duplication, perfect for re-import",
+      icon: FileJson,
+      color: "bg-primary",
+    },
+    {
+      format: "zip" as const,
+      title: "ZIP Bundle",
+      description: "Full project bundle with files + docs",
+      icon: Package,
+      color: "bg-secondary",
+    },
+    {
+      format: "markdown" as const,
+      title: "Markdown Doc",
+      description: "Human + AI readable documentation",
+      icon: FileText,
+      color: "bg-accent",
+    },
+    {
+      format: "uap" as const,
+      title: "UAP Export",
+      description: "Universal App Package for Bridge workflows",
+      icon: Network,
+      color: "bg-gradient-to-r from-indigo-500 to-purple-500",
+    },
+    {
+      format: "ai-collaboration" as const,
+      title: "AI Collaboration Package",
+      description: "Complete runnable source for AI tools",
+      icon: FileText,
+      color: "bg-gradient-to-r from-pink-500 to-red-500",
+    },
+  ];
+
   return (
-    <div className="space-y-8">
-      <div className="text-center">
-        <h2 className="text-3xl font-bold mb-4">🔄 Project Iteration Flow</h2>
-        <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-          Perfect your Lovable projects through an iterative cycle: Export → Refine with AI → Import back to Lovable
-        </p>
-      </div>
+    <div className="w-full max-w-5xl mx-auto">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="mb-6">
+          <TabsTrigger value="export">Export</TabsTrigger>
+          <TabsTrigger value="import">Import</TabsTrigger>
+        </TabsList>
 
-      {/* Flow Visualization */}
-      <Card className="bg-gradient-to-r from-slate-800 to-slate-700 border-slate-600">
-        <CardContent className="p-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Download className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="font-semibold mb-2 text-slate-100">1. Export</h3>
-              <p className="text-sm text-slate-300">
-                Take your Lovable project URL and export as JSON
-              </p>
-            </div>
-            
-            <div className="hidden md:flex items-center justify-center">
-              <ArrowRight className="w-6 h-6 text-blue-400" />
-            </div>
-            
-            <div className="text-center">
-              <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                <MessageSquare className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="font-semibold mb-2 text-slate-100">2. Refine</h3>
-              <p className="text-sm text-slate-300">
-                Use AI tools to improve, modify, or enhance your project structure
-              </p>
-            </div>
-            
-            <div className="hidden md:flex items-center justify-center">
-              <ArrowRight className="w-6 h-6 text-purple-400" />
-            </div>
-            
-            <div className="text-center">
-              <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Upload className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="font-semibold mb-2 text-slate-100">3. Import</h3>
-              <p className="text-sm text-slate-300">
-                Import refined JSON back to create your improved Lovable project
-              </p>
-            </div>
+        <TabsContent value="export">
+          <div className="grid gap-4">
+            {exportOptions.map((option) => (
+              <Card key={option.format} className="relative overflow-hidden">
+                <div className={`absolute left-0 top-0 bottom-0 w-1 ${option.color}`} />
+                <CardContent className="p-6 flex justify-between items-center">
+                  <div className="flex items-center gap-4">
+                    <div className={`p-3 rounded-lg ${option.color} text-white`}>
+                      <option.icon className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold">{option.title}</h3>
+                      <p className="text-sm text-muted-foreground">{option.description}</p>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => onStartExport(option.format)}
+                    className="flex items-center gap-2"
+                  >
+                    Export {option.format.toUpperCase()}
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-        </CardContent>
-      </Card>
+        </TabsContent>
 
-      {/* Action Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="cursor-pointer hover:shadow-lg transition-all bg-slate-800 border-slate-600 hover:border-blue-500">
-          <CardContent className="p-8 text-center">
-            <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Download className="w-10 h-10 text-white" />
-            </div>
-            <h3 className="text-xl font-semibold mb-3 text-slate-100">🚀 Start with Export</h3>
-            <p className="text-slate-300 mb-6">
-              Have an existing Lovable project? Start here to export and refine it.
-            </p>
-            <Button 
-              onClick={onStartExport}
-              className="w-full bg-blue-600 hover:bg-blue-700" 
-              size="lg"
-            >
-              Export Existing Project
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card className="cursor-pointer hover:shadow-lg transition-all bg-slate-800 border-slate-600 hover:border-green-500">
-          <CardContent className="p-8 text-center">
-            <div className="w-20 h-20 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Upload className="w-10 h-10 text-white" />
-            </div>
-            <h3 className="text-xl font-semibold mb-3 text-slate-100">📥 Import Refined JSON</h3>
-            <p className="text-slate-300 mb-6">
-              Already have a refined JSON from AI tools? Import it to create your Lovable prompt.
-            </p>
-            <Button 
-              onClick={onStartImport}
-              variant="outline" 
-              className="w-full border-green-500 text-green-400 hover:bg-green-500 hover:text-white" 
-              size="lg"
-            >
-              Import JSON
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Benefits */}
-      <Card className="bg-gradient-to-r from-slate-800 to-slate-700 border-slate-600">
-        <CardContent className="p-6">
-          <h3 className="text-lg font-semibold mb-4 text-slate-100">💡 Why Use This Flow?</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div>
-              <strong className="text-slate-200">Simple Workflow:</strong>
-              <p className="text-slate-300">Streamlined process for project iteration</p>
-            </div>
-            <div>
-              <strong className="text-slate-200">AI-Powered:</strong>
-              <p className="text-slate-300">Enhance projects with intelligent refinement</p>
-            </div>
-            <div>
-              <strong className="text-slate-200">Rapid Results:</strong>
-              <p className="text-slate-300">Quick iteration without starting from scratch</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        <TabsContent value="import">
+          <Card>
+            <CardHeader>
+              <CardTitle>Import (Coming Soon)</CardTitle>
+            </CardHeader>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
