@@ -94,40 +94,22 @@ export const analyzePackageJson = (content: string): ProjectStructure => {
   // Analyze dependencies to determine project structure
   const deps = { ...packageData.dependencies, ...packageData.devDependencies };
   const hasReact = deps.react || deps['@types/react'];
-  const hasRouter = deps['react-router-dom'] || deps['react-router'];
   
-  let confidence = 0.5;
+  let confidence = 0.4;
   let sourceType: 'lovable' | 'other' = 'other';
   
-  if (hasReact) confidence += 0.2;
-  if (hasRouter) confidence += 0.1;
+  if (hasReact) confidence += 0.3;
   if (deps.lovable) {
     sourceType = 'lovable';
-    confidence += 0.2;
-  }
-  
-  const components: ComponentInfo[] = [
-    { name: 'App', type: 'page', props: [], dependencies: [] }
-  ];
-  
-  if (hasRouter) {
-    components.push(
-      { name: 'Home', type: 'page', props: [], dependencies: [] },
-      { name: 'About', type: 'page', props: [], dependencies: [] }
-    );
+    confidence += 0.3;
   }
   
   return {
     id: `package_${Date.now()}`,
     name: projectName,
     sourceType,
-    pages: hasRouter ? 
-      [
-        { name: 'Home', path: '/', components: ['App', 'Home'] },
-        { name: 'About', path: '/about', components: ['App', 'About'] }
-      ] : 
-      [{ name: 'Home', path: '/', components: ['App'] }],
-    components,
+    pages: [],
+    components: [],
     dataModels: [],
     workflows: [],
     createdAt: new Date(),

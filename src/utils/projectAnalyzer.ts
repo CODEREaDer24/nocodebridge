@@ -65,26 +65,8 @@ const analyzeHtmlContent = async (html: string, url: string): Promise<ProjectStr
 };
 
 const basicUrlAnalysis = async (url: string): Promise<ProjectStructure> => {
-  const urlObj = new URL(url);
-  const projectName = urlObj.hostname.split('.')[0] || 'Unknown Project';
-  
-  return {
-    id: `basic_${Date.now()}`,
-    name: projectName,
-    url,
-    sourceType: url.includes('lovable') ? 'lovable' : 'other',
-    pages: [{ name: 'Home', path: '/', components: ['App', 'Header', 'Main', 'Footer'] }],
-    components: [
-      { name: 'App', type: 'page' },
-      { name: 'Header', type: 'layout' },
-      { name: 'Main', type: 'layout' },
-      { name: 'Footer', type: 'layout' }
-    ],
-    dataModels: [],
-    workflows: [],
-    createdAt: new Date(),
-    confidence: 0.3
-  };
+  // No fallback - return error instead of mock data
+  throw new Error('Analysis failed: unable to analyze project. Please try a different URL or upload project files.');
 };
 
 const extractProjectName = (html: string, urlObj: URL): string => {
@@ -137,15 +119,6 @@ const determineSourceType = (url: string, html: string): 'lovable' | 'other' => 
 
 const extractPagesFromHtml = (html: string): PageInfo[] => {
   const pages: PageInfo[] = [];
-  
-  // Check if this is analyzing our own Project Bridge app
-  if (html.includes('Project Bridge') && html.includes('wizard')) {
-    return [
-      { name: 'Home', path: '/', components: ['ProjectWizard', 'StartScreen'] },
-      { name: 'History', path: '/history', components: ['History'] },
-      { name: 'NotFound', path: '*', components: ['NotFound'] }
-    ];
-  }
   
   const foundRoutes = new Set<string>();
   
@@ -213,26 +186,12 @@ const extractPagesFromHtml = (html: string): PageInfo[] => {
     });
   });
 
-  // Always ensure we have a home page
-  if (!foundRoutes.has('/')) {
+  // Always ensure we have at least a home page if routes were found
+  if (!foundRoutes.has('/') && foundRoutes.size > 0) {
     pages.unshift({
       name: 'Home',
       path: '/',
       components: extractComponentsOnPage(html, '/')
-    });
-  }
-
-  // If still no additional pages found, analyze content for potential pages
-  if (pages.length === 1) {
-    const potentialPages = ['about', 'contact', 'services', 'products', 'blog', 'portfolio'];
-    potentialPages.forEach(pageName => {
-      if (html.toLowerCase().includes(pageName)) {
-        pages.push({
-          name: pageName.charAt(0).toUpperCase() + pageName.slice(1),
-          path: `/${pageName}`,
-          components: [pageName.charAt(0).toUpperCase() + pageName.slice(1) + 'Page', 'Header', 'Footer']
-        });
-      }
     });
   }
 
@@ -241,26 +200,6 @@ const extractPagesFromHtml = (html: string): PageInfo[] => {
 
 const extractComponentsFromHtml = (html: string): ComponentInfo[] => {
   const components: ComponentInfo[] = [];
-  
-  // Check if this is analyzing our own Project Bridge app
-  if (html.includes('Project Bridge') && html.includes('wizard')) {
-    return [
-      { name: 'ProjectWizard', type: 'page', props: [], dependencies: ['StartScreen', 'UploadStep', 'DetectionStep'] },
-      { name: 'StartScreen', type: 'custom', props: ['onSelectFlow'], dependencies: [] },
-      { name: 'ProgressBar', type: 'ui', props: ['currentStep'], dependencies: [] },
-      { name: 'UploadStep', type: 'custom', props: ['onSubmit', 'mode'], dependencies: [] },
-      { name: 'DetectionStep', type: 'custom', props: ['project', 'loading'], dependencies: [] },
-      { name: 'PreviewStep', type: 'custom', props: ['project'], dependencies: [] },
-      { name: 'ExportStep', type: 'custom', props: ['project', 'onExport'], dependencies: [] },
-      { name: 'ImportStep', type: 'custom', props: ['onImport'], dependencies: [] },
-      { name: 'ImportPreviewStep', type: 'custom', props: ['project', 'onNext', 'loading'], dependencies: [] },
-      { name: 'AIRefinementStep', type: 'custom', props: ['project', 'onNext'], dependencies: [] },
-      { name: 'ExportPromptStep', type: 'custom', props: ['prompt', 'onBack', 'onFinish'], dependencies: [] },
-      { name: 'ProjectTemplateGenerator', type: 'custom', props: [], dependencies: [] },
-      { name: 'ChatGPTPromptDialog', type: 'ui', props: [], dependencies: [] },
-      { name: 'JSONSchemaDialog', type: 'ui', props: [], dependencies: [] }
-    ];
-  }
   
   // Multiple strategies to extract components from different types of apps
   const foundComponents = new Set<string>();
@@ -347,16 +286,6 @@ const extractComponentsFromHtml = (html: string): ComponentInfo[] => {
       props: extractPropsFromComponentName(componentName, html)
     });
   });
-  
-  // Ensure we have at least basic components
-  if (components.length === 0) {
-    components.push(
-      { name: 'App', type: 'page' },
-      { name: 'Header', type: 'layout' },
-      { name: 'Main', type: 'layout' },
-      { name: 'Footer', type: 'layout' }
-    );
-  }
   
   return components;
 };
@@ -761,7 +690,7 @@ function analyzePagesForExport(): PageAnalysisDetail[] {
     else if (pageName === 'Import') description = 'Import projects from shareable URLs';
     else if (pageName === 'History') description = 'View export and import history';
     else if (pageName === 'NotFound') description = '404 error page';
-    else if (pageName === 'OutputDemo') description = 'Live analysis of the project structure';
+    else if (pageName === 'ProjectAnalysis') description = 'Analysis results of the analyzed project';
     
     pages.push({
       name: pageName,
@@ -793,7 +722,7 @@ function extractFeaturesFromPageName(pageName: string): string[] {
     'Export': ['AI collaboration doc generation', 'JSON export', 'URL generation', 'Copy to clipboard'],
     'Import': ['URL parameter parsing', 'Base64 decoding', 'JSON display', 'Download imported data'],
     'History': ['Search and filter', 'Tab navigation', 'Status indicators'],
-    'OutputDemo': ['Live project analysis', 'Component detection', 'Route extraction', 'Feature discovery'],
+    'ProjectAnalysis': ['Display analysis results', 'Export to JSON/Markdown/ZIP', 'AI collaboration formats'],
     'NotFound': ['Error messaging', 'Navigation back to home'],
   };
   return featureMap[pageName] || ['General functionality'];
@@ -836,7 +765,7 @@ function analyzeFeaturesForExport(): Feature[] {
   const hasExport = Object.keys(pageModules).some(p => p.includes('Export.tsx'));
   const hasImport = Object.keys(pageModules).some(p => p.includes('Import.tsx'));
   const hasHistory = Object.keys(pageModules).some(p => p.includes('History.tsx'));
-  const hasOutputDemo = Object.keys(pageModules).some(p => p.includes('OutputDemo.tsx'));
+  const hasProjectAnalysis = Object.keys(pageModules).some(p => p.includes('ProjectAnalysis.tsx'));
   
   if (hasExport) {
     features.push({
@@ -883,19 +812,18 @@ function analyzeFeaturesForExport(): Feature[] {
     });
   }
   
-  if (hasOutputDemo) {
+  if (hasProjectAnalysis) {
     features.push({
-      name: 'Live Project Analysis',
-      location: '/output-demo',
-      description: 'Real-time analysis of current project structure',
+      name: 'Project Analysis Results',
+      location: '/analysis',
+      description: 'Display detailed analysis results of analyzed projects',
       capabilities: [
-        'Dynamic page discovery',
-        'Component detection',
-        'Route extraction',
-        'Feature identification',
-        'Tech stack analysis',
+        'Show project structure',
+        'Export to multiple formats',
+        'AI collaboration exports',
+        'JSON/Markdown/ZIP downloads',
       ],
-      components: ['OutputDemo', 'projectAnalyzer'],
+      components: ['ProjectAnalysis', 'projectAnalyzer'],
     });
   }
   

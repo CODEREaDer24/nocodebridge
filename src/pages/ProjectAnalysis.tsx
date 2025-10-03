@@ -5,37 +5,42 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Copy, Download, ArrowLeft, FileJson, FileText, Archive } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { analyzeProject, ProjectAnalysis } from "@/utils/projectAnalyzer";
+import { ProjectAnalysis } from "@/utils/projectAnalyzer";
 import { convertProjectToAnalysis } from "@/utils/projectToAnalysis";
 import { ProjectStructure } from "@/types/project";
 import { useNavigate } from "react-router-dom";
 import { downloadAICollabJSON, downloadAICollabMarkdown, downloadAICollabZIP } from "@/utils/aiCollabExport";
 
-const OutputDemo = () => {
+const ProjectAnalysisPage = () => {
   const [analysis, setAnalysis] = useState<ProjectAnalysis | null>(null);
   const [storedProject, setStoredProject] = useState<ProjectStructure | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if there's an analyzed project from the wizard
+    // Only show results if there's an analyzed project
     const storedProjectStr = localStorage.getItem('analyzed-project');
     
-    if (storedProjectStr) {
-      try {
-        const project: ProjectStructure = JSON.parse(storedProjectStr);
-        setStoredProject(project);
-        const convertedAnalysis = convertProjectToAnalysis(project);
-        setAnalysis(convertedAnalysis);
-      } catch (error) {
-        console.error('Failed to parse stored project:', error);
-        navigate('/');
-      }
-    } else {
-      // No stored project, redirect to home
+    if (!storedProjectStr) {
+      navigate('/');
+      return;
+    }
+    
+    try {
+      const project: ProjectStructure = JSON.parse(storedProjectStr);
+      setStoredProject(project);
+      const convertedAnalysis = convertProjectToAnalysis(project);
+      setAnalysis(convertedAnalysis);
+    } catch (error) {
+      console.error('Failed to parse stored project:', error);
+      toast({
+        title: "Analysis failed",
+        description: "Unable to load project analysis. Please try analyzing again.",
+        variant: "destructive"
+      });
       navigate('/');
     }
-  }, [navigate]);
+  }, [navigate, toast]);
 
   const copyJson = async () => {
     if (!analysis) return;
@@ -63,40 +68,19 @@ const OutputDemo = () => {
   };
 
   const handleDownloadAICollabJSON = () => {
-    if (!storedProject) {
-      toast({ 
-        title: "Not available", 
-        description: "AI Collab export only available for analyzed projects",
-        variant: "destructive"
-      });
-      return;
-    }
+    if (!storedProject) return;
     downloadAICollabJSON(storedProject);
     toast({ title: "Downloaded", description: "AI Collab JSON downloaded successfully" });
   };
 
   const handleDownloadAICollabMarkdown = () => {
-    if (!storedProject) {
-      toast({ 
-        title: "Not available", 
-        description: "AI Collab export only available for analyzed projects",
-        variant: "destructive"
-      });
-      return;
-    }
+    if (!storedProject) return;
     downloadAICollabMarkdown(storedProject);
     toast({ title: "Downloaded", description: "AI Collab Markdown downloaded successfully" });
   };
 
   const handleDownloadAICollabZIP = async () => {
-    if (!storedProject) {
-      toast({ 
-        title: "Not available", 
-        description: "AI Collab export only available for analyzed projects",
-        variant: "destructive"
-      });
-      return;
-    }
+    if (!storedProject) return;
     await downloadAICollabZIP(storedProject);
     toast({ title: "Downloaded", description: "AI Collab ZIP bundle downloaded successfully" });
   };
@@ -216,9 +200,9 @@ const OutputDemo = () => {
         </div>
         
         <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold">Live Project Analysis</h1>
+          <h1 className="text-4xl font-bold">Project Analysis</h1>
           <p className="text-muted-foreground">
-            Real-time analysis of this application's structure, components, and features
+            Complete analysis of {analysis.name}
           </p>
         </div>
 
@@ -246,19 +230,18 @@ const OutputDemo = () => {
                   </div>
                 </div>
 
-                {/* AI Collaboration Export - Only show for analyzed projects */}
-                {storedProject && (
-                  <Card className="bg-gradient-to-r from-blue-600/10 to-cyan-600/10 border-blue-500/50">
-                    <div className="p-6 space-y-4">
-                      <div>
-                        <h3 className="text-lg font-semibold flex items-center gap-2 mb-2">
-                          <Archive className="w-5 h-5" />
-                          AI Collaboration Export
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          Download complete project data for AI collaboration and ideation
-                        </p>
-                      </div>
+                {/* AI Collaboration Export */}
+                <Card className="bg-gradient-to-r from-blue-600/10 to-cyan-600/10 border-blue-500/50">
+                  <div className="p-6 space-y-4">
+                    <div>
+                      <h3 className="text-lg font-semibold flex items-center gap-2 mb-2">
+                        <Archive className="w-5 h-5" />
+                        AI Collaboration Export
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Download complete project data for AI collaboration and ideation
+                      </p>
+                    </div>
                       
                       <div className="grid sm:grid-cols-3 gap-3">
                         <Button 
@@ -299,26 +282,18 @@ const OutputDemo = () => {
                       </div>
                     </div>
                   </Card>
-                )}
 
                 {/* Source Information */}
                 <div className="space-y-3">
                   <h3 className="text-lg font-semibold">Source Information</h3>
                   <div className="flex items-center gap-2">
-                    {localStorage.getItem('analyzed-project') ? (
-                      <>
-                        <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 border-blue-500/20">
-                          analyzed_project
-                        </Badge>
-                        <Badge variant="outline">from_wizard</Badge>
-                      </>
-                    ) : (
-                      <>
-                        <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
-                          current_project
-                        </Badge>
-                        <Badge variant="outline">live_analysis</Badge>
-                      </>
+                    <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 border-blue-500/20">
+                      {storedProject?.sourceType || 'analyzed'}
+                    </Badge>
+                    {storedProject?.url && (
+                      <Badge variant="outline" className="text-xs">
+                        {new URL(storedProject.url).hostname}
+                      </Badge>
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground">
@@ -523,4 +498,4 @@ const OutputDemo = () => {
   );
 };
 
-export default OutputDemo;
+export default ProjectAnalysisPage;

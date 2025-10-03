@@ -305,7 +305,7 @@ export const PreviewStep = ({ project }: PreviewStepProps) => {
                 onClick={() => {
                   // Store project in localStorage and navigate
                   localStorage.setItem('analyzed-project', JSON.stringify(project));
-                  navigate('/output-demo');
+                  navigate('/analysis');
                 }}
                 className="w-full border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white"
               >

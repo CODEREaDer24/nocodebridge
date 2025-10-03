@@ -8,7 +8,7 @@ import Index from "./pages/Index";
 import History from "./pages/History";
 import Export from "./pages/Export";
 import Import from "./pages/Import";
-import OutputDemo from "./pages/OutputDemo";
+import ProjectAnalysis from "./pages/ProjectAnalysis";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,7 +24,7 @@ const App = () => (
           <Route path="/history" element={<History />} />
           <Route path="/export" element={<Export />} />
           <Route path="/import" element={<Import />} />
-          <Route path="/output-demo" element={<OutputDemo />} />
+          <Route path="/analysis" element={<ProjectAnalysis />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
