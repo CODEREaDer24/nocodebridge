@@ -1,90 +1,98 @@
-import { ProjectStructure } from "@/types/project";
 import JSZip from "jszip";
 
 /**
- * Generate AI Collaboration JSON - machine-readable format
- * Contains complete app structure for AI to collaborate
- * Also doubles as the Universal App Profile (UAP) export
+ * Generates export bundles in multiple formats
+ * Used by ExportStep / ExportPromptStep / IterationFlowStep
  */
-export function generateAICollabJSON(project: ProjectStructure): string {
-  const collabData = {
-    appName: project.name || "UnnamedApp",
-    version: "1.0",
-    sourceUrl: project.url || null, // 👈 added for web apps
-    metadata: {
-      projectName: project.name,
-      projectId: project.id,
-      sourceType: project.sourceType,
-      analyzedAt: new Date().toISOString(),
-      confidence: project.confidence || null,
-    },
-    pages: project.pages.map(page => ({
-      name: page.name,
-      path: page.path,
-      components: page.components,
-    })),
-    components: project.components.map(comp => ({
-      name: comp.name,
-      type: comp.type,
-      props: comp.props || [],
-      dependencies: comp.dependencies || [],
-    })),
-    dataModels: project.dataModels.map(model => ({
-      name: model.name,
-      fields: model.fields.map(field => ({
-        name: field.name,
-        type: field.type,
-        required: field.required || false,
-      })),
-    })),
-    workflows: project.workflows
-      ? project.workflows.map(flow => ({
-          name: flow.name,
-          trigger: flow.trigger,
-          actions: flow.actions,
-        }))
-      : [],
-    endpoints: project.endpoints
-      ? project.endpoints.map(ep => ({
-          path: ep.path,
-          method: ep.method,
-          usage: ep.usage || null,
-        }))
-      : [],
-  };
-
-  return JSON.stringify(collabData, null, 2);
-}
-
-/**
- * Generate UAP Export as a ZIP containing JSON + Markdown
- */
-export async function generateAICollabExport(
-  project: ProjectStructure
+export async function generateExport(
+  project: any,
+  format: "json" | "markdown" | "zip" | "ai-collaboration" | "uap"
 ): Promise<Blob> {
-  const zip = new JSZip();
+  switch (format) {
+    case "json": {
+      const jsonString = JSON.stringify(project, null, 2);
+      return new Blob([jsonString], { type: "application/json" });
+    }
 
-  const jsonExport = generateAICollabJSON(project);
-  zip.file("uap-export.json", jsonExport);
+    case "markdown": {
+      const md = `# ${project.name || "Project Export"}\n\n\`\`\`json\n${JSON.stringify(
+        project,
+        null,
+        2
+      )}\n\`\`\``;
+      return new Blob([md], { type: "text/markdown" });
+    }
 
-  const markdownExport = `# Universal App Profile (UAP) Export
-**App Name**: ${project.name || "UnnamedApp"}
-**Project ID**: ${project.id}
-**Source URL**: ${project.url || "N/A"}
-**Analyzed At**: ${new Date().toISOString()}
+    case "zip": {
+      const zip = new JSZip();
+      zip.file(
+        "project.json",
+        JSON.stringify(project, null, 2),
+        { createFolders: true }
+      );
+      // Add placeholder README
+      zip.file(
+        "README.md",
+        `# ${project.name || "Project"}\n\nExported as ZIP from NoCodeBridge.`
+      );
+      return await zip.generateAsync({ type: "blob" });
+    }
 
-## Pages
-${project.pages.map(p => `- ${p.name} (${p.path})`).join("\n")}
+    case "ai-collaboration": {
+      const collabMd = [
+        `# ${project.name || "AI Collaboration Package"}`,
+        `## Overview`,
+        `This package is optimized for use with ChatGPT, Claude, DeepSeek, etc.`,
+        "```json",
+        JSON.stringify(project, null, 2),
+        "```",
+      ].join("\n\n");
+      return new Blob([collabMd], { type: "text/markdown" });
+    }
 
-## Components
-${project.components.map(c => `- ${c.name} (${c.type})`).join("\n")}
+    case "uap": {
+      // Universal App Profile → JSON + Markdown in one bundle
+      const zip = new JSZip();
 
-## Data Models
-${project.dataModels.map(m => `- ${m.name}`).join("\n")}
-`;
+      // JSON core
+      zip.file(
+        "uap.json",
+        JSON.stringify(
+          {
+            meta: {
+              type: "Universal App Profile",
+              version: "1.0.0",
+              source: "NoCodeBridge",
+              exportedAt: new Date().toISOString(),
+            },
+            project,
+          },
+          null,
+          2
+        )
+      );
 
-  zip.file("uap-export.md", markdownExport);
+      // Markdown documentation
+      const md = [
+        `# Universal App Profile Export`,
+        `**App Name:** ${project.name || "Unnamed App"}`,
+        `**Exported:** ${new Date().toLocaleString()}`,
+        "",
+        "## Project Snapshot",
+        "```json",
+        JSON.stringify(project, null, 2),
+        "```",
+        "",
+        "## Notes",
+        "- This UAP bundle is designed for both AI assistants and NoCodeBridge re-import.",
+      ].join("\n");
 
-  const blob = await zip.generateAsync({ type: "blob" });
-  return blob;
+      zip.file("uap.md", md);
+
+      return await zip.generateAsync({ type: "blob" });
+    }
+
+    default:
+      throw new Error(`Unsupported export format: ${format}`);
+  }
 }
