@@ -75,12 +75,12 @@ export const ExportStep = ({ project, onExport }: ExportStepProps) => {
     },
     {
       format: 'uap' as const,
-      title: 'UAP Bundle (Coming Soon)',
-      description: 'Universal App Package - premium format for advanced workflows',
+      title: 'UAP Export',
+      description: 'Universal App Profile - full bridge JSON + Markdown',
       icon: Package,
-      color: 'bg-muted',
-      benefits: ['Advanced features', 'Enhanced compatibility', 'Premium format'],
-      disabled: true
+      color: 'bg-green-500',
+      benefits: ['Advanced workflows', 'Full compatibility', 'AI + No-Code Bridge ready'],
+      disabled: false   // 👈 Enabled now
     }
   ];
 
@@ -184,3 +184,5 @@ export const ExportStep = ({ project, onExport }: ExportStepProps) => {
     </div>
   );
 };
+
+/// FILE: src/components/ExportStep.tsx
