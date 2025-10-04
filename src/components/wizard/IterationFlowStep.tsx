@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ProjectStructure } from "@/types/project";
-import { ExportStep } from "@/components/ExportStep";
 import { ExportPromptStep } from "@/components/wizard/ExportPromptStep";
 
 interface IterationFlowStepProps {
@@ -31,24 +30,13 @@ export const IterationFlowStep = ({ project, onStartExport, onStartImport }: Ite
         </CardHeader>
       </Card>
 
-      {stage === 'prompt' ? (
-        <ExportPromptStep
-          project={project}
-          onExport={(format, data) => {
-            setRefinementData(data);
-            setStage('export');
-            onStartExport(format, data);
-          }}
-        />
-      ) : (
-        <ExportStep
-          project={project}
-          onExport={(format, data) => {
-            setRefinementData(data);
-            handleExport(format, data);
-          }}
-        />
-      )}
+      <ExportPromptStep
+        project={project}
+        onExport={(format, data) => {
+          setRefinementData(data);
+          onStartExport(format, data);
+        }}
+      />
 
       <Card>
         <CardHeader>
