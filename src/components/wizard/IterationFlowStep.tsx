@@ -7,7 +7,7 @@ import { ExportPromptStep } from "@/components/wizard/ExportPromptStep";
 interface IterationFlowStepProps {
   project: ProjectStructure;
   onStartExport: (format: 'json' | 'zip' | 'markdown' | 'uap' | 'ai-collaboration', data?: string) => void;
-  onStartImport?: () => void;
+  onStartImport?: (project: ProjectStructure) => void;
 }
 
 export const IterationFlowStep = ({ project, onStartExport, onStartImport }: IterationFlowStepProps) => {

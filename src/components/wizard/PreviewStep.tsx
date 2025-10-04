@@ -39,17 +39,17 @@ export const PreviewStep = ({ project }: PreviewStepProps) => {
   };
 
   const handleDownloadJSON = () => {
-    downloadAICollabJSON(project);
+    downloadAICollabJSON(project, `${project.name || "project"}.json`);
     toast({ title: "Downloaded", description: "AI Collab JSON downloaded successfully" });
   };
 
   const handleDownloadMarkdown = () => {
-    downloadAICollabMarkdown(project);
+    downloadAICollabMarkdown(project, `${project.name || "project"}.md`);
     toast({ title: "Downloaded", description: "AI Collab Markdown downloaded successfully" });
   };
 
   const handleDownloadZIP = async () => {
-    await downloadAICollabZIP(project);
+    await downloadAICollabZIP(project, `${project.name || "project"}.zip`);
     toast({ title: "Downloaded", description: "AI Collab ZIP bundle downloaded successfully" });
   };
 

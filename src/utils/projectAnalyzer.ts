@@ -4,7 +4,10 @@ import {
   ComponentInfo,
   DataModelInfo,
   WorkflowInfo,
+  ProjectAnalysis,
 } from "@/types/project";
+
+export type { ProjectAnalysis };
 
 export interface AnalysisOptions {
   includeStyles?: boolean;

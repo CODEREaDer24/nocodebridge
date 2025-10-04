@@ -96,3 +96,34 @@ export async function generateExport(
       throw new Error(`Unsupported export format: ${format}`);
   }
 }
+
+// Helper functions for backward compatibility
+export async function downloadAICollabJSON(project: any, filename: string) {
+  const blob = await generateExport(project, "json");
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename || `${project.name || "project"}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export async function downloadAICollabMarkdown(project: any, filename: string) {
+  const blob = await generateExport(project, "markdown");
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename || `${project.name || "project"}.md`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export async function downloadAICollabZIP(project: any, filename: string) {
+  const blob = await generateExport(project, "zip");
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename || `${project.name || "project"}.zip`;
+  a.click();
+  URL.revokeObjectURL(url);
+}

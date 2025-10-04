@@ -133,10 +133,11 @@ export const ProjectWizard = () => {
     setAiGeneratedPrompt("");
   };
 
-  const handleImportFromJson = (jsonData: string) => {
+  const handleImportFromJson = (importedProject: ProjectStructure) => {
+    setProject(importedProject);
     toast({
-      title: "Import initiated",
-      description: "Your project is being imported to Lovable",
+      title: "Import successful",
+      description: "Your project has been imported",
     });
     // In a real app, this would make an API call to Lovable
   };
@@ -183,7 +184,7 @@ export const ProjectWizard = () => {
       case 'ai-refinement':
         return project ? <AIRefinementStep project={project} onNext={handleAIRefinement} /> : null;
       case 'export-prompt':
-        return <ExportPromptStep prompt={aiGeneratedPrompt} onBack={() => setCurrentStep('ai-refinement')} onFinish={handleFinishImport} />;
+        return project ? <ExportPromptStep project={project} onExport={(format, data) => handleExport(format, data)} /> : null;
     }
   };
 
