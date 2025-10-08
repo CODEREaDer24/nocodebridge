@@ -16,8 +16,11 @@ export default function IndexPage() {
               Export, import, and collaborate with Universal App Profiles (UAP).
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-gray-700 text-center text-sm">
+          <CardContent className="space-y-3">
+            <p className="text-gray-600 text-center text-sm">
+              Offline Mode — No Trial, No Login Required
+            </p>
+            <p className="text-gray-700 text-center text-xs">
               Built with ❤️ by <span className="font-semibold">GoNoCodeMode</span> (GoNoCoMoCo)
             </p>
           </CardContent>
