@@ -134,28 +134,27 @@ export const UnifiedWorkflow = ({ onAnalysisComplete }: UnifiedWorkflowProps) =>
   return (
     <div className="space-y-6">
       {/* Input Section */}
-      <Card className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" />
-        <CardContent className="pt-6 space-y-4 relative">
+      <Card className="shadow-md border-gray-200">
+        <CardContent className="pt-6 space-y-4">
           <div>
-            <label className="text-sm font-medium mb-2 block">Project Name</label>
+            <label className="text-sm font-medium mb-2 block text-gray-700">Project Name</label>
             <Input
               placeholder="My Amazing Project"
               value={projectName}
               onChange={(e) => setProjectName(e.target.value)}
-              className="bg-background/50"
+              className="border-gray-300"
             />
           </div>
 
           <div className="relative">
-            <label className="text-sm font-medium mb-2 block">Smart Input</label>
+            <label className="text-sm font-medium mb-2 block text-gray-700">Smart Input</label>
             <Textarea
               placeholder="Paste your project URL, JSON, or Markdown here..."
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onPaste={handlePaste}
-              className={`min-h-32 bg-background/50 transition-all ${
-                isScanning ? "ring-2 ring-primary animate-pulse" : ""
+              className={`min-h-32 border-gray-300 transition-all ${
+                isScanning ? "ring-2 ring-gray-900 animate-pulse" : ""
               }`}
             />
             {isScanning && (
@@ -164,7 +163,7 @@ export const UnifiedWorkflow = ({ onAnalysisComplete }: UnifiedWorkflowProps) =>
               </div>
             )}
             {detectedType && !isScanning && (
-              <div className="mt-2 text-sm text-primary font-medium animate-fade-in">
+              <div className="mt-2 text-sm text-gray-900 font-medium animate-fade-in">
                 Detected: {detectedType}
               </div>
             )}
@@ -185,12 +184,12 @@ export const UnifiedWorkflow = ({ onAnalysisComplete }: UnifiedWorkflowProps) =>
           </div>
 
           <div>
-            <label className="text-sm font-medium mb-2 block">Notes (optional)</label>
+            <label className="text-sm font-medium mb-2 block text-gray-700">Notes (optional)</label>
             <Textarea
               placeholder="Add any additional context or comments..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="bg-background/50"
+              className="border-gray-300"
             />
           </div>
         </CardContent>
@@ -198,7 +197,7 @@ export const UnifiedWorkflow = ({ onAnalysisComplete }: UnifiedWorkflowProps) =>
 
       {/* Output Section */}
       {analyzedProject && (
-        <Card className="animate-fade-in">
+        <Card className="animate-fade-in shadow-md border-gray-200">
           <CardContent className="pt-6 space-y-4">
             <div className="space-y-2">
               <h3 className="text-lg font-semibold">Analysis Summary</h3>
