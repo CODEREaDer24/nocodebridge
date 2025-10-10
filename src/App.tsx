@@ -22,6 +22,8 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/history" element={<History />} />
+          <Route path="/export" element={<Export />} />
+          <Route path="/import" element={<Import />} />
           <Route path="/analysis" element={<ProjectAnalysis />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
