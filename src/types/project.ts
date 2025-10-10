@@ -1,85 +1,64 @@
 export interface ProjectStructure {
+  id: string;
   name: string;
-  description?: string;
-  components?: any[];
-  pages?: any[];
-  data?: Record<string, any>;
-  // Extra catch-all so imports never break if fields change
-  [key: string]: any;
+  url?: string;
+  sourceType: 'lovable' | 'other';
+  pages: PageInfo[];
+  components: ComponentInfo[];
+  dataModels: DataModelInfo[];
+  workflows: WorkflowInfo[];
+  createdAt: Date;
+  confidence?: number;
 }
 
 export interface PageInfo {
   name: string;
   path: string;
-  components?: string[];
-  file?: string;
-  description?: string;
-  features?: string[];
+  components: string[];
 }
 
 export interface ComponentInfo {
   name: string;
-  type: string;
+  type: 'ui' | 'page' | 'layout' | 'custom';
   props?: string[];
   dependencies?: string[];
-  description?: string;
 }
 
 export interface DataModelInfo {
   name: string;
-  fields?: any[];
+  fields: FieldInfo[];
+  relationships?: string[];
+}
+
+export interface FieldInfo {
+  name: string;
+  type: string;
+  required: boolean;
+  description?: string;
 }
 
 export interface WorkflowInfo {
   name: string;
-  steps?: string[];
-  trigger?: string;
-  actions?: string[];
-}
-
-export type WizardStep = 
-  | 'start'
-  | 'input'
-  | 'detect'
-  | 'upload'
-  | 'detection'
-  | 'preview'
-  | 'export'
-  | 'import'
-  | 'import-preview'
-  | 'ai-refinement'
-  | 'export-prompt'
-  | 'iteration-flow';
-
-export type FlowType = 'export' | 'import';
-
-export interface ProjectAnalysis {
-  id?: string;
-  name?: string;
-  appName?: string;
+  trigger: string;
+  actions: string[];
   description?: string;
-  url?: string;
-  sourceType?: 'web' | 'file';
-  pages?: PageInfo[];
-  components?: ComponentInfo[];
-  dataModels?: DataModelInfo[];
-  workflows?: WorkflowInfo[];
-  endpoints?: any[];
-  confidence?: number;
-  techStack?: {
-    frontend?: string[];
-    backend?: string[];
-    styling?: string[];
-    ui?: string[];
-    ai?: string[];
-    database?: string[];
-  };
-  architecture?: {
-    structure?: any;
-    patterns?: string[];
-    dataFlow?: string;
-  };
-  features?: any[];
-  routes?: any[];
-  metadata?: any;
 }
+
+export interface ExportRecord {
+  id: string;
+  projectId: string;
+  format: 'json' | 'zip' | 'markdown' | 'uap' | 'ai-collaboration';
+  createdAt: Date;
+  size?: number;
+}
+
+export interface ImportRecord {
+  id: string;
+  projectId: string;
+  source: 'json' | 'zip' | 'url' | 'uap';
+  createdAt: Date;
+  success: boolean;
+}
+
+export type WizardStep = 'start' | 'input' | 'detect' | 'preview' | 'export' | 'import' | 'import-preview' | 'ai-refinement' | 'export-prompt';
+export type FlowType = 'export' | 'import';

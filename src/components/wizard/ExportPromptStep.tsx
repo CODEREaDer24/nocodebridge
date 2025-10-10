@@ -3,179 +3,176 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { ProjectStructure } from "@/types/project";
-import { Download, Copy, FileText, Package, FileJson, CheckCircle, Network } from "lucide-react";
+import { Copy, CheckCircle, ExternalLink, Download, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface ExportPromptStepProps {
-  project: ProjectStructure;
-  onExport: (format: 'json' | 'zip' | 'markdown' | 'uap' | 'ai-collaboration', data?: string) => void;
+  prompt: string;
+  onBack: () => void;
+  onFinish: () => void;
 }
 
-export const ExportPromptStep = ({ project, onExport }: ExportPromptStepProps) => {
-  const [promptText, setPromptText] = useState("");
+export const ExportPromptStep = ({ prompt, onBack, onFinish }: ExportPromptStepProps) => {
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
   const handleCopyPrompt = async () => {
     try {
-      const exportData = JSON.stringify(project, null, 2);
-      await navigator.clipboard.writeText(exportData);
+      await navigator.clipboard.writeText(prompt);
       setCopied(true);
       toast({
-        title: "Copied",
-        description: "Export JSON copied to clipboard",
+        title: "Copied to clipboard",
+        description: "Prompt has been copied to your clipboard",
       });
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => setCopied(false), 3000);
     } catch (err) {
       toast({
         title: "Copy failed",
-        description: "Could not copy export JSON",
+        description: "Unable to copy to clipboard",
         variant: "destructive",
       });
     }
   };
 
-  const exportOptions = [
-    {
-      format: 'ai-collaboration' as const,
-      title: 'AI Collaboration',
-      description: 'Package ready for ChatGPT, Claude, or other AI assistants',
-      icon: FileText,
-      color: 'bg-gradient-to-r from-purple-500 to-pink-500',
-      benefits: ['Optimized for AI', 'Full source code', 'Easy debugging'],
-      disabled: false
-    },
-    {
-      format: 'json' as const,
-      title: 'JSON Export',
-      description: 'Full JSON snapshot for duplication and re-import',
-      icon: FileJson,
-      color: 'bg-primary',
-      benefits: ['Exact re-import', 'All state preserved'],
-      disabled: false
-    },
-    {
-      format: 'zip' as const,
-      title: 'ZIP Bundle',
-      description: 'Bundle of all files for manual sharing',
-      icon: Package,
-      color: 'bg-secondary',
-      benefits: ['All files included', 'Docs + code'],
-      disabled: false
-    },
-    {
-      format: 'markdown' as const,
-      title: 'Markdown Export',
-      description: 'Readable documentation export',
-      icon: FileText,
-      color: 'bg-accent',
-      benefits: ['Readable docs', 'Version control friendly'],
-      disabled: false
-    },
-    {
-      format: 'uap' as const,
-      title: 'UAP Export',
-      description: 'Universal App Profile - bridge JSON + metadata',
-      icon: Network,
-      color: 'bg-green-500',
-      benefits: ['Universal schema', 'Works with NoCodeBridge', 'AI + human readable'],
-      disabled: false   // 👈 Enabled now
-    }
-  ];
+  const handleDownloadPrompt = () => {
+    const blob = new Blob([prompt], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `lovable-prompt-${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Download started",
+      description: "Prompt has been downloaded as a text file",
+    });
+  };
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6">
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Export Your Project</CardTitle>
+          <CardTitle className="text-2xl flex items-center justify-center gap-2">
+            <CheckCircle className="w-6 h-6 text-success" />
+            Ready to Copy
+          </CardTitle>
           <CardDescription>
-            Choose an export format or copy JSON directly
+            Your project is now ready as a Lovable-friendly prompt
           </CardDescription>
         </CardHeader>
       </Card>
 
-      {/* Prompt Section */}
-      <Card>
+      {/* Instructions Card */}
+      <Card className="bg-gradient-to-r from-primary/10 to-success/10 border-primary">
         <CardHeader>
-          <CardTitle className="text-lg">Optional Instructions</CardTitle>
-          <CardDescription>
-            Add notes or modifications for this export
-          </CardDescription>
+          <CardTitle className="text-lg">Next Steps</CardTitle>
         </CardHeader>
         <CardContent>
+          <ol className="list-decimal list-inside space-y-2 text-sm">
+            <li>Copy the prompt below using the <Badge variant="outline">Copy Prompt</Badge> button</li>
+            <li>Open Lovable in a new tab or window</li>
+            <li>Create a new project or open an existing one</li>
+            <li>Paste this prompt into Lovable's chat box</li>
+            <li>Let Lovable rebuild your project with all the structure and features</li>
+          </ol>
+        </CardContent>
+      </Card>
+
+      {/* Prompt Display */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Lovable Prompt</CardTitle>
+          <CardDescription>
+            This prompt contains all your project details in a format Lovable understands
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <Textarea
-            placeholder="e.g. Remove demo data, simplify auth, optimize routes"
-            value={promptText}
-            onChange={(e) => setPromptText(e.target.value)}
-            className="min-h-[100px]"
+            value={prompt}
+            readOnly
+            className="min-h-[400px] font-mono text-sm"
           />
+          
+          <div className="flex flex-wrap gap-3">
+            <Button 
+              onClick={handleCopyPrompt}
+              size="lg"
+              className="flex items-center gap-2"
+            >
+              {copied ? (
+                <>
+                  <CheckCircle className="w-5 h-5" />
+                  Copied to Clipboard!
+                </>
+              ) : (
+                <>
+                  <Copy className="w-5 h-5" />
+                  Copy Prompt
+                </>
+              )}
+            </Button>
+            
+            <Button 
+              onClick={handleDownloadPrompt}
+              variant="outline"
+              size="lg"
+              className="flex items-center gap-2"
+            >
+              <Download className="w-5 h-5" />
+              Download as File
+            </Button>
+            
+            <Button 
+              asChild
+              variant="outline"
+              size="lg"
+              className="flex items-center gap-2"
+            >
+              <a href="https://lovable.dev" target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="w-5 h-5" />
+                Open Lovable
+              </a>
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
-      {/* Export Options */}
-      <div className="grid gap-4">
-        {exportOptions.map((option) => (
-          <Card key={option.format} className="relative overflow-hidden">
-            <div className={`absolute left-0 top-0 bottom-0 w-1 ${option.color}`} />
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="flex items-start gap-4">
-                  <div className={`p-3 rounded-lg ${option.color} text-white`}>
-                    <option.icon className="w-6 h-6" />
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-semibold">{option.title}</h3>
-                    <p className="text-muted-foreground">{option.description}</p>
-                    <div className="flex flex-wrap gap-1">
-                      {option.benefits.map((benefit, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          {benefit}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <Button 
-                  onClick={() => onExport(option.format, promptText || undefined)}
-                  className="flex items-center gap-2"
-                >
-                  <Download className="w-4 h-4" />
-                  Export {option.format.toUpperCase()}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      {/* Success Message */}
+      <Card className="border-success bg-success/5">
+        <CardContent className="p-6">
+          <div className="text-center space-y-2">
+            <CheckCircle className="w-12 h-12 text-success mx-auto" />
+            <h3 className="text-lg font-semibold">Import Process Complete!</h3>
+            <p className="text-muted-foreground">
+              Your project has been successfully converted to a Lovable prompt. 
+              Copy it and paste into Lovable to rebuild your project.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Navigation */}
+      <div className="flex justify-between">
+        <Button 
+          onClick={onBack}
+          variant="outline"
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Refinement
+        </Button>
+        
+        <Button 
+          onClick={onFinish}
+          className="flex items-center gap-2"
+        >
+          Finish
+          <CheckCircle className="w-4 h-4" />
+        </Button>
       </div>
-
-      {/* Quick Copy */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Quick Copy</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Button 
-            variant="outline" 
-            onClick={handleCopyPrompt}
-            className="w-full flex items-center gap-2"
-          >
-            {copied ? (
-              <>
-                <CheckCircle className="w-4 h-4" />
-                Copied!
-              </>
-            ) : (
-              <>
-                <Copy className="w-4 h-4" />
-                Copy JSON
-              </>
-            )}
-          </Button>
-        </CardContent>
-      </Card>
     </div>
   );
 };
-
-/// FILE: src/components/wizard/ExportPromptStep.tsx

@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ProjectStructure } from "@/types/project";
-import { Download, Copy, FileText, Package, FileJson, CheckCircle, Network } from "lucide-react";
+import { Download, Copy, FileText, Package, FileJson, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface ExportStepProps {
@@ -40,10 +40,10 @@ export const ExportStep = ({ project, onExport }: ExportStepProps) => {
     {
       format: 'ai-collaboration' as const,
       title: 'AI Collaboration Package',
-      description: 'Complete runnable source code for AI assistants',
+      description: 'Complete runnable source code for ChatGPT collaboration',
       icon: FileText,
       color: 'bg-gradient-to-r from-purple-500 to-pink-500',
-      benefits: ['Ready for AI', 'Complete source code', 'Instant collaboration', 'No-code friendly'],
+      benefits: ['Ready for ChatGPT', 'Complete source code', 'Instant collaboration', 'No-code friendly'],
       disabled: false
     },
     {
@@ -75,12 +75,12 @@ export const ExportStep = ({ project, onExport }: ExportStepProps) => {
     },
     {
       format: 'uap' as const,
-      title: 'UAP Export',
-      description: 'Universal App Profile - full bridge JSON + Markdown',
-      icon: Network,
-      color: 'bg-green-500',
-      benefits: ['Advanced workflows', 'Full compatibility', 'AI + No-Code Bridge ready'],
-      disabled: false   // 👈 Enabled
+      title: 'UAP Bundle (Coming Soon)',
+      description: 'Universal App Package - premium format for advanced workflows',
+      icon: Package,
+      color: 'bg-muted',
+      benefits: ['Advanced features', 'Enhanced compatibility', 'Premium format'],
+      disabled: true
     }
   ];
 
@@ -116,23 +116,25 @@ export const ExportStep = ({ project, onExport }: ExportStepProps) => {
       {/* Export Options */}
       <div className="grid gap-4">
         {exportOptions.map((option) => (
-          <Card key={option.format} className={`relative overflow-hidden`}>
+          <Card key={option.format} className={`relative overflow-hidden ${option.disabled ? 'opacity-60' : ''}`}>
             <div className={`absolute left-0 top-0 bottom-0 w-1 ${option.color}`} />
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-4">
-                  <div className={`p-3 rounded-lg ${option.color} text-white`}>
+                  <div className={`p-3 rounded-lg ${option.color} ${option.disabled ? 'text-muted-foreground' : 'text-white'}`}>
                     <option.icon className="w-6 h-6" />
                   </div>
                   <div className="space-y-2">
-                    <h3 className="text-lg font-semibold">{option.title}</h3>
+                    <h3 className={`text-lg font-semibold ${option.disabled ? 'text-muted-foreground' : ''}`}>
+                      {option.title}
+                    </h3>
                     <p className="text-muted-foreground">{option.description}</p>
                     <div className="flex flex-wrap gap-1">
                       {option.benefits.map((benefit, index) => (
                         <Badge 
                           key={index} 
-                          variant="secondary" 
-                          className="text-xs"
+                          variant={option.disabled ? "outline" : "secondary"} 
+                          className={`text-xs ${option.disabled ? 'text-muted-foreground border-muted' : ''}`}
                         >
                           {benefit}
                         </Badge>
@@ -141,8 +143,9 @@ export const ExportStep = ({ project, onExport }: ExportStepProps) => {
                   </div>
                 </div>
                 <Button 
-                  onClick={() => onExport(option.format, refinementText || undefined)}
+                  onClick={() => option.disabled ? undefined : onExport(option.format, refinementText || undefined)}
                   className="flex items-center gap-2"
+                  disabled={option.disabled}
                 >
                   <Download className="w-4 h-4" />
                   Export {option.format.toUpperCase()}
@@ -181,5 +184,3 @@ export const ExportStep = ({ project, onExport }: ExportStepProps) => {
     </div>
   );
 };
-
-/// FILE: src/components/ExportStep.tsx

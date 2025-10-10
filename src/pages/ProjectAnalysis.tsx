@@ -69,19 +69,19 @@ const ProjectAnalysisPage = () => {
 
   const handleDownloadAICollabJSON = () => {
     if (!storedProject) return;
-    downloadAICollabJSON(storedProject, `${storedProject.name || "project"}.json`);
+    downloadAICollabJSON(storedProject);
     toast({ title: "Downloaded", description: "AI Collab JSON downloaded successfully" });
   };
 
   const handleDownloadAICollabMarkdown = () => {
     if (!storedProject) return;
-    downloadAICollabMarkdown(storedProject, `${storedProject.name || "project"}.md`);
+    downloadAICollabMarkdown(storedProject);
     toast({ title: "Downloaded", description: "AI Collab Markdown downloaded successfully" });
   };
 
   const handleDownloadAICollabZIP = async () => {
     if (!storedProject) return;
-    await downloadAICollabZIP(storedProject, `${storedProject.name || "project"}.zip`);
+    await downloadAICollabZIP(storedProject);
     toast({ title: "Downloaded", description: "AI Collab ZIP bundle downloaded successfully" });
   };
 
