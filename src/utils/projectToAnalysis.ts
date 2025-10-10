@@ -8,6 +8,7 @@ export function convertProjectToAnalysis(project: ProjectStructure): ProjectAnal
   return {
     appName: project.name || "UnnamedApp",
     description: `Analyzed project: ${project.name || "UnnamedApp"}`,
+    name: project.name,
     metadata: {
       projectId: project.id,
       sourceUrl: project.url || null,

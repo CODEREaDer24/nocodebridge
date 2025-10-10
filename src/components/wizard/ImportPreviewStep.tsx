@@ -1,106 +1,50 @@
-import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ProjectStructure } from "@/types/project";
-import { ExportStep } from "@/components/ExportStep";
-import { ExportPromptStep } from "@/components/wizard/ExportPromptStep";
-import { ImportStep } from "@/components/wizard/ImportStep";
 
-interface IterationFlowStepProps {
+interface ImportPreviewStepProps {
   project: ProjectStructure;
-  onStartExport: (
-    format: "json" | "zip" | "markdown" | "uap" | "ai-collaboration",
-    data?: string
-  ) => void;
-  onStartImport?: (project: ProjectStructure) => void;
+  onNext: () => void;
+  loading?: boolean;
 }
 
-export const IterationFlowStep = ({
-  project,
-  onStartExport,
-  onStartImport,
-}: IterationFlowStepProps) => {
-  const [stage, setStage] = useState<"prompt" | "export" | "import">("prompt");
-  const [refinementData, setRefinementData] = useState<string | undefined>(undefined);
-
-  const handleExport = (
-    format: "json" | "zip" | "markdown" | "uap" | "ai-collaboration",
-    data?: string
-  ) => {
-    setRefinementData(data);
-    onStartExport(format, data);
-  };
-
+export const ImportPreviewStep = ({ project, onNext, loading }: ImportPreviewStepProps) => {
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6">
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Project Wizard</CardTitle>
+          <CardTitle className="text-2xl">Import Preview</CardTitle>
           <CardDescription>
-            Refine, export, or import your project data
+            Review the imported project before continuing
           </CardDescription>
         </CardHeader>
-      </Card>
-
-      {stage === "prompt" && (
-        <ExportPromptStep
-          project={project}
-          onExport={(format, data) => {
-            setRefinementData(data);
-            setStage("export");
-            onStartExport(format, data);
-          }}
-        />
-      )}
-
-      {stage === "export" && (
-        <ExportStep
-          project={project}
-          onExport={(format, data) => {
-            setRefinementData(data);
-            handleExport(format, data);
-          }}
-        />
-      )}
-
-      {stage === "import" && (
-        <ImportStep
-          onImport={(proj) => {
-            if (onStartImport) onStartImport(proj);
-          }}
-        />
-      )}
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Navigation</CardTitle>
-          <CardDescription>
-            Switch between refinement, export, and import
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex gap-4">
-          <Button
-            variant={stage === "prompt" ? "default" : "outline"}
-            onClick={() => setStage("prompt")}
-          >
-            Prompt
-          </Button>
-          <Button
-            variant={stage === "export" ? "default" : "outline"}
-            onClick={() => setStage("export")}
-          >
-            Export
-          </Button>
-          <Button
-            variant={stage === "import" ? "default" : "outline"}
-            onClick={() => setStage("import")}
-          >
-            Import
-          </Button>
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-semibold">Project Name</h3>
+              <p className="text-muted-foreground">{project.name || "Unnamed Project"}</p>
+            </div>
+            {project.description && (
+              <div>
+                <h3 className="font-semibold">Description</h3>
+                <p className="text-muted-foreground">{project.description}</p>
+              </div>
+            )}
+            <div>
+              <h3 className="font-semibold">Project Data</h3>
+              <pre className="bg-muted p-4 rounded-lg overflow-auto max-h-96 text-sm">
+                {JSON.stringify(project, null, 2)}
+              </pre>
+            </div>
+          </div>
         </CardContent>
       </Card>
+
+      <div className="flex justify-end">
+        <Button onClick={onNext} disabled={loading}>
+          {loading ? "Processing..." : "Continue to AI Refinement"}
+        </Button>
+      </div>
     </div>
   );
 };
-
-/// FILE: src/components/wizard/IterationFlowStep.tsx
