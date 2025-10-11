@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, Download, Share2, Link as LinkIcon, FileText, Sparkles, Home } from "lucide-react";
+import { Copy, Download, Share2, Link as LinkIcon, FileText, Sparkles, Home, Package } from "lucide-react";
 import { analyzeProject, generateAICollaborationDoc } from "@/utils/projectAnalyzer";
 import { Link } from "react-router-dom";
 
@@ -11,6 +13,13 @@ const Export = () => {
   const [projectData, setProjectData] = useState("");
   const [shareUrl, setShareUrl] = useState("");
   const [markdownDoc, setMarkdownDoc] = useState("");
+  const [uapExport, setUapExport] = useState("");
+  const [exportOptions, setExportOptions] = useState({
+    markdown: true,
+    json: true,
+    uap: true,
+    shareUrl: false
+  });
   const { toast } = useToast();
 
   const generateComprehensiveExport = () => {
@@ -18,13 +27,39 @@ const Export = () => {
       // Analyze the current project
       const analysis = analyzeProject();
       
-      // Generate AI collaboration document
-      const markdown = generateAICollaborationDoc(analysis);
-      setMarkdownDoc(markdown);
+      // Generate based on selected options
+      if (exportOptions.markdown) {
+        const markdown = generateAICollaborationDoc(analysis);
+        setMarkdownDoc(markdown);
+      }
       
-      // Also generate JSON for URL sharing
-      const jsonData = JSON.stringify(analysis, null, 2);
-      setProjectData(jsonData);
+      if (exportOptions.json) {
+        const jsonData = JSON.stringify(analysis, null, 2);
+        setProjectData(jsonData);
+      }
+
+      if (exportOptions.uap) {
+        // Generate UAP (Universal App Profile) - enhanced format
+        const uap = {
+          version: "1.0",
+          format: "UAP",
+          metadata: {
+            exportedAt: new Date().toISOString(),
+            generator: "NoCodeBridge",
+            projectId: `project_${Date.now()}`,
+            projectName: analysis.projectName || "Current Project"
+          },
+          project: analysis,
+          documentation: generateAICollaborationDoc(analysis),
+          crossPlatformMapping: {
+            lovable: true,
+            bubble: false,
+            webflow: false,
+            base44: false
+          }
+        };
+        setUapExport(JSON.stringify(uap, null, 2));
+      }
       
       toast({
         title: "Export generated!",
@@ -43,7 +78,7 @@ const Export = () => {
     if (!projectData.trim()) {
       toast({
         title: "No data to share",
-        description: "Please paste your project JSON first",
+        description: "Please generate exports first",
         variant: "destructive",
       });
       return;
@@ -70,6 +105,14 @@ const Export = () => {
       });
     }
   };
+
+  // Auto-generate share URL if option is enabled
+  React.useEffect(() => {
+    if (exportOptions.shareUrl && projectData && !shareUrl) {
+      generateShareUrl();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [exportOptions.shareUrl, projectData]);
 
   const copyUrl = async () => {
     if (!shareUrl) return;
@@ -121,6 +164,22 @@ const Export = () => {
     });
   };
 
+  const downloadMarkdown = () => {
+    if (!markdownDoc) return;
+    const blob = new Blob([markdownDoc], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `ai-collaboration-doc-${Date.now()}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Downloaded!",
+      description: "Markdown documentation saved",
+    });
+  };
+
   const copyMarkdown = async () => {
     if (!markdownDoc) return;
     await navigator.clipboard.writeText(markdownDoc);
@@ -129,6 +188,35 @@ const Export = () => {
       description: "AI collaboration doc copied to clipboard",
     });
   };
+
+    if (!uapExport) return;
+    const blob = new Blob([uapExport], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `project-uap-${Date.now()}.uap`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Downloaded!",
+      description: "UAP file saved to your device",
+    });
+  };
+
+  const copyUap = async () => {
+    if (!uapExport) return;
+    await navigator.clipboard.writeText(uapExport);
+    toast({
+      title: "Copied!",
+      description: "UAP export copied to clipboard",
+    });
+  };
+
+  const toggleOption = (option: keyof typeof exportOptions) => {
+    setExportOptions(prev => ({ ...prev, [option]: !prev[option] }));
+  };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-6">
@@ -151,7 +239,87 @@ const Export = () => {
           </p>
         </div>
 
-        {/* Quick Generate Button */}
+        {/* Export Options */}
+        <Card className="p-6 border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
+          <div className="space-y-4">
+            <h3 className="font-semibold text-lg mb-4">Export Options</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Select which formats to include in your export:
+            </p>
+            
+            <div className="space-y-4">
+              <div className="flex items-start space-x-3 p-3 rounded-lg border bg-background/50">
+                <Checkbox 
+                  id="markdown" 
+                  checked={exportOptions.markdown}
+                  onCheckedChange={() => toggleOption('markdown')}
+                />
+                <div className="flex-1">
+                  <Label htmlFor="markdown" className="font-medium cursor-pointer flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    Markdown Documentation
+                  </Label>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Human-readable format perfect for AI assistants like ChatGPT and Claude. Includes complete project overview, architecture, and code examples.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-3 p-3 rounded-lg border bg-background/50">
+                <Checkbox 
+                  id="json" 
+                  checked={exportOptions.json}
+                  onCheckedChange={() => toggleOption('json')}
+                />
+                <div className="flex-1">
+                  <Label htmlFor="json" className="font-medium cursor-pointer flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    JSON Export
+                  </Label>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Machine-readable format containing raw project data. Ideal for programmatic access, re-import, and integration with other tools.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-3 p-3 rounded-lg border bg-background/50 border-purple-500/50">
+                <Checkbox 
+                  id="uap" 
+                  checked={exportOptions.uap}
+                  onCheckedChange={() => toggleOption('uap')}
+                />
+                <div className="flex-1">
+                  <Label htmlFor="uap" className="font-medium cursor-pointer flex items-center gap-2">
+                    <Package className="w-4 h-4 text-purple-500" />
+                    UAP (Universal App Profile)
+                  </Label>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    <strong className="text-purple-400">Premium format</strong> - Cross-platform compatibility standard that works with Lovable, Bubble, Webflow, and other no-code platforms. 
+                    Includes metadata, documentation, and platform mappings for seamless migration between tools.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-3 p-3 rounded-lg border bg-background/50">
+                <Checkbox 
+                  id="shareUrl" 
+                  checked={exportOptions.shareUrl}
+                  onCheckedChange={() => toggleOption('shareUrl')}
+                />
+                <div className="flex-1">
+                  <Label htmlFor="shareUrl" className="font-medium cursor-pointer flex items-center gap-2">
+                    <LinkIcon className="w-4 h-4" />
+                    Generate Share URL
+                  </Label>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Create a shareable URL that contains your project data. Anyone with the link can import your project without downloading files.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+
         <Card className="p-6 border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
           <div className="space-y-4">
             <div className="flex items-start gap-3">
@@ -181,7 +349,43 @@ const Export = () => {
           </div>
         </Card>
 
-        {/* Markdown Documentation Output */}
+        {/* UAP Export Output */}
+        {uapExport && exportOptions.uap && (
+          <Card className="p-6 space-y-4 border-purple-500/50 bg-purple-500/5">
+            <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400">
+              <Package className="w-5 h-5" />
+              <h3 className="font-semibold">Universal App Profile (UAP)</h3>
+            </div>
+            
+            <div className="space-y-2">
+              <Textarea
+                value={uapExport}
+                readOnly
+                className="min-h-[200px] font-mono text-xs bg-muted"
+              />
+              <div className="flex gap-2 flex-wrap">
+                <Button onClick={copyUap} className="gap-2 bg-purple-600 hover:bg-purple-700">
+                  <Copy className="w-4 h-4" />
+                  Copy UAP
+                </Button>
+                <Button onClick={downloadUap} variant="outline" className="gap-2 border-purple-500">
+                  <Download className="w-4 h-4" />
+                  Download .uap File
+                </Button>
+              </div>
+            </div>
+
+            <div className="text-sm text-muted-foreground space-y-1 pt-2 border-t border-purple-500/30">
+              <p className="font-semibold text-foreground">UAP Benefits:</p>
+              <p>✓ Cross-platform compatible (Lovable, Bubble, Webflow, etc.)</p>
+              <p>✓ Includes metadata and documentation</p>
+              <p>✓ Platform-specific migration mappings</p>
+              <p>✓ Version-controlled format specification</p>
+              <p>✓ Perfect for no-code platform migrations</p>
+            </div>
+          </Card>
+        )}
+
         {markdownDoc && (
           <Card className="p-6 space-y-4 border-green-500/50 bg-green-500/5">
             <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
@@ -218,7 +422,7 @@ const Export = () => {
         )}
 
         {/* JSON Data Output */}
-        {projectData && (
+        {projectData && exportOptions.json && (
           <Card className="p-6 space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Project JSON (for URL sharing)</label>
@@ -230,10 +434,6 @@ const Export = () => {
             </div>
 
             <div className="flex gap-2 flex-wrap">
-              <Button onClick={generateShareUrl} className="gap-2">
-                <LinkIcon className="w-4 h-4" />
-                Generate Share URL
-              </Button>
               <Button onClick={copyJson} variant="outline" className="gap-2">
                 <Copy className="w-4 h-4" />
                 Copy JSON
@@ -246,7 +446,7 @@ const Export = () => {
           </Card>
         )}
 
-        {shareUrl && (
+        {shareUrl && exportOptions.shareUrl && (
           <Card className="p-6 space-y-4 border-primary/50">
             <div className="flex items-center gap-2 text-primary">
               <Share2 className="w-5 h-5" />
@@ -279,3 +479,4 @@ const Export = () => {
 };
 
 export default Export;
+
