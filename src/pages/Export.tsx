@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, Download, Share2, Link, FileText, Sparkles } from "lucide-react";
+import { Copy, Download, Share2, Link as LinkIcon, FileText, Sparkles, Home } from "lucide-react";
 import { analyzeProject, generateAICollaborationDoc } from "@/utils/projectAnalyzer";
+import { Link } from "react-router-dom";
 
 const Export = () => {
   const [projectData, setProjectData] = useState("");
@@ -132,6 +133,15 @@ const Export = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-6">
       <div className="max-w-6xl mx-auto space-y-6">
+        <div className="flex justify-between items-start mb-4">
+          <Button variant="outline" asChild>
+            <Link to="/" className="flex items-center gap-2">
+              <Home className="w-4 h-4" />
+              Back to Home
+            </Link>
+          </Button>
+        </div>
+
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
             AI Collaboration Export
@@ -221,7 +231,7 @@ const Export = () => {
 
             <div className="flex gap-2 flex-wrap">
               <Button onClick={generateShareUrl} className="gap-2">
-                <Link className="w-4 h-4" />
+                <LinkIcon className="w-4 h-4" />
                 Generate Share URL
               </Button>
               <Button onClick={copyJson} variant="outline" className="gap-2">
