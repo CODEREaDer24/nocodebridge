@@ -12,7 +12,7 @@ import { ImportPreviewStep } from "./wizard/ImportPreviewStep";
 import { AIRefinementStep } from "./wizard/AIRefinementStep";
 import { ExportPromptStep } from "./wizard/ExportPromptStep";
 import { ProjectStructure, WizardStep, FlowType } from "@/types/project";
-import { ChevronLeft, ArrowLeft, History as HistoryIcon } from "lucide-react";
+import { ChevronLeft, ArrowLeft, History as HistoryIcon, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { parseProjectFile, generateProjectBundle } from "@/utils/fileHandling";
@@ -201,12 +201,20 @@ export const ProjectWizard = () => {
                 </Button>
               )}
             </div>
-            <Button variant="outline" asChild>
-              <Link to="/history" className="flex items-center gap-2">
-                <HistoryIcon className="w-4 h-4" />
-                View History
-              </Link>
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="default" asChild>
+                <Link to="/export" className="flex items-center gap-2">
+                  <Download className="w-4 h-4" />
+                  Export This App
+                </Link>
+              </Button>
+              <Button variant="outline" asChild>
+                <Link to="/history" className="flex items-center gap-2">
+                  <HistoryIcon className="w-4 h-4" />
+                  View History
+                </Link>
+              </Button>
+            </div>
           </div>
           
           {currentStep !== 'start' && (
