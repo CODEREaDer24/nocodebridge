@@ -33,7 +33,7 @@ export const StartScreen = ({ onSelectFlow }: StartScreenProps) => {
         </div>
 
         {/* Main Action Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {/* Export Flow */}
           <Card className="bg-card border-border hover:border-primary/50 transition-all duration-300 group cursor-pointer">
             <CardContent className="p-8 text-center space-y-6">
@@ -108,6 +108,48 @@ export const StartScreen = ({ onSelectFlow }: StartScreenProps) => {
                 >
                   Start Import
                   <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* UAP Export/Import */}
+          <Card className="bg-card border-border hover:border-primary/50 transition-all duration-300 group cursor-pointer">
+            <CardContent className="p-8 text-center space-y-6">
+              <div className="w-24 h-24 bg-gradient-to-br from-[hsl(var(--gono-coral))] to-orange-800 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300">
+                <Zap className="w-12 h-12 text-white" />
+              </div>
+              <div className="space-y-3">
+                <h3 className="text-2xl font-bold text-foreground">🔄 UAP Export / Import</h3>
+                <p className="text-muted-foreground text-lg">
+                  Upload extractor files or export NoCodeBridge data
+                </p>
+              </div>
+              <div className="space-y-4">
+                <div className="text-sm space-y-2">
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-2 h-2 bg-[hsl(var(--gono-coral))] rounded-full"></div>
+                    <span className="text-muted-foreground">Upload .uap, .json, or .md files</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-2 h-2 bg-[hsl(var(--gono-coral))] rounded-full"></div>
+                    <span className="text-muted-foreground">View project summaries</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-2 h-2 bg-[hsl(var(--gono-coral))] rounded-full"></div>
+                    <span className="text-muted-foreground">Export as UAP format</span>
+                  </div>
+                </div>
+                <Button 
+                  asChild
+                  variant="outline"
+                  className="w-full border-[hsl(var(--gono-coral))] text-[hsl(var(--gono-coral))] hover:bg-[hsl(var(--gono-coral))] hover:text-white" 
+                  size="lg"
+                >
+                  <Link to="/export">
+                    Open UAP Tool
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Link>
                 </Button>
               </div>
             </CardContent>

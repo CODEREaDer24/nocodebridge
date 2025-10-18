@@ -147,22 +147,46 @@ const Export = () => {
 
     try {
       const text = await file.text();
+      let parsedData: any = null;
       
-      if (fileExtension === 'md') {
-        setMarkdownDoc(text);
-        setUploadedData({ 
-          meta: { 
-            projectName: file.name.replace('.md', ''),
-            generated_at: new Date().toISOString()
-          }
-        });
-      } else {
-        const data = JSON.parse(text);
-        setUploadedData(data);
-        setProjectData(JSON.stringify(data, null, 2));
+      // Try JSON parsing first
+      try {
+        parsedData = JSON.parse(text);
+        setUploadedData(parsedData);
+        setProjectData(JSON.stringify(parsedData, null, 2));
         
-        if (data.summary_markdown || data.summary) {
-          setMarkdownDoc(data.summary_markdown || data.summary);
+        if (parsedData.summary_markdown || parsedData.summary) {
+          setMarkdownDoc(parsedData.summary_markdown || parsedData.summary);
+        }
+      } catch (jsonError) {
+        // If JSON fails, check if it's markdown with JSON block
+        if (text.trim().startsWith('#') || text.includes('```json')) {
+          // Extract JSON from markdown code block if present
+          const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
+          if (jsonMatch) {
+            try {
+              parsedData = JSON.parse(jsonMatch[1]);
+              setUploadedData(parsedData);
+              setProjectData(JSON.stringify(parsedData, null, 2));
+            } catch {
+              // Just use markdown as-is
+            }
+          }
+          
+          // Set markdown content
+          setMarkdownDoc(text);
+          
+          // Create minimal metadata if no JSON was extracted
+          if (!parsedData) {
+            setUploadedData({ 
+              meta: { 
+                projectName: file.name.replace(/\.(md|uap|json)$/, ''),
+                generated_at: new Date().toISOString()
+              }
+            });
+          }
+        } else {
+          throw new Error("Invalid file format");
         }
       }
 
@@ -172,8 +196,8 @@ const Export = () => {
       });
     } catch (e) {
       toast({
-        title: "Upload failed",
-        description: "Could not parse file",
+        title: "Invalid file format",
+        description: "Could not parse file. Please upload a valid .uap, .json, or .md file.",
         variant: "destructive",
       });
     }
