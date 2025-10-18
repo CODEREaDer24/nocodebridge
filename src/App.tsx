@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import History from "./pages/History";
 import Export from "./pages/Export";
 import Import from "./pages/Import";
+import Bridge from "./pages/Bridge";
 import ProjectAnalysis from "./pages/ProjectAnalysis";
 import StylePreview from "./pages/StylePreview";
 import HowTo from "./pages/HowTo";
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/history" element={<History />} />
           <Route path="/export" element={<Export />} />
           <Route path="/import" element={<Import />} />
+          <Route path="/bridge" element={<Bridge />} />
           <Route path="/analysis" element={<ProjectAnalysis />} />
           <Route path="/style-preview" element={<StylePreview />} />
           <Route path="/howto" element={<HowTo />} />
