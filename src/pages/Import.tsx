@@ -1,140 +1,214 @@
-import React, { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle, AlertCircle, Download } from "lucide-react";
+import { Upload, Copy, ArrowLeft } from "lucide-react";
 
 const Import = () => {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [projectData, setProjectData] = useState<any>(null);
-  const [error, setError] = useState("");
+  const [fileName, setFileName] = useState("");
 
-  useEffect(() => {
-    const dataParam = searchParams.get("data");
-    if (!dataParam) {
-      setError("No project data in URL");
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validExtensions = ['.uap', '.json', '.md'];
+    const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+    
+    if (!validExtensions.includes(fileExtension)) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload a .uap, .json, or .md file",
+        variant: "destructive",
+      });
       return;
     }
 
+    setFileName(file.name);
+
     try {
-      const decoded = decodeURIComponent(atob(dataParam));
-      const parsed = JSON.parse(decoded);
-      setProjectData(parsed);
+      const content = await file.text();
       
+      if (fileExtension === '.md') {
+        // For markdown, create a simple structure
+        setProjectData({
+          meta: {
+            format: "Markdown",
+            source: file.name,
+          },
+          summary: content,
+        });
+      } else {
+        // For JSON/UAP
+        const parsed = JSON.parse(content);
+        setProjectData(parsed);
+      }
+
       toast({
-        title: "Project loaded!",
-        description: "Successfully imported from share URL",
+        title: "File loaded!",
+        description: `Successfully imported ${file.name}`,
       });
     } catch (e) {
-      setError("Invalid or corrupted share URL");
       toast({
-        title: "Import failed",
-        description: "Could not decode project data",
+        title: "Parse error",
+        description: "Could not read or parse the file",
         variant: "destructive",
       });
     }
-  }, [searchParams, toast]);
+  };
 
-  const downloadProject = () => {
+  const copySummary = () => {
     if (!projectData) return;
-    const blob = new Blob([JSON.stringify(projectData, null, 2)], { 
-      type: "application/json" 
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `imported-project-${Date.now()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    
+    const summary = projectData.summary_markdown || projectData.summary || JSON.stringify(projectData, null, 2);
+    navigator.clipboard.writeText(summary);
     
     toast({
-      title: "Downloaded!",
-      description: "Project saved to your device",
+      title: "Copied!",
+      description: "Summary copied to clipboard",
     });
   };
 
-  const openInLovable = () => {
-    window.open("https://lovable.dev", "_blank");
-  };
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-destructive/5 flex items-center justify-center p-6">
-        <Card className="p-8 max-w-md text-center space-y-4">
-          <AlertCircle className="w-12 h-12 text-destructive mx-auto" />
-          <h2 className="text-2xl font-bold">Import Error</h2>
-          <p className="text-muted-foreground">{error}</p>
-          <Button onClick={() => navigate("/")} variant="outline">
-            Go Home
-          </Button>
-        </Card>
-      </div>
-    );
-  }
-
-  if (!projectData) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-6">
-        <Card className="p-8 text-center">
-          <div className="animate-pulse space-y-3">
-            <div className="w-12 h-12 bg-primary/20 rounded-full mx-auto" />
-            <p className="text-muted-foreground">Loading project...</p>
-          </div>
-        </Card>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-6">
-      <Card className="p-8 max-w-2xl space-y-6">
-        <div className="text-center space-y-3">
-          <div className="inline-block px-4 py-2 bg-[hsl(var(--gono-lime))]/20 border border-[hsl(var(--gono-lime))]/50 rounded-full mb-2">
-            <span className="text-[hsl(var(--gono-lime))] font-semibold text-sm">AEIOU Flow Stage: Integrate + Unify</span>
-          </div>
-          <CheckCircle className="w-16 h-16 text-primary mx-auto" />
-          <h2 className="text-3xl font-bold font-['Outfit']">Review & Apply (UAPIMP)</h2>
-          <p className="text-lg font-['Inter']">GoNoCoMoCo AEIOU Framework</p>
-          <p className="text-muted-foreground">
-            Your project has been successfully loaded
+    <div className="min-h-screen bg-[hsl(var(--gono-navy))] flex items-center justify-center p-6">
+      <Card className="p-8 max-w-4xl w-full space-y-6 bg-background/95 border-[hsl(var(--gono-electric-blue))]/30">
+        {/* Header */}
+        <div className="space-y-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/")}
+            className="mb-4"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
+          </Button>
+          
+          <h1 className="text-4xl font-bold font-['Outfit'] text-[hsl(var(--gono-electric-blue))]">
+            Import Project Data
+          </h1>
+          <p className="text-muted-foreground font-['Inter']">
+            Upload your exported app data (.uap, .json, or .md) to view the project summary
           </p>
         </div>
 
-        <div className="bg-muted p-4 rounded-lg space-y-2">
-          <h3 className="font-semibold">Project Details:</h3>
-          <div className="text-sm space-y-1 text-muted-foreground">
-            {projectData.name && <p>• Name: {projectData.name}</p>}
-            {projectData.pages && <p>• Pages: {projectData.pages.length}</p>}
-            {projectData.components && <p>• Components: {projectData.components.length}</p>}
+        {/* Upload Section */}
+        {!projectData && (
+          <div className="border-2 border-dashed border-[hsl(var(--gono-electric-blue))]/30 rounded-lg p-12 text-center space-y-4">
+            <Upload className="w-16 h-16 text-[hsl(var(--gono-electric-blue))] mx-auto" />
+            <div>
+              <label htmlFor="file-upload" className="cursor-pointer">
+                <div className="text-lg font-semibold text-[hsl(var(--gono-electric-blue))]">
+                  Click to upload
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">
+                  .uap, .json, or .md files only
+                </p>
+              </label>
+              <Input
+                id="file-upload"
+                type="file"
+                accept=".uap,.json,.md"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+            </div>
           </div>
-        </div>
+        )}
 
-        <div className="flex gap-3 flex-col sm:flex-row">
-          <Button onClick={downloadProject} className="flex-1 gap-2">
-            <Download className="w-4 h-4" />
-            Download JSON
-          </Button>
-          <Button onClick={openInLovable} variant="outline" className="flex-1">
-            Open in Lovable
-          </Button>
-        </div>
+        {/* Project Summary */}
+        {projectData && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold font-['Outfit'] text-[hsl(var(--gono-electric-blue))]">
+                Project Summary
+              </h2>
+              <Button onClick={copySummary} variant="outline" size="sm" className="gap-2">
+                <Copy className="w-4 h-4" />
+                Copy Summary
+              </Button>
+            </div>
 
-        <div className="text-center">
-          <Button 
-            onClick={() => navigate("/")} 
-            variant="ghost" 
-            size="sm"
-          >
-            Import Another Project
-          </Button>
-        </div>
+            {/* Metadata Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {projectData.meta?.name || projectData.name ? (
+                <Card className="p-4 bg-muted/50">
+                  <p className="text-sm text-muted-foreground">Project Name</p>
+                  <p className="text-lg font-semibold">{projectData.meta?.name || projectData.name}</p>
+                </Card>
+              ) : null}
+              
+              {projectData.meta?.domain || projectData.domain ? (
+                <Card className="p-4 bg-muted/50">
+                  <p className="text-sm text-muted-foreground">Domain / URL</p>
+                  <p className="text-lg font-semibold">{projectData.meta?.domain || projectData.domain}</p>
+                </Card>
+              ) : null}
+              
+              {projectData.meta?.generated_at || projectData.exported_at ? (
+                <Card className="p-4 bg-muted/50">
+                  <p className="text-sm text-muted-foreground">Exported Date</p>
+                  <p className="text-lg font-semibold">
+                    {new Date(projectData.meta?.generated_at || projectData.exported_at).toLocaleString()}
+                  </p>
+                </Card>
+              ) : null}
+              
+              {projectData.pages || projectData.components ? (
+                <Card className="p-4 bg-muted/50">
+                  <p className="text-sm text-muted-foreground">Components</p>
+                  <p className="text-lg font-semibold">
+                    {projectData.pages?.length || 0} pages, {projectData.components?.length || 0} components
+                  </p>
+                </Card>
+              ) : null}
+            </div>
+
+            {/* Description */}
+            {(projectData.meta?.description || projectData.description) && (
+              <Card className="p-4 bg-muted/50">
+                <p className="text-sm text-muted-foreground mb-2">Description</p>
+                <p className="text-base">{projectData.meta?.description || projectData.description}</p>
+              </Card>
+            )}
+
+            {/* Full Summary */}
+            <Card className="p-4 bg-muted/50">
+              <p className="text-sm text-muted-foreground mb-3">Full Summary</p>
+              <ScrollArea className="h-[300px] w-full rounded border bg-background p-4">
+                <pre className="text-xs font-mono whitespace-pre-wrap">
+                  {projectData.summary_markdown || projectData.summary || JSON.stringify(projectData, null, 2)}
+                </pre>
+              </ScrollArea>
+            </Card>
+
+            {/* Actions */}
+            <div className="flex gap-3">
+              <Button
+                onClick={() => {
+                  setProjectData(null);
+                  setFileName("");
+                }}
+                variant="outline"
+                className="flex-1"
+              >
+                Upload Another File
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Footer */}
-        <div className="text-center pt-4 border-t">
-          <p className="text-muted-foreground font-['Inter'] text-sm">
+        <div className="text-center pt-6 border-t border-border/50">
+          <p className="text-sm text-muted-foreground font-['Inter']">
+            Ready for AI Collaboration or return trip to NoCodeBridge.
+          </p>
+          <p className="text-xs text-muted-foreground/70 mt-2">
             🚀 Powered by GoNoCoMoCo + AEIOU Framework
           </p>
         </div>
