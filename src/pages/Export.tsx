@@ -14,31 +14,6 @@ const Export = () => {
   const [uploadedData, setUploadedData] = useState<any>(null);
   const { toast } = useToast();
 
-  const generateComprehensiveExport = () => {
-    try {
-      // Analyze the current project
-      const analysis = analyzeProject();
-      
-      // Generate AI collaboration document
-      const markdown = generateAICollaborationDoc(analysis);
-      setMarkdownDoc(markdown);
-      
-      // Also generate JSON for URL sharing
-      const jsonData = JSON.stringify(analysis, null, 2);
-      setProjectData(jsonData);
-      
-      toast({
-        title: "Export generated!",
-        description: "Complete AI collaboration document ready",
-      });
-    } catch (e) {
-      toast({
-        title: "Export failed",
-        description: "Please try again",
-        variant: "destructive",
-      });
-    }
-  };
 
   const generateShareUrl = () => {
     if (!projectData.trim()) {
@@ -332,35 +307,20 @@ const Export = () => {
           </Card>
         )}
 
-        {/* Quick Generate Button */}
-        <Card className="p-6 border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
-          <div className="space-y-4">
-            <div className="flex items-start gap-3">
-              <Sparkles className="w-6 h-6 text-primary mt-1" />
-              <div className="flex-1">
-                <h3 className="font-semibold text-lg mb-2">Generate Complete Project Export</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Automatically analyze your project and generate comprehensive documentation including:
+        {/* No File Uploaded Message */}
+        {!uploadedData && !markdownDoc && (
+          <Card className="p-8 border-dashed border-2 border-muted-foreground/30">
+            <div className="text-center space-y-4">
+              <Upload className="w-16 h-16 mx-auto text-muted-foreground/50" />
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">Upload a UAP, JSON, or Markdown file from another app to begin.</h3>
+                <p className="text-sm text-muted-foreground">
+                  This page processes external app data only. To export NoCodeBridge itself, visit the Self-Extractor page.
                 </p>
-                <ul className="text-sm text-muted-foreground space-y-1 mb-4">
-                  <li>✓ Complete tech stack and architecture</li>
-                  <li>✓ Every page, route, and component</li>
-                  <li>✓ All features and capabilities</li>
-                  <li>✓ Code patterns and examples</li>
-                  <li>✓ Development guidelines</li>
-                </ul>
-                <Button 
-                  onClick={generateComprehensiveExport} 
-                  size="lg"
-                  className="gap-2"
-                >
-                  <FileText className="w-4 h-4" />
-                  Generate AI Collaboration Doc
-                </Button>
               </div>
             </div>
-          </div>
-        </Card>
+          </Card>
+        )}
 
         {/* Markdown Documentation Output */}
         {markdownDoc && (

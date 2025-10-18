@@ -91,6 +91,9 @@ const SelfExtract = () => {
         </div>
 
         <div className="text-center space-y-2">
+          <div className="inline-block px-4 py-2 bg-[hsl(var(--gono-blue))]/20 border border-[hsl(var(--gono-blue))]/50 rounded-full mb-2">
+            <span className="text-[hsl(var(--gono-blue))] font-semibold text-sm">Internal Use Only</span>
+          </div>
           <h1 className="text-4xl font-bold font-['Outfit'] bg-gradient-to-r from-[hsl(var(--gono-blue))] to-[hsl(var(--gono-lime))] bg-clip-text text-transparent">
             Self-Extractor – GoNoCoMoCo Backup
           </h1>
@@ -109,9 +112,9 @@ const SelfExtract = () => {
             />
           </div>
 
-          <Button onClick={downloadSelfExtract} size="lg" className="w-full gap-2">
+          <Button onClick={downloadSelfExtract} size="lg" className="w-full gap-2 bg-[hsl(var(--gono-blue))] hover:bg-[hsl(var(--gono-blue))]/90">
             <Download className="w-4 h-4" />
-            Download Self Extract (.uap)
+            Export This App (.uap)
           </Button>
 
           <div className="text-sm text-muted-foreground space-y-1 pt-4 border-t">

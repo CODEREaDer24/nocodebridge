@@ -32,7 +32,7 @@ const App = () => (
           <Route path="/style-preview" element={<StylePreview />} />
           <Route path="/howto" element={<HowTo />} />
           <Route path="/self-export" element={<SelfExport />} />
-          <Route path="/self-extract" element={<SelfExtract />} />
+          <Route path="/extractor" element={<SelfExtract />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

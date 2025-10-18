@@ -186,6 +186,11 @@ export const StartScreen = ({ onSelectFlow }: StartScreenProps) => {
               View Theme
             </Link>
           </Button>
+          <Button variant="outline" asChild className="border-[hsl(var(--gono-blue))] text-[hsl(var(--gono-blue))]">
+            <Link to="/extractor" className="flex items-center gap-2">
+              🧠 Self-Extractor
+            </Link>
+          </Button>
         </div>
 
         {/* Benefits */}
