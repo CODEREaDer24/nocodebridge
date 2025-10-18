@@ -14,15 +14,21 @@ export const StartScreen = ({ onSelectFlow }: StartScreenProps) => {
       <div className="container mx-auto px-4 py-16 space-y-12">
         {/* Header */}
         <div className="text-center space-y-6">
-          <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
-            Project Bridge
+          <div className="inline-block px-4 py-2 bg-[hsl(var(--gono-blue))]/20 border border-[hsl(var(--gono-blue))]/50 rounded-full mb-4">
+            <span className="text-[hsl(var(--gono-blue))] font-semibold text-sm">AEIOU Framework</span>
+          </div>
+          <h1 className="text-6xl font-['Outfit'] font-bold mb-4 bg-gradient-to-r from-[hsl(var(--gono-blue))] to-[hsl(var(--gono-lime))] bg-clip-text text-transparent">
+            Go No Code Mode Co
           </h1>
-          <p className="text-3xl font-semibold text-foreground mb-2">
-            Perfect your projects with AI. Export now. Refine with AI. Import later.
+          <p className="text-3xl font-['Inter'] font-semibold text-foreground mb-2">
+            The AEIOU Bridge
+          </p>
+          <p className="text-xl text-muted-foreground mb-4">
+            Export. Teleport. Collaborate.
           </p>
           <div className="flex items-center justify-center gap-2 text-lg text-muted-foreground">
-            <Zap className="w-5 h-5 text-yellow-400" />
-            <span>Export once to save credits. Refine offline. Reimport when ready.</span>
+            <Sparkles className="w-5 h-5 text-[hsl(var(--gono-lime))]" />
+            <span className="font-['Inter']">Build smarter, ship faster, spend fewer credits.</span>
           </div>
         </div>
 
@@ -124,35 +130,58 @@ export const StartScreen = ({ onSelectFlow }: StartScreenProps) => {
           </CardContent>
         </Card>
 
+        {/* Quick Links */}
+        <div className="flex justify-center gap-4 flex-wrap">
+          <Button variant="outline" asChild>
+            <Link to="/howto" className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              How AEIOU Works
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link to="/style-preview" className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4" />
+              View Theme
+            </Link>
+          </Button>
+        </div>
+
         {/* Benefits */}
         <Card className="bg-gradient-to-r from-accent to-secondary border-border max-w-5xl mx-auto">
           <CardContent className="p-8">
             <div className="text-center mb-6">
-              <Sparkles className="w-8 h-8 text-primary mx-auto mb-3" />
-              <h3 className="text-xl font-semibold text-foreground">Independent Flows</h3>
+              <Sparkles className="w-8 h-8 text-[hsl(var(--gono-lime))] mx-auto mb-3" />
+              <h3 className="text-xl font-['Outfit'] font-semibold text-foreground">AEIOU-Powered Workflow</h3>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center font-['Inter']">
               <div className="space-y-2">
-                <div className="text-primary font-semibold">Save Credits</div>
+                <div className="text-[hsl(var(--gono-blue))] font-semibold">Save Credits</div>
                 <p className="text-sm text-muted-foreground">
                   Export once, iterate offline without burning through credits
                 </p>
               </div>
               <div className="space-y-2">
-                <div className="text-primary font-semibold">AI-Powered</div>
+                <div className="text-[hsl(var(--gono-lime))] font-semibold">AI-Enhanced</div>
                 <p className="text-sm text-muted-foreground">
                   Use any AI tool to refine your project structure
                 </p>
               </div>
               <div className="space-y-2">
-                <div className="text-primary font-semibold">Platform Agnostic</div>
+                <div className="text-[hsl(var(--gono-coral))] font-semibold">Universal Format</div>
                 <p className="text-sm text-muted-foreground">
-                  Works with multiple no-code builders, not just one
+                  UAP format works across platforms - no vendor lock-in
                 </p>
               </div>
             </div>
           </CardContent>
         </Card>
+
+        {/* Footer */}
+        <div className="text-center py-8">
+          <p className="text-muted-foreground font-['Inter'] text-sm">
+            🚀 Powered by GoNoCoMoCo + AEIOU Framework
+          </p>
+        </div>
       </div>
     </div>
   );

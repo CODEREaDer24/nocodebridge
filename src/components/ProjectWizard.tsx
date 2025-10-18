@@ -219,11 +219,16 @@ export const ProjectWizard = () => {
           
           {currentStep !== 'start' && (
             <div className="text-center">
-              <h1 className="text-4xl font-bold mb-2">Project Bridge MVP</h1>
-              <p className="text-xl text-muted-foreground">
+              <div className="inline-block px-4 py-2 bg-[hsl(var(--gono-blue))]/20 border border-[hsl(var(--gono-blue))]/50 rounded-full mb-2">
+                <span className="text-[hsl(var(--gono-blue))] font-semibold text-sm">AEIOU Framework</span>
+              </div>
+              <h1 className="text-4xl font-['Outfit'] font-bold mb-2 bg-gradient-to-r from-[hsl(var(--gono-blue))] to-[hsl(var(--gono-lime))] bg-clip-text text-transparent">
+                GoNoCoMoCo Bridge
+              </h1>
+              <p className="text-xl font-['Inter'] text-muted-foreground">
                 {currentFlow === 'export' 
-                  ? 'Export, refine, and re-import your Lovable projects with precision'
-                  : 'Import your project to create a new Lovable project'
+                  ? 'Export, refine, and re-import with AEIOU precision'
+                  : 'Import your project using the AEIOU framework'
                 }
               </p>
             </div>

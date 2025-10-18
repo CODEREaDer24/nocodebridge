@@ -92,10 +92,14 @@ const Import = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-6">
       <Card className="p-8 max-w-2xl space-y-6">
         <div className="text-center space-y-3">
+          <div className="inline-block px-4 py-2 bg-[hsl(var(--gono-lime))]/20 border border-[hsl(var(--gono-lime))]/50 rounded-full mb-2">
+            <span className="text-[hsl(var(--gono-lime))] font-semibold text-sm">AEIOU Flow Stage: Integrate + Unify</span>
+          </div>
           <CheckCircle className="w-16 h-16 text-primary mx-auto" />
-          <h2 className="text-3xl font-bold">Project Imported!</h2>
+          <h2 className="text-3xl font-bold font-['Outfit']">Review & Apply (UAPIMP)</h2>
+          <p className="text-lg font-['Inter']">GoNoCoMoCo AEIOU Framework</p>
           <p className="text-muted-foreground">
-            Your Lovable project has been successfully loaded
+            Your project has been successfully loaded
           </p>
         </div>
 
@@ -126,6 +130,13 @@ const Import = () => {
           >
             Import Another Project
           </Button>
+        </div>
+
+        {/* Footer */}
+        <div className="text-center pt-4 border-t">
+          <p className="text-muted-foreground font-['Inter'] text-sm">
+            🚀 Powered by GoNoCoMoCo + AEIOU Framework
+          </p>
         </div>
       </Card>
     </div>

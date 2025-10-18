@@ -143,11 +143,15 @@ const Export = () => {
         </div>
 
         <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            AI Collaboration Export
+          <div className="inline-block px-4 py-2 bg-[hsl(var(--gono-blue))]/20 border border-[hsl(var(--gono-blue))]/50 rounded-full mb-2">
+            <span className="text-[hsl(var(--gono-blue))] font-semibold text-sm">AEIOU Flow Stage: Extract + Optimize</span>
+          </div>
+          <h1 className="text-4xl font-bold font-['Outfit'] bg-gradient-to-r from-[hsl(var(--gono-blue))] to-[hsl(var(--gono-lime))] bg-clip-text text-transparent">
+            Export & Analyze (UAP / JSON / MD)
           </h1>
+          <p className="text-lg font-['Inter']">GoNoCoMoCo AEIOU Framework</p>
           <p className="text-muted-foreground">
-            Generate comprehensive documentation for AI assistants (ChatGPT, Claude, Lovable)
+            Generate comprehensive documentation for AI collaboration
           </p>
         </div>
 
@@ -273,6 +277,12 @@ const Export = () => {
             </div>
           </Card>
         )}
+        {/* Footer */}
+        <div className="text-center py-8 border-t mt-8">
+          <p className="text-muted-foreground font-['Inter'] text-sm">
+            🚀 Powered by GoNoCoMoCo + AEIOU Framework
+          </p>
+        </div>
       </div>
     </div>
   );
