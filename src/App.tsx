@@ -12,6 +12,7 @@ import ProjectAnalysis from "./pages/ProjectAnalysis";
 import StylePreview from "./pages/StylePreview";
 import HowTo from "./pages/HowTo";
 import SelfExport from "./pages/SelfExport";
+import SelfExtract from "./pages/SelfExtract";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/style-preview" element={<StylePreview />} />
           <Route path="/howto" element={<HowTo />} />
           <Route path="/self-export" element={<SelfExport />} />
+          <Route path="/self-extract" element={<SelfExtract />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

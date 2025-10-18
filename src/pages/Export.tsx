@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, Download, Share2, Link as LinkIcon, FileText, Sparkles, Home } from "lucide-react";
+import { Copy, Download, Share2, Link as LinkIcon, FileText, Sparkles, Home, Upload } from "lucide-react";
 import { analyzeProject, generateAICollaborationDoc } from "@/utils/projectAnalyzer";
 import { Link } from "react-router-dom";
 
@@ -11,6 +11,7 @@ const Export = () => {
   const [projectData, setProjectData] = useState("");
   const [shareUrl, setShareUrl] = useState("");
   const [markdownDoc, setMarkdownDoc] = useState("");
+  const [uploadedData, setUploadedData] = useState<any>(null);
   const { toast } = useToast();
 
   const generateComprehensiveExport = () => {
@@ -130,6 +131,83 @@ const Export = () => {
     });
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    if (!['uap', 'json', 'md'].includes(fileExtension || '')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload a .uap, .json, or .md file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const text = await file.text();
+      
+      if (fileExtension === 'md') {
+        setMarkdownDoc(text);
+        setUploadedData({ 
+          meta: { 
+            projectName: file.name.replace('.md', ''),
+            generated_at: new Date().toISOString()
+          }
+        });
+      } else {
+        const data = JSON.parse(text);
+        setUploadedData(data);
+        setProjectData(JSON.stringify(data, null, 2));
+        
+        if (data.summary_markdown || data.summary) {
+          setMarkdownDoc(data.summary_markdown || data.summary);
+        }
+      }
+
+      toast({
+        title: "File uploaded!",
+        description: `Successfully parsed ${file.name}`,
+      });
+    } catch (e) {
+      toast({
+        title: "Upload failed",
+        description: "Could not parse file",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const downloadUAP = () => {
+    if (!uploadedData && !projectData) return;
+    
+    const data = uploadedData || JSON.parse(projectData);
+    const uapData = {
+      meta: {
+        format: "UAP",
+        version: "1.0.0",
+        generated_at: new Date().toISOString(),
+        source: "GoNoCoMoCo / AEIOU",
+        ...data.meta
+      },
+      ...data
+    };
+
+    const blob = new Blob([JSON.stringify(uapData, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `export-${Date.now()}.uap`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Downloaded!",
+      description: "UAP file saved to your device",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-6">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -151,9 +229,84 @@ const Export = () => {
           </h1>
           <p className="text-lg font-['Inter']">GoNoCoMoCo AEIOU Framework</p>
           <p className="text-muted-foreground">
-            Generate comprehensive documentation for AI collaboration
+            Upload Extractor File (.uap, .json, or .md) — exported from your app
           </p>
         </div>
+
+        {/* File Upload Section */}
+        <Card className="p-6 border-[hsl(var(--gono-blue))]/30 bg-gradient-to-br from-[hsl(var(--gono-blue))]/5 to-transparent">
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <Upload className="w-6 h-6 text-[hsl(var(--gono-blue))] mt-1" />
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg mb-2">Upload Exported Project File</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Upload a .uap, .json, or .md file exported from your app's Extractor Tool
+                </p>
+                <input
+                  type="file"
+                  accept=".uap,.json,.md"
+                  onChange={handleFileUpload}
+                  className="block w-full text-sm text-muted-foreground
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-md file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-[hsl(var(--gono-blue))] file:text-white
+                    hover:file:bg-[hsl(var(--gono-blue))]/90
+                    cursor-pointer"
+                />
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Uploaded Data Summary */}
+        {uploadedData && (
+          <Card className="p-6 space-y-4 border-[hsl(var(--gono-lime))]/50 bg-[hsl(var(--gono-lime))]/5">
+            <div className="flex items-center gap-2 text-[hsl(var(--gono-lime))]">
+              <FileText className="w-5 h-5" />
+              <h3 className="font-semibold">Project Summary</h3>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="font-semibold">Project Name:</span>
+                <p className="text-muted-foreground">{uploadedData.meta?.projectName || uploadedData.projectName || 'N/A'}</p>
+              </div>
+              <div>
+                <span className="font-semibold">Domain / URL:</span>
+                <p className="text-muted-foreground">{uploadedData.meta?.domain || uploadedData.domain || 'N/A'}</p>
+              </div>
+              <div>
+                <span className="font-semibold">Description:</span>
+                <p className="text-muted-foreground">{uploadedData.meta?.description || uploadedData.description || 'N/A'}</p>
+              </div>
+              <div>
+                <span className="font-semibold">Pages & Components:</span>
+                <p className="text-muted-foreground">
+                  {uploadedData.pages?.length || 0} pages, {uploadedData.components?.length || 0} components
+                </p>
+              </div>
+              <div>
+                <span className="font-semibold">Exported Date:</span>
+                <p className="text-muted-foreground">
+                  {uploadedData.meta?.generated_at || uploadedData.exported_at || uploadedData.meta?.exportedAt || 'N/A'}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-2 flex-wrap pt-4 border-t">
+              <Button onClick={copyMarkdown} className="gap-2">
+                <Copy className="w-4 h-4" />
+                Copy Summary
+              </Button>
+              <Button onClick={downloadUAP} variant="outline" className="gap-2">
+                <Download className="w-4 h-4" />
+                Download UAP
+              </Button>
+            </div>
+          </Card>
+        )}
 
         {/* Quick Generate Button */}
         <Card className="p-6 border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
