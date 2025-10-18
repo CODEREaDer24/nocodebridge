@@ -8,101 +8,35 @@ import { analyzeProject, generateAICollaborationDoc } from "@/utils/projectAnaly
 import { Link } from "react-router-dom";
 
 const Export = () => {
-  const [projectData, setProjectData] = useState("");
-  const [shareUrl, setShareUrl] = useState("");
-  const [markdownDoc, setMarkdownDoc] = useState("");
-  const [uploadedData, setUploadedData] = useState<any>(null);
+  const [markdownContent, setMarkdownContent] = useState("");
+  const [uapData, setUapData] = useState<any>(null);
+  const [fileName, setFileName] = useState("");
   const { toast } = useToast();
 
 
-  const generateShareUrl = () => {
-    if (!projectData.trim()) {
-      toast({
-        title: "No data to share",
-        description: "Please paste your project JSON first",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      // Validate JSON
-      JSON.parse(projectData);
-      
-      // Encode the data in URL
-      const encoded = btoa(encodeURIComponent(projectData));
-      const url = `${window.location.origin}/import?data=${encoded}`;
-      setShareUrl(url);
-      
-      toast({
-        title: "Share URL generated!",
-        description: "Copy and share this URL with anyone",
-      });
-    } catch (e) {
-      toast({
-        title: "Invalid JSON",
-        description: "Please check your project data format",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const copyUrl = async () => {
-    if (!shareUrl) return;
-    await navigator.clipboard.writeText(shareUrl);
+  const copyUAP = async () => {
+    if (!uapData) return;
+    await navigator.clipboard.writeText(JSON.stringify(uapData, null, 2));
     toast({
-      title: "Copied!",
-      description: "Share URL copied to clipboard",
+      title: "Copied to clipboard!",
+      description: "Builder UAP copied",
     });
   };
 
-  const copyJson = async () => {
-    if (!projectData) return;
-    await navigator.clipboard.writeText(projectData);
-    toast({
-      title: "Copied!",
-      description: "JSON copied to clipboard",
-    });
-  };
-
-  const downloadJson = () => {
-    if (!projectData) return;
-    const blob = new Blob([projectData], { type: "application/json" });
+  const downloadUAP = () => {
+    if (!uapData) return;
+    const projectName = uapData.meta?.projectName || uapData.name || "project";
+    const blob = new Blob([JSON.stringify(uapData, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `project-export-${Date.now()}.json`;
+    a.download = `${projectName}_AI_Ready.uap`;
     a.click();
     URL.revokeObjectURL(url);
     
     toast({
-      title: "Downloaded!",
-      description: "JSON file saved to your device",
-    });
-  };
-
-  const downloadMarkdown = () => {
-    if (!markdownDoc) return;
-    const blob = new Blob([markdownDoc], { type: "text/markdown" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `ai-collaboration-doc-${Date.now()}.md`;
-    a.click();
-    URL.revokeObjectURL(url);
-    
-    toast({
-      title: "Downloaded!",
-      description: "Markdown documentation saved",
-    });
-  };
-
-  const copyMarkdown = async () => {
-    if (!markdownDoc) return;
-    await navigator.clipboard.writeText(markdownDoc);
-    toast({
-      title: "Copied!",
-      description: "AI collaboration doc copied to clipboard",
+      title: "Markdown converted back to Builder UAP!",
+      description: "UAP file saved to your device",
     });
   };
 
@@ -111,100 +45,83 @@ const Export = () => {
     if (!file) return;
 
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
-    if (!['uap', 'json', 'md'].includes(fileExtension || '')) {
+    if (fileExtension !== 'md') {
       toast({
         title: "Invalid file type",
-        description: "Please upload a .uap, .json, or .md file",
+        description: "Please upload a .md file (Markdown only)",
         variant: "destructive",
       });
       return;
     }
 
+    setFileName(file.name);
+
     try {
       const text = await file.text();
-      let parsedData: any = null;
-      
-      // Try JSON parsing first
-      try {
-        parsedData = JSON.parse(text);
-        setUploadedData(parsedData);
-        setProjectData(JSON.stringify(parsedData, null, 2));
-        
-        if (parsedData.summary_markdown || parsedData.summary) {
-          setMarkdownDoc(parsedData.summary_markdown || parsedData.summary);
-        }
-      } catch (jsonError) {
-        // If JSON fails, check if it's markdown with JSON block
-        if (text.trim().startsWith('#') || text.includes('```json')) {
-          // Extract JSON from markdown code block if present
-          const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
-          if (jsonMatch) {
-            try {
-              parsedData = JSON.parse(jsonMatch[1]);
-              setUploadedData(parsedData);
-              setProjectData(JSON.stringify(parsedData, null, 2));
-            } catch {
-              // Just use markdown as-is
-            }
-          }
-          
-          // Set markdown content
-          setMarkdownDoc(text);
-          
-          // Create minimal metadata if no JSON was extracted
-          if (!parsedData) {
-            setUploadedData({ 
-              meta: { 
-                projectName: file.name.replace(/\.(md|uap|json)$/, ''),
-                generated_at: new Date().toISOString()
-              }
-            });
-          }
-        } else {
-          throw new Error("Invalid file format");
-        }
-      }
+      setMarkdownContent(text);
+
+      // Extract project data from markdown (basic parser)
+      const extractedData = parseMarkdownToUAP(text, file.name);
+      setUapData(extractedData);
 
       toast({
-        title: "File uploaded!",
+        title: "Markdown converted back to Builder UAP!",
         description: `Successfully parsed ${file.name}`,
       });
     } catch (e) {
       toast({
-        title: "Invalid file format",
-        description: "Could not parse file. Please upload a valid .uap, .json, or .md file.",
+        title: "Parse error",
+        description: "Could not parse Markdown file",
         variant: "destructive",
       });
     }
   };
 
-  const downloadUAP = () => {
-    if (!uploadedData && !projectData) return;
-    
-    const data = uploadedData || JSON.parse(projectData);
-    const uapData = {
+  const parseMarkdownToUAP = (markdown: string, filename: string): any => {
+    // Extract project name from header
+    const nameMatch = markdown.match(/# AI Collaboration Document: (.+)/);
+    const projectName = nameMatch ? nameMatch[1].trim() : filename.replace('.md', '');
+
+    // Extract pages
+    const pagesSection = markdown.match(/## 📄 Pages & Routes\s+([\s\S]*?)---/);
+    const pages: any[] = [];
+    if (pagesSection) {
+      const pageMatches = pagesSection[1].matchAll(/### (.+)\s+- \*\*Path:\*\* `(.+?)`/g);
+      for (const match of pageMatches) {
+        pages.push({
+          name: match[1].trim(),
+          path: match[2].trim(),
+        });
+      }
+    }
+
+    // Extract components
+    const componentsSection = markdown.match(/## 🧩 Components\s+([\s\S]*?)---/);
+    const components: any[] = [];
+    if (componentsSection) {
+      const componentMatches = componentsSection[1].matchAll(/### (.+)\s+- \*\*Type:\*\* (.+)/g);
+      for (const match of componentMatches) {
+        components.push({
+          name: match[1].trim(),
+          type: match[2].trim(),
+        });
+      }
+    }
+
+    return {
       meta: {
         format: "UAP",
         version: "1.0.0",
         generated_at: new Date().toISOString(),
-        source: "GoNoCoMoCo / AEIOU",
-        ...data.meta
+        source: "GoNoCoMoCo / AEIOU - Markdown Import",
+        projectName,
       },
-      ...data
+      name: projectName,
+      projectName,
+      pages,
+      components,
+      description: `Imported from AI Collaboration Markdown: ${filename}`,
     };
-
-    const blob = new Blob([JSON.stringify(uapData, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `export-${Date.now()}.uap`;
-    a.click();
-    URL.revokeObjectURL(url);
-    
-    toast({
-      title: "Downloaded!",
-      description: "UAP file saved to your device",
-    });
   };
 
   return (
@@ -220,38 +137,38 @@ const Export = () => {
         </div>
 
         <div className="text-center space-y-2">
-          <div className="inline-block px-4 py-2 bg-[hsl(var(--gono-blue))]/20 border border-[hsl(var(--gono-blue))]/50 rounded-full mb-2">
-            <span className="text-[hsl(var(--gono-blue))] font-semibold text-sm">AEIOU Flow Stage: Extract + Optimize</span>
+          <div className="inline-block px-4 py-2 bg-[hsl(var(--gono-electric-blue))]/20 border border-[hsl(var(--gono-electric-blue))]/50 rounded-full mb-2">
+            <span className="text-[hsl(var(--gono-electric-blue))] font-semibold text-sm">AEIOU Flow Stage: Optimize + Upload</span>
           </div>
-          <h1 className="text-4xl font-bold font-['Outfit'] bg-gradient-to-r from-[hsl(var(--gono-blue))] to-[hsl(var(--gono-lime))] bg-clip-text text-transparent">
-            Export & Analyze (UAP / JSON / MD)
+          <h1 className="text-4xl font-bold font-['Outfit'] bg-gradient-to-r from-[hsl(var(--gono-electric-blue))] to-[hsl(var(--gono-lime))] bg-clip-text text-transparent">
+            Export Back to Builder
           </h1>
-          <p className="text-lg font-['Inter']">GoNoCoMoCo AEIOU Framework</p>
+          <p className="text-lg font-['Inter']">AI Collaboration Markdown → Builder UAP</p>
           <p className="text-muted-foreground">
-            Upload Extractor File (.uap, .json, or .md) — exported from your app
+            Upload AI-edited .md file to convert back to .uap format
           </p>
         </div>
 
         {/* File Upload Section */}
-        <Card className="p-6 border-[hsl(var(--gono-blue))]/30 bg-gradient-to-br from-[hsl(var(--gono-blue))]/5 to-transparent">
+        <Card className="p-6 border-[hsl(var(--gono-electric-blue))]/30 bg-gradient-to-br from-[hsl(var(--gono-electric-blue))]/5 to-transparent">
           <div className="space-y-4">
             <div className="flex items-start gap-3">
-              <Upload className="w-6 h-6 text-[hsl(var(--gono-blue))] mt-1" />
+              <Upload className="w-6 h-6 text-[hsl(var(--gono-electric-blue))] mt-1" />
               <div className="flex-1">
-                <h3 className="font-semibold text-lg mb-2">Upload Exported Project File</h3>
+                <h3 className="font-semibold text-lg mb-2">Upload AI-Edited Markdown File</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Upload a .uap, .json, or .md file exported from your app's Extractor Tool
+                  Upload the .md file edited by ChatGPT, Claude, or Lovable AI
                 </p>
                 <input
                   type="file"
-                  accept=".uap,.json,.md"
+                  accept=".md"
                   onChange={handleFileUpload}
                   className="block w-full text-sm text-muted-foreground
                     file:mr-4 file:py-2 file:px-4
                     file:rounded-md file:border-0
                     file:text-sm file:font-semibold
-                    file:bg-[hsl(var(--gono-blue))] file:text-white
-                    hover:file:bg-[hsl(var(--gono-blue))]/90
+                    file:bg-[hsl(var(--gono-electric-blue))] file:text-white
+                    hover:file:bg-[hsl(var(--gono-electric-blue))]/90
                     cursor-pointer"
                 />
               </div>
@@ -259,164 +176,86 @@ const Export = () => {
           </div>
         </Card>
 
-        {/* Uploaded Data Summary */}
-        {uploadedData && (
+        {/* UAP Output */}
+        {uapData && (
           <Card className="p-6 space-y-4 border-[hsl(var(--gono-lime))]/50 bg-[hsl(var(--gono-lime))]/5">
             <div className="flex items-center gap-2 text-[hsl(var(--gono-lime))]">
               <FileText className="w-5 h-5" />
-              <h3 className="font-semibold">Project Summary</h3>
+              <h3 className="font-semibold">Builder UAP (Ready for Import)</h3>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="font-semibold">Project Name:</span>
-                <p className="text-muted-foreground">{uploadedData.meta?.projectName || uploadedData.projectName || 'N/A'}</p>
+                <p className="text-muted-foreground">{uapData.meta?.projectName || uapData.name || 'N/A'}</p>
               </div>
               <div>
-                <span className="font-semibold">Domain / URL:</span>
-                <p className="text-muted-foreground">{uploadedData.meta?.domain || uploadedData.domain || 'N/A'}</p>
-              </div>
-              <div>
-                <span className="font-semibold">Description:</span>
-                <p className="text-muted-foreground">{uploadedData.meta?.description || uploadedData.description || 'N/A'}</p>
-              </div>
-              <div>
-                <span className="font-semibold">Pages & Components:</span>
+                <span className="font-semibold">Components:</span>
                 <p className="text-muted-foreground">
-                  {uploadedData.pages?.length || 0} pages, {uploadedData.components?.length || 0} components
-                </p>
-              </div>
-              <div>
-                <span className="font-semibold">Exported Date:</span>
-                <p className="text-muted-foreground">
-                  {uploadedData.meta?.generated_at || uploadedData.exported_at || uploadedData.meta?.exportedAt || 'N/A'}
+                  {uapData.pages?.length || 0} pages, {uapData.components?.length || 0} components
                 </p>
               </div>
             </div>
 
+            <div className="space-y-2">
+              <label className="text-sm font-medium">UAP JSON Preview</label>
+              <Textarea
+                value={JSON.stringify(uapData, null, 2)}
+                readOnly
+                className="min-h-[300px] font-mono text-xs bg-muted"
+              />
+            </div>
+
             <div className="flex gap-2 flex-wrap pt-4 border-t">
-              <Button onClick={copyMarkdown} className="gap-2">
+              <Button onClick={copyUAP} className="gap-2 bg-[hsl(var(--gono-lime))] hover:bg-[hsl(var(--gono-lime))]/90 text-black">
                 <Copy className="w-4 h-4" />
-                Copy Summary
+                Copy UAP
               </Button>
               <Button onClick={downloadUAP} variant="outline" className="gap-2">
                 <Download className="w-4 h-4" />
-                Download UAP
+                Download .uap
               </Button>
+              <Button
+                onClick={() => {
+                  setUapData(null);
+                  setMarkdownContent("");
+                  setFileName("");
+                }}
+                variant="ghost"
+              >
+                Upload Another Markdown
+              </Button>
+            </div>
+
+            <div className="text-sm text-muted-foreground space-y-1 pt-2 border-t">
+              <p className="font-semibold text-foreground">Next steps:</p>
+              <p>1. Download or copy the UAP file</p>
+              <p>2. Import it back into Lovable or your builder</p>
+              <p>3. The AI-enhanced changes are ready to use</p>
             </div>
           </Card>
         )}
 
         {/* No File Uploaded Message */}
-        {!uploadedData && !markdownDoc && (
+        {!uapData && (
           <Card className="p-8 border-dashed border-2 border-muted-foreground/30">
             <div className="text-center space-y-4">
               <Upload className="w-16 h-16 mx-auto text-muted-foreground/50" />
               <div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">Upload a UAP, JSON, or Markdown file from another app to begin.</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-2">Upload an AI-edited Markdown file to convert back to UAP.</h3>
                 <p className="text-sm text-muted-foreground">
-                  This page processes external app data only. To export NoCodeBridge itself, visit the Self-Extractor page.
+                  This completes the AEIOU loop: UAP → AI Markdown → Enhanced UAP
                 </p>
               </div>
-            </div>
-          </Card>
-        )}
-
-        {/* Markdown Documentation Output */}
-        {markdownDoc && (
-          <Card className="p-6 space-y-4 border-green-500/50 bg-green-500/5">
-            <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-              <FileText className="w-5 h-5" />
-              <h3 className="font-semibold">AI Collaboration Document (Markdown)</h3>
-            </div>
-            
-            <div className="space-y-2">
-              <Textarea
-                value={markdownDoc}
-                readOnly
-                className="min-h-[300px] font-mono text-xs bg-muted"
-              />
-              <div className="flex gap-2 flex-wrap">
-                <Button onClick={copyMarkdown} className="gap-2">
-                  <Copy className="w-4 h-4" />
-                  Copy Markdown
-                </Button>
-                <Button onClick={downloadMarkdown} variant="outline" className="gap-2">
-                  <Download className="w-4 h-4" />
-                  Download .md File
-                </Button>
-              </div>
-            </div>
-
-            <div className="text-sm text-muted-foreground space-y-1 pt-2 border-t">
-              <p className="font-semibold text-foreground">How to use:</p>
-              <p>1. Copy or download this markdown document</p>
-              <p>2. Paste it into ChatGPT, Claude, or Lovable</p>
-              <p>3. The AI will have complete context about your project</p>
-              <p>4. Ask questions, request features, or get code reviews</p>
-            </div>
-          </Card>
-        )}
-
-        {/* JSON Data Output */}
-        {projectData && (
-          <Card className="p-6 space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Project JSON (for URL sharing)</label>
-              <Textarea
-                value={projectData}
-                readOnly
-                className="min-h-[200px] font-mono text-sm bg-muted"
-              />
-            </div>
-
-            <div className="flex gap-2 flex-wrap">
-              <Button onClick={generateShareUrl} className="gap-2">
-                <LinkIcon className="w-4 h-4" />
-                Generate Share URL
-              </Button>
-              <Button onClick={copyJson} variant="outline" className="gap-2">
-                <Copy className="w-4 h-4" />
-                Copy JSON
-              </Button>
-              <Button onClick={downloadJson} variant="outline" className="gap-2">
-                <Download className="w-4 h-4" />
-                Download JSON
-              </Button>
-            </div>
-          </Card>
-        )}
-
-        {shareUrl && (
-          <Card className="p-6 space-y-4 border-primary/50">
-            <div className="flex items-center gap-2 text-primary">
-              <Share2 className="w-5 h-5" />
-              <h3 className="font-semibold">Your Shareable URL</h3>
-            </div>
-            
-            <div className="space-y-2">
-              <Textarea
-                value={shareUrl}
-                readOnly
-                className="font-mono text-sm bg-muted"
-                rows={3}
-              />
-              <Button onClick={copyUrl} className="w-full gap-2">
-                <Copy className="w-4 h-4" />
-                Copy Share URL
-              </Button>
-            </div>
-
-            <div className="text-sm text-muted-foreground space-y-1">
-              <p>✓ Anyone with this URL can import your project</p>
-              <p>✓ No file uploads needed - just share the link!</p>
-              <p>✓ Works with any no-code platform</p>
             </div>
           </Card>
         )}
         {/* Footer */}
         <div className="text-center py-8 border-t mt-8">
           <p className="text-muted-foreground font-['Inter'] text-sm">
+            Markdown → UAP — Ready to import back into your builder
+          </p>
+          <p className="text-xs text-muted-foreground/70 mt-2">
             🚀 Powered by GoNoCoMoCo + AEIOU Framework
           </p>
         </div>

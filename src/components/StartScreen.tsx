@@ -113,44 +113,55 @@ export const StartScreen = ({ onSelectFlow }: StartScreenProps) => {
             </CardContent>
           </Card>
 
-          {/* UAP Export/Import */}
+          {/* AEIOU Bridge */}
           <Card className="bg-card border-border hover:border-primary/50 transition-all duration-300 group cursor-pointer">
             <CardContent className="p-8 text-center space-y-6">
               <div className="w-24 h-24 bg-gradient-to-br from-[hsl(var(--gono-coral))] to-orange-800 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300">
                 <Zap className="w-12 h-12 text-white" />
               </div>
               <div className="space-y-3">
-                <h3 className="text-2xl font-bold text-foreground">🔄 UAP Export / Import</h3>
+                <h3 className="text-2xl font-bold text-foreground">🌉 AEIOU Bridge</h3>
                 <p className="text-muted-foreground text-lg">
-                  Upload extractor files or export NoCodeBridge data
+                  Complete conversion loop: UAP ↔ AI Markdown
                 </p>
               </div>
               <div className="space-y-4">
                 <div className="text-sm space-y-2">
                   <div className="flex items-center justify-center gap-2">
-                    <div className="w-2 h-2 bg-[hsl(var(--gono-coral))] rounded-full"></div>
-                    <span className="text-muted-foreground">Upload .uap, .json, or .md files</span>
+                    <div className="w-2 h-2 bg-[hsl(var(--gono-lime))] rounded-full"></div>
+                    <span className="text-muted-foreground">Import: UAP → Markdown</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-2 h-2 bg-[hsl(var(--gono-electric-blue))] rounded-full"></div>
+                    <span className="text-muted-foreground">Export: Markdown → UAP</span>
                   </div>
                   <div className="flex items-center justify-center gap-2">
                     <div className="w-2 h-2 bg-[hsl(var(--gono-coral))] rounded-full"></div>
-                    <span className="text-muted-foreground">View project summaries</span>
-                  </div>
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-2 h-2 bg-[hsl(var(--gono-coral))] rounded-full"></div>
-                    <span className="text-muted-foreground">Export as UAP format</span>
+                    <span className="text-muted-foreground">Round-trip AI collaboration</span>
                   </div>
                 </div>
-                <Button 
-                  asChild
-                  variant="outline"
-                  className="w-full border-[hsl(var(--gono-coral))] text-[hsl(var(--gono-coral))] hover:bg-[hsl(var(--gono-coral))] hover:text-white" 
-                  size="lg"
-                >
-                  <Link to="/export">
-                    Open UAP Tool
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Link>
-                </Button>
+                <div className="flex flex-col gap-2">
+                  <Button 
+                    asChild
+                    variant="outline"
+                    className="w-full border-[hsl(var(--gono-lime))] text-[hsl(var(--gono-lime))] hover:bg-[hsl(var(--gono-lime))] hover:text-black" 
+                  >
+                    <Link to="/import">
+                      📥 Import UAP
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
+                  </Button>
+                  <Button 
+                    asChild
+                    variant="outline"
+                    className="w-full border-[hsl(var(--gono-electric-blue))] text-[hsl(var(--gono-electric-blue))] hover:bg-[hsl(var(--gono-electric-blue))] hover:text-white" 
+                  >
+                    <Link to="/export">
+                      📤 Export to Builder
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
