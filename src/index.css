@@ -45,8 +45,14 @@ All colors MUST be HSL.
     --info: 199 89% 48%;
     --info-foreground: 0 0% 98%;
 
+    --gono-navy: 220 40% 5%;
+    --gono-blue: 217 91% 60%;
+    --gono-lime: 75 100% 65%;
+    --gono-coral: 5 100% 69%;
+
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(199 89% 48%));
     --gradient-secondary: linear-gradient(135deg, hsl(var(--secondary)), hsl(240 3.7% 25.9%));
+    --gradient-gono: linear-gradient(135deg, hsl(var(--gono-navy)), hsl(var(--gono-blue)));
     
     --shadow-glow: 0 0 40px hsl(var(--primary) / 0.15);
     --shadow-elegant: 0 10px 40px -10px hsl(0 0% 0% / 0.8);
