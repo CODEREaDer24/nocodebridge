@@ -1,286 +1,132 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Card } from "@/components/ui/card";
+import React from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useToast } from "@/hooks/use-toast";
-import { Upload, Copy, ArrowLeft, Download, ExternalLink } from "lucide-react";
-import { generateAICollabMarkdown } from "@/utils/aiCollabExport";
+import { Card, CardContent } from "@/components/ui/card";
+import { Download, Upload, ArrowRight, Home } from "lucide-react";
 
-const Bridge = () => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const [output, setOutput] = useState("");
-  const [isMarkdown, setIsMarkdown] = useState(false);
-  const [fileName, setFileName] = useState("");
-  const [projectName, setProjectName] = useState("");
-
-  const parseUAP = (fileText: string, filename: string) => {
-    try {
-      const json = JSON.parse(fileText);
-      const markdown = generateAICollabMarkdown(json);
-      const name = json.meta?.projectName || json.projectName || json.name || filename.replace(/\.(uap|json)$/, '');
-      return { markdown, name };
-    } catch {
-      throw new Error("Invalid or unreadable UAP file");
-    }
-  };
-
-  const convertMarkdownToUAP = (text: string, filename: string) => {
-    const nameMatch = text.match(/^# AI Collaboration Document: (.+)$/m) || text.match(/^# (.+)$/m);
-    const name = nameMatch ? nameMatch[1].trim() : filename.replace('.md', '');
-
-    // Extract pages
-    const pagesSection = text.match(/## 📄 Pages & Routes\s+([\s\S]*?)(?:---|##|$)/);
-    const pages: any[] = [];
-    if (pagesSection) {
-      const pageMatches = pagesSection[1].matchAll(/### (.+)\s+- \*\*Path:\*\* `(.+?)`/g);
-      for (const match of pageMatches) {
-        pages.push({
-          name: match[1].trim(),
-          path: match[2].trim(),
-        });
-      }
-    }
-
-    // Extract components
-    const componentsSection = text.match(/## 🧩 Components\s+([\s\S]*?)(?:---|##|$)/);
-    const components: any[] = [];
-    if (componentsSection) {
-      const componentMatches = componentsSection[1].matchAll(/### (.+)\s+- \*\*Type:\*\* (.+)/g);
-      for (const match of componentMatches) {
-        components.push({
-          name: match[1].trim(),
-          type: match[2].trim(),
-        });
-      }
-    }
-
-    return JSON.stringify(
-      {
-        meta: {
-          format: "UAP",
-          version: "1.0.0",
-          generated_at: new Date().toISOString(),
-          source: "GoNoCoMoCo / AEIOU Bridge",
-          projectName: name,
-        },
-        name,
-        projectName: name,
-        pages,
-        components,
-        description: `Imported from AI Collaboration Markdown: ${filename}`,
-      },
-      null,
-      2
-    );
-  };
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
-    const text = await file.text();
-
-    try {
-      if (fileExtension === '.uap' || fileExtension === '.json') {
-        const { markdown, name } = parseUAP(text, file.name);
-        setOutput(markdown);
-        setIsMarkdown(true);
-        setFileName(name);
-        setProjectName(name);
-        toast({
-          title: "UAP converted to Markdown!",
-          description: `Successfully converted ${file.name}`,
-        });
-      } else if (fileExtension === '.md') {
-        const json = convertMarkdownToUAP(text, file.name);
-        const parsed = JSON.parse(json);
-        setOutput(json);
-        setIsMarkdown(false);
-        setFileName(file.name.replace('.md', ''));
-        setProjectName(parsed.projectName);
-        toast({
-          title: "Markdown converted to UAP!",
-          description: `Successfully converted ${file.name}`,
-        });
-      } else {
-        throw new Error("Unsupported file type. Please upload .uap, .json, or .md files.");
-      }
-    } catch (err: any) {
-      toast({
-        title: "Conversion error",
-        description: err.message || "Could not parse file",
-        variant: "destructive",
-      });
-      setOutput("");
-    }
-  };
-
-  const handleCopy = async () => {
-    if (!output) return;
-    await navigator.clipboard.writeText(output);
-    toast({
-      title: "Copied to clipboard!",
-      description: isMarkdown ? "Markdown copied" : "UAP JSON copied",
-    });
-  };
-
-  const handleDownload = () => {
-    if (!output) return;
-    const blob = new Blob([output], {
-      type: isMarkdown ? "text/markdown" : "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = isMarkdown
-      ? `${projectName || fileName || "Export"}_AI_Collaboration_Summary.md`
-      : `${projectName || fileName || "AI_Ready"}_AI_Ready.uap`;
-    a.click();
-    URL.revokeObjectURL(url);
-
-    toast({
-      title: "Downloaded!",
-      description: `File saved to your device`,
-    });
-  };
-
-  const launchChatGPT = () => {
-    if (!output || !isMarkdown) return;
-    window.open('https://chat.openai.com/', '_blank');
-    toast({
-      title: "Opening ChatGPT...",
-      description: "Paste the markdown from your clipboard",
-    });
-  };
-
+export default function Bridge() {
   return (
-    <div className="min-h-screen bg-[hsl(var(--gono-navy))] flex items-center justify-center p-6">
-      <Card className="p-8 max-w-4xl w-full space-y-6 bg-background/95 border-[hsl(var(--gono-electric-blue))]/30">
-        {/* Header */}
-        <div className="space-y-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/")}
-            className="mb-4"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
+    <div className="min-h-screen bg-[#0a0e1a] text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-20 left-20 w-64 h-64 border border-blue-400 rounded-full animate-pulse"></div>
+        <div className="absolute bottom-20 right-20 w-80 h-80 border border-cyan-400 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+      </div>
 
-          <h1 className="text-4xl font-bold font-['Outfit'] bg-gradient-to-r from-[hsl(var(--gono-electric-blue))] to-[hsl(var(--gono-lime))] bg-clip-text text-transparent">
-            🧠 AEIOU Bridge
-          </h1>
-          <p className="text-lg text-muted-foreground font-['Inter']">
-            Smart UAP ↔ Markdown Converter
-          </p>
-          <p className="text-sm text-muted-foreground font-['Inter']">
-            Drop in a <span className="font-semibold text-[hsl(var(--gono-electric-blue))]">.uap</span> to get Markdown for ChatGPT, or drop in a <span className="font-semibold text-[hsl(var(--gono-lime))]">.md</span> to get a Builder-ready <span className="font-semibold text-[hsl(var(--gono-electric-blue))]">.uap</span>.
-          </p>
-          <div className="inline-block px-3 py-1 bg-[hsl(var(--gono-lime))]/20 border border-[hsl(var(--gono-lime))]/50 rounded-full">
-            <span className="text-[hsl(var(--gono-lime))] font-semibold text-xs">💯 100% Local — Zero Credits Used</span>
-          </div>
+      <div className="max-w-4xl mx-auto relative z-10 space-y-12">
+        {/* Navigation */}
+        <div className="text-center">
+          <Link to="/">
+            <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+              <Home className="mr-2 h-4 w-4" />
+              Back to Home
+            </Button>
+          </Link>
         </div>
 
-        {/* Upload Section */}
-        {!output && (
-          <div className="border-2 border-dashed border-[hsl(var(--gono-electric-blue))]/30 rounded-lg p-12 text-center space-y-4">
-            <Upload className="w-16 h-16 text-[hsl(var(--gono-electric-blue))] mx-auto" />
-            <div>
-              <label htmlFor="file-upload" className="cursor-pointer">
-                <div className="text-lg font-semibold text-[hsl(var(--gono-electric-blue))]">
-                  Click to upload file
-                </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Accepts .uap, .json, or .md files
+        {/* Header */}
+        <div className="text-center space-y-4">
+          <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+            🌉 Welcome to NoCodeBridge 2.0
+          </h1>
+          <p className="text-2xl text-gray-300">
+            The AEIOU Bridge
+          </p>
+          <p className="text-lg text-gray-400">
+            Connect No-Code apps and AI tools seamlessly
+          </p>
+        </div>
+
+        {/* Main Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Self-Exporter Card */}
+          <Card className="bg-[#111826]/80 backdrop-blur-sm border-blue-500/50 hover:border-blue-400 transition-all duration-300 group">
+            <CardContent className="p-8 text-center space-y-6">
+              <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300 shadow-[0_0_30px_rgba(59,130,246,0.5)]">
+                <Download className="w-10 h-10 text-white" />
+              </div>
+              <div className="space-y-3">
+                <h3 className="text-2xl font-bold text-blue-400">Self-Exporter</h3>
+                <p className="text-gray-400">
+                  Generate UAP v2.0 with JSON schema and Markdown docs
                 </p>
-              </label>
-              <Input
-                id="file-upload"
-                type="file"
-                accept=".uap,.json,.md"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Output Section */}
-        {output && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold font-['Outfit'] text-[hsl(var(--gono-lime))]">
-                {isMarkdown ? "AI Collaboration Markdown" : "Builder UAP (JSON)"}
-              </h2>
-            </div>
-
-            {/* Metadata Card */}
-            {projectName && (
-              <Card className="p-4 bg-muted/50 border-[hsl(var(--gono-lime))]/30">
-                <p className="text-sm text-muted-foreground">Project Name</p>
-                <p className="text-lg font-semibold">{projectName}</p>
-              </Card>
-            )}
-
-            {/* Preview */}
-            <Card className="p-6 space-y-4 border-[hsl(var(--gono-lime))]/50 bg-[hsl(var(--gono-lime))]/5">
-              <p className="text-sm text-muted-foreground mb-3 font-semibold">
-                {isMarkdown ? "Markdown Preview" : "UAP JSON Preview"}
-              </p>
-              <ScrollArea className="h-[400px] w-full rounded border bg-background p-4">
-                <pre className="text-xs font-mono whitespace-pre-wrap">
-                  {output}
-                </pre>
-              </ScrollArea>
-            </Card>
-
-            {/* Action Buttons */}
-            <div className="flex gap-3 flex-wrap">
-              <Button onClick={handleCopy} className="gap-2 bg-[hsl(var(--gono-lime))] hover:bg-[hsl(var(--gono-lime))]/90 text-black">
-                <Copy className="w-4 h-4" />
-                Copy Output
-              </Button>
-              <Button onClick={handleDownload} variant="outline" className="gap-2">
-                <Download className="w-4 h-4" />
-                Download {isMarkdown ? ".md" : ".uap"}
-              </Button>
-              {isMarkdown && (
-                <Button onClick={launchChatGPT} variant="outline" className="gap-2">
-                  <ExternalLink className="w-4 h-4" />
-                  Open in ChatGPT
-                </Button>
-              )}
-              <Button
-                onClick={() => {
-                  setOutput("");
-                  setFileName("");
-                  setProjectName("");
-                }}
-                variant="ghost"
+              </div>
+              <Button 
+                asChild
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white" 
+                size="lg"
               >
-                Convert Another File
+                <Link to="/self-export">
+                  Go to Self-Exporter
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Link>
               </Button>
+            </CardContent>
+          </Card>
+
+          {/* Importer Card */}
+          <Card className="bg-[#111826]/80 backdrop-blur-sm border-cyan-500/50 hover:border-cyan-400 transition-all duration-300 group">
+            <CardContent className="p-8 text-center space-y-6">
+              <div className="w-20 h-20 bg-gradient-to-br from-cyan-600 to-cyan-800 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300 shadow-[0_0_30px_rgba(34,211,238,0.5)]">
+                <Upload className="w-10 h-10 text-white" />
+              </div>
+              <div className="space-y-3">
+                <h3 className="text-2xl font-bold text-cyan-400">Importer</h3>
+                <p className="text-gray-400">
+                  Upload .uap or .uapimp files to view diffs and merge AI improvements
+                </p>
+              </div>
+              <Button 
+                asChild
+                className="w-full bg-cyan-600 hover:bg-cyan-700 text-white" 
+                size="lg"
+              >
+                <Link to="/import">
+                  Go to Importer
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* How It Works */}
+        <Card className="bg-gradient-to-r from-[#111826]/80 to-[#0f1729]/80 backdrop-blur-sm border-blue-500/30">
+          <CardContent className="p-8">
+            <h3 className="text-xl font-semibold text-center text-white mb-6">
+              🔄 How The Bridge Works
+            </h3>
+            <div className="space-y-3 text-sm text-gray-300">
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">1</div>
+                <p><b>Export:</b> Generate .uap file with your project structure</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 bg-cyan-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">2</div>
+                <p><b>Collaborate:</b> Send to GPT, Claude, Gemini, or any AI for improvements</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">3</div>
+                <p><b>Import:</b> Upload improved .uapimp file back</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 bg-green-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">4</div>
+                <p><b>Merge:</b> View diffs and merge changes back to Lovable</p>
+              </div>
             </div>
-          </div>
-        )}
+          </CardContent>
+        </Card>
 
         {/* Footer */}
-        <div className="text-center pt-6 border-t border-border/50">
-          <p className="text-sm text-muted-foreground font-['Inter']">
-            One-step tool for moving your app data between Lovable, ChatGPT, and back again.
+        <div className="text-center py-6 border-t border-white/10">
+          <p className="text-gray-400 text-sm">
+            🚀 NoCodeBridge 2.0 | Powered by AEIOU Framework
           </p>
-          <p className="text-xs text-muted-foreground/70 mt-2">
-            🚀 Powered by GoNoCoMoCo + AEIOU Framework
+          <p className="text-gray-500 text-xs mt-2">
+            "This is the world's first true AI-to-No-Code Bridge."
           </p>
         </div>
-      </Card>
+      </div>
     </div>
   );
-};
-
-export default Bridge;
+}
