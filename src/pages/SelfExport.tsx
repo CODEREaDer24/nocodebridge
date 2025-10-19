@@ -5,15 +5,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Copy, Download, ArrowLeft, FileText, Code2, FileJson } from "lucide-react";
 import { Link } from "react-router-dom";
-import { analyzeProject, generateAICollaborationDoc } from "@/utils/projectAnalyzer";
-
-const AI_READING_GUIDE = `🧠 AI READING GUIDE:
-- Parse the \`schema\` (JSON) as the app's structure
-- Parse the \`markdown\` as human-readable documentation
-- Preserve \`meta\` and \`diff\` keys
-- Never remove project context or nested structures
-- When improving, append changes under \`improvements\`
-- Output updated \`.uap\` as \`.uapimp\``;
+import { analyzeProject } from "@/utils/projectToAnalysis";
+import { AI_READING_GUIDE, generateAICollaborationDoc } from "@/utils/uapGenerator";
 
 const SelfExport = () => {
   const [uapData, setUapData] = useState("");

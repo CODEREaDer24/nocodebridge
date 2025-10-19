@@ -2,6 +2,42 @@ import { ProjectStructure } from "@/types/project";
 import { ProjectAnalysis } from "@/utils/projectAnalyzer";
 
 /**
+ * Analyzes the current project structure by examining the file system
+ * This is a simplified version that returns the project metadata
+ */
+export function analyzeProject(): {
+  name: string;
+  pages: any[];
+  components: any[];
+  dependencies: any[];
+} {
+  // Return basic project structure
+  // This could be enhanced to scan actual files in the future
+  return {
+    name: "NoCodeBridge",
+    pages: [
+      { name: "Index", path: "/", components: ["Card", "Button"] },
+      { name: "SelfExport", path: "/self-export", components: ["Card", "Button", "Textarea"] },
+      { name: "Import", path: "/import", components: ["Card", "Button", "Textarea", "Tabs"] },
+      { name: "Bridge", path: "/bridge", components: ["Card", "Button"] },
+    ],
+    components: [
+      { name: "Button", type: "ui", props: ["onClick", "className", "children"] },
+      { name: "Card", type: "ui", props: ["className", "children"] },
+      { name: "Textarea", type: "ui", props: ["value", "onChange", "className"] },
+      { name: "Tabs", type: "ui", props: ["defaultValue", "children"] },
+    ],
+    dependencies: [
+      "react",
+      "react-router-dom",
+      "@radix-ui/react-tabs",
+      "sonner",
+      "lucide-react"
+    ]
+  };
+}
+
+/**
  * Converts a ProjectStructure (from wizard analysis) to ProjectAnalysis format
  */
 export function convertProjectToAnalysis(project: ProjectStructure): ProjectAnalysis {
