@@ -6,8 +6,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Import from "./pages/Import";
+import Export from "./pages/Export";
+import Glossary from "./pages/Glossary";
 import Bridge from "./pages/Bridge";
-import SelfExport from "./pages/SelfExport";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,8 +22,9 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/import" element={<Import />} />
+          <Route path="/export" element={<Export />} />
+          <Route path="/glossary" element={<Glossary />} />
           <Route path="/bridge" element={<Bridge />} />
-          <Route path="/self-export" element={<SelfExport />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
