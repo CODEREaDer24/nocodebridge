@@ -10,6 +10,11 @@ import Bridge from "./pages/Bridge";
 import SelfExport from "./pages/SelfExport";
 import SelfExtractorAdmin from "./pages/SelfExtractorAdmin";
 import SelfExtractorTool from "./pages/SelfExtractorTool";
+import InstallExtractor from "./pages/InstallExtractor";
+import UploadAnalyze from "./pages/UploadAnalyze";
+import ImproveWithAI from "./pages/ImproveWithAI";
+import ReturnToBuilder from "./pages/ReturnToBuilder";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +32,11 @@ const App = () => (
           <Route path="/self-export" element={<SelfExport />} />
           <Route path="/self-extractor-admin" element={<SelfExtractorAdmin />} />
           <Route path="/self-extractor" element={<SelfExtractorTool />} />
+          <Route path="/install-extractor" element={<InstallExtractor />} />
+          <Route path="/upload-analyze" element={<UploadAnalyze />} />
+          <Route path="/improve-with-ai" element={<ImproveWithAI />} />
+          <Route path="/return-to-builder" element={<ReturnToBuilder />} />
+          <Route path="/admin" element={<Admin />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

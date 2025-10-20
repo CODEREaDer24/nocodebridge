@@ -2,184 +2,137 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Download, Upload, ArrowRight, Sparkles } from "lucide-react";
+import { Download, Upload, Sparkles, ArrowRight } from "lucide-react";
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-[#0a0e1a] text-white relative overflow-hidden">
-      {/* Animated Background */}
+      {/* Animated UFO Background */}
       <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-20 left-20 w-64 h-64 border border-blue-400 rounded-full animate-pulse"></div>
+        <div className="absolute top-20 left-20 w-64 h-64 border border-lime-400 rounded-full animate-pulse"></div>
         <div className="absolute bottom-20 right-20 w-80 h-80 border border-cyan-400 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 w-96 h-96 border border-violet-400 rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
       </div>
 
       <div className="container mx-auto px-4 py-16 space-y-12 relative z-10">
         {/* Header */}
         <div className="text-center space-y-6">
-          <div className="inline-block px-4 py-2 bg-blue-500/20 border border-blue-500/50 rounded-full mb-4">
-            <span className="text-blue-400 font-semibold text-sm">AEIOU Framework v2.0</span>
+          <div className="inline-block px-4 py-2 bg-lime-500/20 border border-lime-500/50 rounded-full mb-4">
+            <span className="text-lime-400 font-semibold text-sm">AEIOU Framework v3.0</span>
           </div>
-          <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+          <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-lime-400 via-cyan-400 to-violet-400 bg-clip-text text-transparent">
             NoCodeBridge 2.0
           </h1>
           <p className="text-3xl font-semibold text-white mb-2">
-            The AEIOU Bridge
+            Save Credits, Not Creativity
           </p>
           <p className="text-xl text-gray-400 mb-4">
-            AI Enabling Interoperability of Universes
+            Bridge your no-code apps between builders and AIs without wasting credits.
           </p>
-          <div className="flex items-center justify-center gap-2 text-lg text-gray-300">
-            <Sparkles className="w-5 h-5 text-cyan-400" />
-            <span>Make it clean, make it obvious, make it universal.</span>
-          </div>
         </div>
 
-        {/* Main Action Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {/* Self-Export Card */}
-          <Card className="bg-[#111826]/80 backdrop-blur-sm border-blue-500/50 hover:border-blue-400 transition-all duration-300 group cursor-pointer">
-            <CardContent className="p-8 text-center space-y-6">
-              <div className="w-24 h-24 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300 shadow-[0_0_30px_rgba(59,130,246,0.5)]">
-                <Download className="w-12 h-12 text-white" />
+        {/* 4-Step Workflow */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+          {/* Step 1 */}
+          <Card className="bg-[#111826]/80 backdrop-blur-sm border-lime-500/50 hover:border-lime-400 transition-all duration-300 group cursor-pointer rounded-2xl shadow-[0_0_20px_rgba(163,230,53,0.2)]">
+            <CardContent className="p-8 text-center space-y-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-lime-600 to-lime-800 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300 shadow-[0_0_30px_rgba(163,230,53,0.5)]">
+                <Download className="w-8 h-8 text-white" />
               </div>
-              <div className="space-y-3">
-                <h3 className="text-2xl font-bold text-white">Self-Exporter</h3>
-                <p className="text-gray-400 text-lg">
-                  Generate UAP v2.0 from your project
-                </p>
-              </div>
-              <div className="space-y-4">
-                <div className="text-sm space-y-2">
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span className="text-gray-400">Auto-detect & parse files</span>
-                  </div>
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span className="text-gray-400">Generate JSON + Markdown</span>
-                  </div>
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span className="text-gray-400">Ready for AI collaboration</span>
-                  </div>
-                </div>
-                <Button 
-                  asChild
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white" 
-                  size="lg"
-                >
-                  <Link to="/self-export">
-                    Start Export
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Link>
-                </Button>
-              </div>
+              <h3 className="text-xl font-bold text-white">Step 1 — Install Your Extractor Tool</h3>
+              <p className="text-gray-400 text-sm">
+                Add the self-extractor to your Lovable app
+              </p>
+              <Button 
+                asChild
+                className="w-full bg-lime-600 hover:bg-lime-700 text-white rounded-xl" 
+                size="lg"
+              >
+                <Link to="/install-extractor">
+                  Get Started
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Link>
+              </Button>
             </CardContent>
           </Card>
 
-          {/* Import Card */}
-          <Card className="bg-[#111826]/80 backdrop-blur-sm border-cyan-500/50 hover:border-cyan-400 transition-all duration-300 group cursor-pointer">
-            <CardContent className="p-8 text-center space-y-6">
-              <div className="w-24 h-24 bg-gradient-to-br from-cyan-600 to-cyan-800 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300 shadow-[0_0_30px_rgba(34,211,238,0.5)]">
-                <Upload className="w-12 h-12 text-white" />
+          {/* Step 2 */}
+          <Card className="bg-[#111826]/80 backdrop-blur-sm border-cyan-500/50 hover:border-cyan-400 transition-all duration-300 group cursor-pointer rounded-2xl shadow-[0_0_20px_rgba(34,211,238,0.2)]">
+            <CardContent className="p-8 text-center space-y-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-cyan-600 to-cyan-800 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300 shadow-[0_0_30px_rgba(34,211,238,0.5)]">
+                <Upload className="w-8 h-8 text-white" />
               </div>
-              <div className="space-y-3">
-                <h3 className="text-2xl font-bold text-white">Importer</h3>
-                <p className="text-gray-400 text-lg">
-                  Reunite AI improvements with No-Code
-                </p>
+              <h3 className="text-xl font-bold text-white">Step 2 — Upload & Analyze Your App (UAP)</h3>
+              <p className="text-gray-400 text-sm">
+                Upload your exported UAP for analysis
+              </p>
+              <Button 
+                asChild
+                className="w-full bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl" 
+                size="lg"
+              >
+                <Link to="/upload-analyze">
+                  Upload UAP
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Step 3 */}
+          <Card className="bg-[#111826]/80 backdrop-blur-sm border-violet-500/50 hover:border-violet-400 transition-all duration-300 group cursor-pointer rounded-2xl shadow-[0_0_20px_rgba(139,92,246,0.2)]">
+            <CardContent className="p-8 text-center space-y-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-violet-600 to-violet-800 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300 shadow-[0_0_30px_rgba(139,92,246,0.5)]">
+                <Sparkles className="w-8 h-8 text-white" />
               </div>
-              <div className="space-y-4">
-                <div className="text-sm space-y-2">
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-2 h-2 bg-cyan-500 rounded-full"></div>
-                    <span className="text-gray-400">Upload .uap or .uapimp</span>
-                  </div>
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-2 h-2 bg-cyan-500 rounded-full"></div>
-                    <span className="text-gray-400">View diffs & changes</span>
-                  </div>
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-2 h-2 bg-cyan-500 rounded-full"></div>
-                    <span className="text-gray-400">Merge improvements</span>
-                  </div>
-                </div>
-                <Button 
-                  asChild
-                  className="w-full bg-cyan-600 hover:bg-cyan-700 text-white" 
-                  size="lg"
-                >
-                  <Link to="/import">
-                    Start Import
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Link>
-                </Button>
+              <h3 className="text-xl font-bold text-white">Step 3 — Improve with AI</h3>
+              <p className="text-gray-400 text-sm">
+                Generate AI improvement prompts
+              </p>
+              <Button 
+                asChild
+                className="w-full bg-violet-600 hover:bg-violet-700 text-white rounded-xl" 
+                size="lg"
+              >
+                <Link to="/improve-with-ai">
+                  Create Prompts
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Step 4 */}
+          <Card className="bg-[#111826]/80 backdrop-blur-sm border-blue-500/50 hover:border-blue-400 transition-all duration-300 group cursor-pointer rounded-2xl shadow-[0_0_20px_rgba(59,130,246,0.2)]">
+            <CardContent className="p-8 text-center space-y-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300 shadow-[0_0_30px_rgba(59,130,246,0.5)]">
+                <ArrowRight className="w-8 h-8 text-white" />
               </div>
+              <h3 className="text-xl font-bold text-white">Step 4 — Return to Builder</h3>
+              <p className="text-gray-400 text-sm">
+                Apply improvements back to your app
+              </p>
+              <Button 
+                asChild
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl" 
+                size="lg"
+              >
+                <Link to="/return-to-builder">
+                  Merge Changes
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Link>
+              </Button>
             </CardContent>
           </Card>
         </div>
-
-        {/* Quick Links */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button 
-            asChild
-            variant="outline"
-            className="border-blue-400/50 text-blue-400 hover:bg-blue-400/10"
-            size="lg"
-          >
-            <Link to="/bridge">
-              🌉 Go to AEIOU Bridge Hub
-            </Link>
-          </Button>
-          <Button 
-            asChild
-            variant="outline"
-            className="border-purple-400/50 text-purple-400 hover:bg-purple-400/10"
-            size="lg"
-          >
-            <Link to="/self-extractor">
-              🛠️ Self-Extractor Tool
-            </Link>
-          </Button>
-        </div>
-
-        {/* Benefits Section */}
-        <Card className="bg-gradient-to-r from-[#111826]/80 to-[#0f1729]/80 backdrop-blur-sm border-blue-500/30 max-w-5xl mx-auto">
-          <CardContent className="p-8">
-            <div className="text-center mb-6">
-              <Sparkles className="w-8 h-8 text-cyan-400 mx-auto mb-3" />
-              <h3 className="text-xl font-semibold text-white">The First True AI-to-No-Code Bridge</h3>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-              <div className="space-y-2">
-                <div className="text-blue-400 font-semibold">100% Local</div>
-                <p className="text-sm text-gray-400">
-                  All conversions run in your browser. Zero API calls, zero credits.
-                </p>
-              </div>
-              <div className="space-y-2">
-                <div className="text-cyan-400 font-semibold">Universal Format</div>
-                <p className="text-sm text-gray-400">
-                  UAP v2.0 works with any AI and any no-code builder.
-                </p>
-              </div>
-              <div className="space-y-2">
-                <div className="text-purple-400 font-semibold">AI-Enhanced</div>
-                <p className="text-sm text-gray-400">
-                  Collaborate with GPT, Claude, Gemini, or any AI tool.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Footer */}
         <div className="text-center py-8 border-t border-white/10">
           <p className="text-gray-400 text-sm">
-            🚀 NoCodeBridge 2.0 | Powered by AEIOU Framework
+            🚀 Built by Go No Code Mode Co.
           </p>
           <p className="text-gray-500 text-xs mt-2">
-            "This is the world's first true AI-to-No-Code Bridge."
+            NoCodeBridge 2.0 | AEIOU Framework | Zero Credit Waste
           </p>
         </div>
       </div>
