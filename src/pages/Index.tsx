@@ -119,8 +119,8 @@ const Index = () => {
           </Card>
         </div>
 
-        {/* Quick Link to Bridge */}
-        <div className="text-center">
+        {/* Quick Links */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button 
             asChild
             variant="outline"
@@ -129,6 +129,16 @@ const Index = () => {
           >
             <Link to="/bridge">
               🌉 Go to AEIOU Bridge Hub
+            </Link>
+          </Button>
+          <Button 
+            asChild
+            variant="outline"
+            className="border-purple-400/50 text-purple-400 hover:bg-purple-400/10"
+            size="lg"
+          >
+            <Link to="/self-extractor">
+              🛠️ Self-Extractor Tool
             </Link>
           </Button>
         </div>

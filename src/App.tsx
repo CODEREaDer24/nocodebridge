@@ -8,6 +8,8 @@ import Index from "./pages/Index";
 import Import from "./pages/Import";
 import Bridge from "./pages/Bridge";
 import SelfExport from "./pages/SelfExport";
+import SelfExtractorAdmin from "./pages/SelfExtractorAdmin";
+import SelfExtractorTool from "./pages/SelfExtractorTool";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +25,8 @@ const App = () => (
           <Route path="/import" element={<Import />} />
           <Route path="/bridge" element={<Bridge />} />
           <Route path="/self-export" element={<SelfExport />} />
+          <Route path="/self-extractor-admin" element={<SelfExtractorAdmin />} />
+          <Route path="/self-extractor" element={<SelfExtractorTool />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
