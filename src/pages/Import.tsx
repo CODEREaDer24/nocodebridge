@@ -1,69 +1,102 @@
-import React, { useState } from "react";
-import { toast } from "sonner";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { Copy, Download, ArrowLeft } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Download, Copy, Upload, ArrowLeft, FileCode, FileText, GitMerge } from "lucide-react";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
+import "@/utils/rebuilder"; // Load rebuilder hook
 
-// 🔄 Universal Parser
-function parseAnything(fileText: string, fileName = "Unknown") {
-  let detected = "Plain Text";
-  let parsedData: any = null;
-  
-  try {
-    const json = JSON.parse(fileText);
-    detected = json.meta?.format || "JSON";
-    parsedData = json;
+// Universal parser - auto-detects and normalizes any format
+function parseAnything(text: string, filename: string) {
+  const timestamp = new Date().toISOString();
+  let parsed: any = {};
+  let sourceType = "unknown";
 
-    const projectName =
-      json.projectName ||
-      json.name ||
-      json.meta?.projectName ||
-      "Unnamed Project";
-
-    const description =
-      json.description ||
-      json.meta?.description ||
-      "No description provided.";
-
-    const pagesCount = json.pages?.length || json.schema?.pages?.length || 0;
-    const componentsCount = json.components?.length || json.schema?.components?.length || 0;
-
-    const md = `# ${projectName}\n\n${description}\n\nPages: ${pagesCount}\nComponents: ${componentsCount}\n\n---\nGenerated: ${new Date().toLocaleString()}`;
-
-    return { 
-      markdown: json.markdown || md, 
-      name: projectName, 
-      detected,
-      schema: json.schema || json,
-      improvements: json.improvements || [],
-      diff: json.diff || {}
-    };
-  } catch {
-    const title =
-      fileText.match(/^# (.+)$/m)?.[1]?.trim() ||
-      fileName.replace(/\.[^/.]+$/, "") ||
-      "ImportedText";
-    return { 
-      markdown: fileText.slice(0, 4000), 
-      name: title, 
-      detected,
-      schema: {},
-      improvements: [],
-      diff: {}
-    };
+  // Detect and parse based on content
+  if (text.trim().startsWith("{") || text.trim().startsWith("[")) {
+    // JSON/UAP format
+    try {
+      parsed = JSON.parse(text);
+      sourceType = filename.endsWith(".uap") ? "uap" : "json";
+    } catch (e) {
+      console.error("JSON parse failed:", e);
+      parsed = { raw: text };
+      sourceType = "invalid_json";
+    }
+  } else if (text.includes("```json")) {
+    // Markdown with fenced JSON
+    const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/);
+    if (jsonMatch) {
+      try {
+        parsed = JSON.parse(jsonMatch[1]);
+        sourceType = "markdown_json";
+      } catch (e) {
+        parsed = { markdown_blocks: [jsonMatch[1]] };
+        sourceType = "markdown_invalid";
+      }
+    }
+  } else if (filename.endsWith(".md") || text.includes("#")) {
+    // Plain markdown
+    parsed = { markdown_blocks: [text] };
+    sourceType = "markdown";
+  } else if (text.startsWith("http://") || text.startsWith("https://")) {
+    // URL - would need fetch in real impl
+    parsed = { url: text };
+    sourceType = "url";
+  } else {
+    // Raw text
+    parsed = { raw: text };
+    sourceType = "text";
   }
+
+  // Normalize into UAP v3.0 format
+  const normalized = {
+    meta: {
+      source_type: sourceType,
+      timestamp,
+      original_filename: filename,
+      format: "UAP v3.0 (normalized)"
+    },
+    project: {
+      name: parsed.project?.name || parsed.meta?.source || filename.replace(/\.(uap|json|md|uapimp)$/, ""),
+      pages: parsed.project?.pages || parsed.pages || [],
+      components: parsed.project?.components || parsed.components || [],
+      logic: parsed.project?.logic || parsed.logic || [],
+      data_models: parsed.project?.data_models || parsed.data_models || parsed.studentProfiles || [],
+      ai_prompts: parsed.project?.ai_prompts || parsed.ai_prompts || [],
+      variables: parsed.project?.variables || parsed.variables || {},
+      styles: parsed.project?.styles || parsed.styles || {},
+      connections: parsed.project?.connections || parsed.connections || {},
+      datasets: parsed.datasets || parsed,
+      markdown_blocks: parsed.markdown_blocks || (parsed.markdown ? [parsed.markdown] : [])
+    },
+    improvements: parsed.improvements || [],
+    diff: parsed.diff || {}
+  };
+
+  const markdown = `# NoCodeBridge Import\n\n**Source:** ${filename}\n**Type:** ${sourceType}\n**Imported:** ${timestamp}\n\n## Project Summary\n\n- **Name:** ${normalized.project.name}\n- **Pages:** ${normalized.project.pages.length}\n- **Components:** ${normalized.project.components.length}\n- **Data Models:** ${normalized.project.data_models.length}\n\n## Full Schema\n\n\`\`\`json\n${JSON.stringify(normalized, null, 2)}\n\`\`\``;
+
+  return {
+    normalized,
+    markdown,
+    sourceType,
+    schema: JSON.stringify(normalized.project, null, 2),
+    improvements: normalized.improvements,
+    diff: normalized.diff
+  };
 }
 
 export default function Import() {
   const [output, setOutput] = useState("");
-  const [detected, setDetected] = useState("None");
+  const [detected, setDetected] = useState("");
   const [fileName, setFileName] = useState("");
   const [schema, setSchema] = useState("");
   const [improvements, setImprovements] = useState<any[]>([]);
-  const [diff, setDiff] = useState<any>({});
+  const [diff, setDiff] = useState({});
+  const [normalized, setNormalized] = useState<any>(null);
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -71,17 +104,47 @@ export default function Import() {
     const text = await file.text();
 
     try {
-      const { markdown, name, detected, schema: parsedSchema, improvements: parsedImprovements, diff: parsedDiff } = parseAnything(text, file.name);
-      setOutput(markdown);
-      setDetected(detected);
-      setFileName(name);
-      setSchema(JSON.stringify(parsedSchema, null, 2));
-      setImprovements(parsedImprovements);
-      setDiff(parsedDiff);
-      toast.success(`✅ Imported ${detected} file`);
+      const result = parseAnything(text, file.name);
+      setOutput(result.markdown);
+      setDetected(result.sourceType);
+      setFileName(result.normalized.project.name);
+      setSchema(result.schema);
+      setImprovements(result.improvements);
+      setDiff(result.diff);
+      setNormalized(result.normalized);
+      
+      // Store in localStorage as 'uap_import'
+      localStorage.setItem('uap_import', JSON.stringify(result.normalized));
+      
+      toast.success(`✅ Imported ${result.sourceType} → UAP v3.0`);
+      
+      // Auto-rebuild if function exists
+      if ((window as any).NoCodeBridge?.rebuild) {
+        const rebuildResult = (window as any).NoCodeBridge.rebuild(result.normalized);
+        console.log("🧠 Auto-rebuild:", rebuildResult);
+      }
     } catch (err) {
+      console.error("Import error:", err);
       toast.error("❌ Could not analyze file");
       setOutput("");
+    }
+  }
+
+  async function handlePaste() {
+    try {
+      const text = await navigator.clipboard.readText();
+      const result = parseAnything(text, "clipboard.txt");
+      setOutput(result.markdown);
+      setDetected(result.sourceType);
+      setFileName(result.normalized.project.name);
+      setSchema(result.schema);
+      setImprovements(result.improvements);
+      setDiff(result.diff);
+      setNormalized(result.normalized);
+      localStorage.setItem('uap_import', JSON.stringify(result.normalized));
+      toast.success(`✅ Pasted ${result.sourceType} → UAP v3.0`);
+    } catch (err) {
+      toast.error("❌ Could not read clipboard");
     }
   }
 
@@ -126,26 +189,42 @@ export default function Import() {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-cyan-400 mb-2">📥 NoCodeBridge Importer</h1>
+          <h1 className="text-4xl font-bold text-cyan-400 mb-2">📥 AEIOU Universal Importer</h1>
           <p className="text-xl text-blue-400 mb-2">
-            Reunite AI with No-Code
+            Auto-detect • Normalize • Rebuild
           </p>
           <p className="text-gray-400">
-            Upload <b>.uap</b> or <b>.uapimp</b> to view, merge, and download improvements
+            Accepts <b>.uap</b>, <b>.json</b>, <b>.md</b>, paste, or URL
           </p>
         </div>
 
-        <input
-          type="file"
-          accept=".uap,.uapimp,.json,.md,.txt"
-          onChange={handleUpload}
-          className="cursor-pointer bg-cyan-900/40 px-4 py-2 rounded-lg hover:bg-cyan-900/60 transition mb-6 block mx-auto"
-        />
+        <div className="space-y-4">
+          <div className="flex flex-col items-center justify-center p-12 border-2 border-dashed border-gray-700 rounded-lg bg-gray-900/30">
+            <Upload className="w-12 h-12 text-cyan-400 mb-4" />
+            <label htmlFor="file-upload" className="cursor-pointer">
+              <Button variant="outline" className="border-cyan-500 text-cyan-400 hover:bg-cyan-500/20" asChild>
+                <span>Upload .uap, .json, .md file</span>
+              </Button>
+            </label>
+            <Input
+              id="file-upload"
+              type="file"
+              accept=".uap,.json,.md,.uapimp,.txt"
+              onChange={handleUpload}
+              className="hidden"
+            />
+          </div>
+          <div className="text-center">
+            <Button onClick={handlePaste} variant="outline" className="border-purple-500 text-purple-400 hover:bg-purple-500/20">
+              📋 Paste from Clipboard
+            </Button>
+          </div>
+        </div>
 
         {output ? (
           <>
-            <div className="text-sm mb-4 text-center text-gray-400">
-              <b>Detected Format:</b> {detected}
+            <div className="text-sm mb-4 text-center text-gray-400 mt-6">
+              <b>Detected Format:</b> {detected} → <span className="text-green-400">UAP v3.0 (normalized)</span>
             </div>
 
             <Tabs defaultValue="summary" className="w-full">
@@ -166,9 +245,6 @@ export default function Import() {
                 <Card className="bg-[#111826]/80 backdrop-blur-sm border-cyan-500/50">
                   <CardHeader>
                     <CardTitle className="text-cyan-400">Markdown Summary</CardTitle>
-                    <CardDescription className="text-gray-400">
-                      Human-readable documentation layer
-                    </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <Textarea
@@ -201,10 +277,7 @@ export default function Import() {
               <TabsContent value="schema">
                 <Card className="bg-[#111826]/80 backdrop-blur-sm border-blue-500/50">
                   <CardHeader>
-                    <CardTitle className="text-blue-400">JSON Schema</CardTitle>
-                    <CardDescription className="text-gray-400">
-                      Complete app structure and data
-                    </CardDescription>
+                    <CardTitle className="text-blue-400">JSON Schema (UAP v3.0)</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <Textarea
@@ -238,9 +311,6 @@ export default function Import() {
                 <Card className="bg-[#111826]/80 backdrop-blur-sm border-purple-500/50">
                   <CardHeader>
                     <CardTitle className="text-purple-400">Changes & Improvements</CardTitle>
-                    <CardDescription className="text-gray-400">
-                      Visual differences and AI suggestions
-                    </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {improvements.length > 0 ? (
@@ -284,36 +354,34 @@ export default function Import() {
               </Button>
               <Button
                 onClick={() => {
-                  const fullUAP = {
+                  const fullUAP = normalized || {
                     meta: {
-                      format: "UAP",
-                      version: "2.0",
+                      format: "UAP v3.0",
                       timestamp: new Date().toISOString()
                     },
-                    schema: JSON.parse(schema || "{}"),
-                    markdown: output,
+                    project: JSON.parse(schema || "{}"),
                     improvements,
                     diff
                   };
-                  handleDownload(JSON.stringify(fullUAP, null, 2), `${fileName}_updated.uap`, "application/json");
+                  handleDownload(JSON.stringify(fullUAP, null, 2), `${fileName}_updated_v3.uap`, "application/json");
                 }}
                 variant="outline"
                 className="border-cyan-500 text-cyan-400 hover:bg-cyan-500/20 px-6"
               >
-                Download Updated UAP
+                Download Updated UAP v3.0
               </Button>
             </div>
           </>
         ) : (
           <p className="text-gray-500 text-sm mt-10 text-center">
-            ⚙️ Ready to import UAP or UAPIMP files. No credits used.
+            ⚙️ Ready to import. Accepts any format. Auto-normalizes to UAP v3.0. Zero credits.
           </p>
         )}
 
         {/* Footer */}
         <div className="text-center py-8 border-t border-white/10 mt-8">
           <p className="text-gray-400 text-sm">
-            🚀 NoCodeBridge 2.0 | AEIOU Framework
+            🧩 NoCodeBridge AEIOU v3.0 | Teleportation Loop Ready
           </p>
         </div>
       </div>
