@@ -15,6 +15,9 @@ import UploadAnalyze from "./pages/UploadAnalyze";
 import ImproveWithAI from "./pages/ImproveWithAI";
 import ReturnToBuilder from "./pages/ReturnToBuilder";
 import Admin from "./pages/Admin";
+import Step2Import from "./pages/Step2Import";
+import Step3Iterate from "./pages/Step3Iterate";
+import Step4Reimport from "./pages/Step4Reimport";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +40,9 @@ const App = () => (
           <Route path="/improve-with-ai" element={<ImproveWithAI />} />
           <Route path="/return-to-builder" element={<ReturnToBuilder />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/step2-import" element={<Step2Import />} />
+          <Route path="/step3-iterate" element={<Step3Iterate />} />
+          <Route path="/step4-reimport" element={<Step4Reimport />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

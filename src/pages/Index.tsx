@@ -18,7 +18,7 @@ const Index = () => {
         {/* Header */}
         <div className="text-center space-y-6">
           <div className="inline-block px-4 py-2 bg-lime-500/20 border border-lime-500/50 rounded-full mb-4">
-            <span className="text-lime-400 font-semibold text-sm">AEIOU Framework v3.0</span>
+            <span className="text-lime-400 font-semibold text-sm">AEIOU Framework v3.5</span>
           </div>
           <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-lime-400 via-cyan-400 to-violet-400 bg-clip-text text-transparent">
             NoCodeBridge 2.0
@@ -27,7 +27,7 @@ const Index = () => {
             Save Credits, Not Creativity
           </p>
           <p className="text-xl text-gray-400 mb-4">
-            Bridge your no-code apps between builders and AIs without wasting credits.
+            Bridge your no-code apps with 100% lossless capture. Zero credit waste.
           </p>
         </div>
 
@@ -62,16 +62,16 @@ const Index = () => {
               <div className="w-16 h-16 bg-gradient-to-br from-cyan-600 to-cyan-800 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300 shadow-[0_0_30px_rgba(34,211,238,0.5)]">
                 <Upload className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-white">Step 2 — Upload & Analyze Your App (UAP)</h3>
+              <h3 className="text-xl font-bold text-white">Step 2 — Import & Analyze</h3>
               <p className="text-gray-400 text-sm">
-                Upload your exported UAP for analysis
+                Upload your UAP files for analysis
               </p>
               <Button 
                 asChild
                 className="w-full bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl" 
                 size="lg"
               >
-                <Link to="/upload-analyze">
+                <Link to="/step2-import">
                   Upload UAP
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
@@ -85,17 +85,17 @@ const Index = () => {
               <div className="w-16 h-16 bg-gradient-to-br from-violet-600 to-violet-800 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300 shadow-[0_0_30px_rgba(139,92,246,0.5)]">
                 <Sparkles className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-white">Step 3 — Improve with AI</h3>
+              <h3 className="text-xl font-bold text-white">Step 3 — Iterate & Review</h3>
               <p className="text-gray-400 text-sm">
-                Generate AI improvement prompts
+                AI or manual improvements (optional)
               </p>
               <Button 
                 asChild
                 className="w-full bg-violet-600 hover:bg-violet-700 text-white rounded-xl" 
                 size="lg"
               >
-                <Link to="/improve-with-ai">
-                  Create Prompts
+                <Link to="/step3-iterate">
+                  Review Changes
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
               </Button>
@@ -108,17 +108,17 @@ const Index = () => {
               <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300 shadow-[0_0_30px_rgba(59,130,246,0.5)]">
                 <ArrowRight className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-white">Step 4 — Return to Builder</h3>
+              <h3 className="text-xl font-bold text-white">Step 4 — Re-Import</h3>
               <p className="text-gray-400 text-sm">
-                Apply improvements back to your app
+                Apply updates to your builder
               </p>
               <Button 
                 asChild
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl" 
                 size="lg"
               >
-                <Link to="/return-to-builder">
-                  Merge Changes
+                <Link to="/step4-reimport">
+                  Re-Import Now
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
               </Button>
@@ -129,10 +129,10 @@ const Index = () => {
         {/* Footer */}
         <div className="text-center py-8 border-t border-white/10">
           <p className="text-gray-400 text-sm">
-            🚀 Built by Go No Code Mode Co.
+            NoCodeBridge 2.0 · AEIOU v3.5 · Save Credits. Bridge Better.
           </p>
           <p className="text-gray-500 text-xs mt-2">
-            NoCodeBridge 2.0 | AEIOU Framework | Zero Credit Waste
+            Built by Go No Code Mode Co.
           </p>
         </div>
       </div>
