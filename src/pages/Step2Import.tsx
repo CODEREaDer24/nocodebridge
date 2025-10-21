@@ -17,35 +17,30 @@ Return:
 Keep your response focused and actionable. Format as Markdown.`;
 
 const Step2Import = () => {
-  const [file, setFile] = useState<File | null>(null);
-  const [content, setContent] = useState<string>("");
-  const [fileType, setFileType] = useState<string>("");
+  const [files, setFiles] = useState<File[]>([]);
+  const [fileContents, setFileContents] = useState<Map<string, string>>(new Map());
   const [copied, setCopied] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>("");
   const { toast } = useToast();
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const uploadedFile = e.target.files?.[0];
-    if (!uploadedFile) return;
+    const uploadedFiles = Array.from(e.target.files || []).slice(0, 3);
+    if (uploadedFiles.length === 0) return;
 
-    setFile(uploadedFile);
-    const text = await uploadedFile.text();
-    setContent(text);
-
-    // Detect file type
-    const extension = uploadedFile.name.split('.').pop()?.toLowerCase();
-    if (extension === 'uap' || extension === 'uap-imp') {
-      setFileType('✅ AEIOU UAP Recognized');
-    } else if (extension === 'json') {
-      setFileType('✅ JSON Schema Recognized');
-    } else if (extension === 'md') {
-      setFileType('✅ Markdown Report Recognized');
-    } else {
-      setFileType('⚠️ Unknown format (viewable)');
+    setFiles(uploadedFiles);
+    const contentsMap = new Map<string, string>();
+    
+    for (const file of uploadedFiles) {
+      const text = await file.text();
+      contentsMap.set(file.name, text);
     }
+    
+    setFileContents(contentsMap);
+    setActiveTab(uploadedFiles[0].name);
 
     toast({
-      title: "File uploaded!",
-      description: `${uploadedFile.name} loaded successfully`,
+      title: "Files uploaded!",
+      description: `${uploadedFiles.length} file(s) loaded successfully`,
     });
   };
 
@@ -67,8 +62,50 @@ const Step2Import = () => {
     }
   };
 
-  const previewLines = content.split('\n').slice(0, 40).join('\n');
-  const hasMore = content.split('\n').length > 40;
+  const handleCopyFile = async (fileName: string) => {
+    const content = fileContents.get(fileName);
+    if (!content) return;
+
+    try {
+      await navigator.clipboard.writeText(content);
+      toast({
+        title: "Copied! ✅",
+        description: `${fileName} copied to clipboard`,
+      });
+    } catch (error) {
+      toast({
+        title: "Copy failed ⚠️",
+        description: "Please select and copy manually",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDownloadFile = (fileName: string) => {
+    const content = fileContents.get(fileName);
+    if (!content) return;
+
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Downloaded! ✅",
+      description: `${fileName} downloaded successfully`,
+    });
+  };
+
+  const getFileType = (fileName: string) => {
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    if (extension === 'uap' || extension === 'uap-imp') return '✅ AEIOU UAP';
+    if (extension === 'json') return '✅ JSON Schema';
+    if (extension === 'md') return '✅ Markdown Report';
+    return '⚠️ Unknown format';
+  };
 
   return (
     <div className="min-h-screen bg-[#0a0e1a] text-white relative overflow-hidden">
@@ -99,7 +136,7 @@ const Step2Import = () => {
               <Upload className="w-16 h-16 text-cyan-400" />
               <h3 className="text-xl font-bold text-white">Upload Your Export</h3>
               <p className="text-gray-400 text-center">
-                Accept .uap, .uap-imp, .json, or .md files from your self-extractor
+                Accept up to 3 files: .uap, .uap-imp, .json, or .md
               </p>
               <input
                 type="file"
@@ -107,43 +144,94 @@ const Step2Import = () => {
                 onChange={handleFileUpload}
                 className="hidden"
                 id="file-upload"
+                multiple
               />
               <label htmlFor="file-upload">
                 <Button asChild className="bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl cursor-pointer">
-                  <span>Choose File</span>
+                  <span>Choose Files</span>
                 </Button>
               </label>
-              {file && (
+              {files.length > 0 && (
                 <div className="text-center space-y-2">
                   <p className="text-sm text-lime-400">
-                    Loaded: {file.name}
+                    Loaded: {files.length} file(s)
                   </p>
-                  <p className="text-xs text-gray-400">
-                    {fileType}
-                  </p>
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {files.map((file) => (
+                      <span key={file.name} className="text-xs text-gray-400 bg-black/30 px-2 py-1 rounded">
+                        {file.name} ({getFileType(file.name)})
+                      </span>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
           </CardContent>
         </Card>
 
-        {/* Preview Card */}
-        {content && (
+        {/* File Viewer with Tabs */}
+        {files.length > 0 && (
           <Card className="bg-[#111826]/80 backdrop-blur-sm border-violet-500/50 rounded-2xl">
             <CardHeader>
-              <CardTitle className="text-white">File Preview (40 lines max)</CardTitle>
+              <CardTitle className="text-white">Full File Viewer</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <pre className="bg-black/50 p-6 rounded-xl overflow-auto max-h-[500px] text-sm text-gray-300 border border-white/10">
-                {previewLines}
-                {hasMore && '\n\n... (more content available)'}
-              </pre>
+              {/* File Tabs */}
+              <div className="flex flex-wrap gap-2 border-b border-white/10 pb-3">
+                {files.map((file) => (
+                  <Button
+                    key={file.name}
+                    onClick={() => setActiveTab(file.name)}
+                    variant={activeTab === file.name ? "default" : "outline"}
+                    className={activeTab === file.name 
+                      ? "bg-violet-600 hover:bg-violet-700 text-white rounded-lg" 
+                      : "border-violet-400/50 text-violet-400 hover:bg-violet-400/10 rounded-lg"}
+                    size="sm"
+                  >
+                    {file.name}
+                  </Button>
+                ))}
+              </div>
+
+              {/* Active File Content */}
+              {activeTab && fileContents.has(activeTab) && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-400">
+                      <span className="text-violet-400 font-semibold">{getFileType(activeTab)}</span> • {activeTab}
+                      <span className="ml-2">({fileContents.get(activeTab)?.split('\n').length} lines)</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => handleCopyFile(activeTab)}
+                        className="bg-violet-600 hover:bg-violet-700 text-white rounded-lg"
+                        size="sm"
+                      >
+                        <Copy className="w-4 h-4 mr-2" />
+                        Copy
+                      </Button>
+                      <Button
+                        onClick={() => handleDownloadFile(activeTab)}
+                        variant="outline"
+                        className="border-violet-400/50 text-violet-400 hover:bg-violet-400/10 rounded-lg"
+                        size="sm"
+                      >
+                        <Check className="w-4 h-4 mr-2" />
+                        Download
+                      </Button>
+                    </div>
+                  </div>
+                  <pre className="bg-black/50 p-6 rounded-xl overflow-auto max-h-[600px] text-sm text-gray-300 border border-white/10 whitespace-pre-wrap break-words">
+                    {fileContents.get(activeTab)}
+                  </pre>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
 
         {/* Actions */}
-        {file && (
+        {files.length > 0 && (
           <div className="grid md:grid-cols-2 gap-4">
             <Card className="bg-gradient-to-br from-violet-900/20 to-blue-900/20 backdrop-blur-sm border-violet-500/50 rounded-2xl">
               <CardContent className="p-6 space-y-4">

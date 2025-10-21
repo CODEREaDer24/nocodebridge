@@ -3,10 +3,8 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, ArrowRight, Copy, Check, AlertTriangle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Copy, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 
 const REIMPORT_PROMPT_TEMPLATE = `Rebuild this Lovable app from the following AEIOU submission (UAP-Imp or patch plan).
 
@@ -23,11 +21,53 @@ Instructions:
 [PASTE YOUR UAP-IMP OR AI FEEDBACK HERE]
 ──────────────────────────────`;
 
+const PROMPT_OPTIONS = {
+  general: `Analyze this UAP and provide general improvement suggestions.
+
+Focus on:
+- Code quality and best practices
+- Performance optimizations
+- UI/UX enhancements
+- Security considerations
+
+Return a structured list of Issues, Suggestions, and an AEIOU Patch Plan.`,
+  
+  bugfix: `Review this UAP and identify any bugs or issues.
+
+Look for:
+- Logic errors
+- Broken workflows
+- Missing dependencies
+- Inconsistent state management
+
+Return a detailed bug report with fixes in AEIOU Patch Plan format.`,
+  
+  feature: `Analyze this UAP and suggest new features or enhancements.
+
+Consider:
+- User experience improvements
+- New functionality opportunities
+- Integration possibilities
+- Scalability features
+
+Return actionable feature suggestions with implementation guidance.`,
+  
+  custom: `You are the AEIOU Assistant. Analyze the attached UAP.
+
+Return:
+1. Issues List
+2. Suggestions List
+3. AEIOU Patch Plan
+
+Keep your response focused and actionable.`
+};
+
 const Step3Iterate = () => {
-  const [autoImprove, setAutoImprove] = useState(false);
+  const [selectedPromptType, setSelectedPromptType] = useState<string>("");
   const [feedback, setFeedback] = useState("");
   const [reimportPrompt, setReimportPrompt] = useState("");
   const [copied, setCopied] = useState(false);
+  const [promptCopied, setPromptCopied] = useState(false);
   const { toast } = useToast();
 
   const handleGeneratePrompt = () => {
@@ -88,6 +128,24 @@ const Step3Iterate = () => {
     }
   };
 
+  const handleCopyIterationPrompt = async (type: keyof typeof PROMPT_OPTIONS) => {
+    try {
+      await navigator.clipboard.writeText(PROMPT_OPTIONS[type]);
+      setPromptCopied(true);
+      toast({
+        title: "Copied! ✅",
+        description: "AI iteration prompt copied to clipboard",
+      });
+      setTimeout(() => setPromptCopied(false), 2000);
+    } catch (error) {
+      toast({
+        title: "Copy failed ⚠️",
+        description: "Please select and copy manually",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0a0e1a] text-white relative overflow-hidden">
       {/* Background */}
@@ -110,30 +168,60 @@ const Step3Iterate = () => {
           </Button>
         </div>
 
-        {/* Auto-Improve Toggle */}
+        {/* Manual AI Prompt Options */}
         <Card className="bg-[#111826]/80 backdrop-blur-sm border-violet-500/50 rounded-2xl">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <Label htmlFor="auto-improve" className="text-lg font-semibold text-white">
-                  Auto-Improve with AI
-                </Label>
-                <p className="text-sm text-gray-400">
-                  Enable to automatically run AI improvements (will use credits)
-                </p>
-              </div>
-              <Switch
-                id="auto-improve"
-                checked={autoImprove}
-                onCheckedChange={setAutoImprove}
-              />
+          <CardHeader>
+            <CardTitle className="text-white">📋 Manual AI Prompt Options (No Credits)</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-gray-400">
+              Choose a prompt template to copy and paste into your AI assistant with your UAP file attached.
+            </p>
+            <div className="grid md:grid-cols-2 gap-3">
+              <Button
+                onClick={() => handleCopyIterationPrompt('general')}
+                variant="outline"
+                className="border-violet-400/50 text-violet-400 hover:bg-violet-400/10 rounded-lg justify-start h-auto py-3 px-4"
+              >
+                <div className="text-left">
+                  <div className="font-semibold">General Improvement</div>
+                  <div className="text-xs text-gray-400">Quality, performance, UX</div>
+                </div>
+              </Button>
+              <Button
+                onClick={() => handleCopyIterationPrompt('bugfix')}
+                variant="outline"
+                className="border-violet-400/50 text-violet-400 hover:bg-violet-400/10 rounded-lg justify-start h-auto py-3 px-4"
+              >
+                <div className="text-left">
+                  <div className="font-semibold">Bug Fix Analysis</div>
+                  <div className="text-xs text-gray-400">Logic errors, issues</div>
+                </div>
+              </Button>
+              <Button
+                onClick={() => handleCopyIterationPrompt('feature')}
+                variant="outline"
+                className="border-violet-400/50 text-violet-400 hover:bg-violet-400/10 rounded-lg justify-start h-auto py-3 px-4"
+              >
+                <div className="text-left">
+                  <div className="font-semibold">Feature Suggestions</div>
+                  <div className="text-xs text-gray-400">New functionality ideas</div>
+                </div>
+              </Button>
+              <Button
+                onClick={() => handleCopyIterationPrompt('custom')}
+                variant="outline"
+                className="border-violet-400/50 text-violet-400 hover:bg-violet-400/10 rounded-lg justify-start h-auto py-3 px-4"
+              >
+                <div className="text-left">
+                  <div className="font-semibold">Custom Analysis</div>
+                  <div className="text-xs text-gray-400">General AEIOU prompt</div>
+                </div>
+              </Button>
             </div>
-            {autoImprove && (
-              <div className="mt-4 p-4 bg-yellow-900/20 border border-yellow-500/50 rounded-lg flex items-start gap-3">
-                <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-yellow-200">
-                  Warning: Auto-improve will use AI credits. Disable this option to work manually and save credits.
-                </p>
+            {promptCopied && (
+              <div className="p-3 bg-lime-900/20 border border-lime-500/50 rounded-lg text-center">
+                <p className="text-sm text-lime-400">✅ Prompt copied! Paste it into your AI assistant.</p>
               </div>
             )}
           </CardContent>

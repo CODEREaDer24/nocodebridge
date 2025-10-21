@@ -8,16 +8,29 @@ import { Home, Copy, Download, Upload } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { saveAs } from "file-saver";
 
-const EXTRACTOR_PROMPT = `Create a hidden page called /export or /self-extractor.
+const EXTRACTOR_PROMPT = `Create a hidden page at /self-extractor (owner-only).
+
+EXPORT FUNCTIONALITY:
 When the user clicks 'Export My App', generate and auto-download three files:
-  1. {app-name}-uap-v3.0.uap
+  1. {app-name}-uap-v3.5.uap
   2. {app-name}-schema.json
   3. {app-name}-export.md
-Show confirmation:
-  "Your app has been exported. Upload the UAP into NoCodeBridge.xyz to analyze and refine it."`;
+
+Capture 100% of the app with full fidelity - no summaries, no truncation.
+
+IMPORT FUNCTIONALITY:
+When the user clicks 'Import Improved UAP', open a file picker accepting .uap, .uap-imp, .json files.
+Validate the AEIOU header, then generate and display a rebuild prompt with a copy button.
+
+Both features must be credit-free and run locally.
+
+Show confirmation after export:
+  "✅ Your app has been exported. Upload the UAP into NoCodeBridge.xyz to analyze and refine it."`;
 
 const SelfExtractorTool = () => {
   const [uploadedFile, setUploadedFile] = useState<{ name: string; content: string; type: string } | null>(null);
+  const [importedFile, setImportedFile] = useState<{ name: string; content: string } | null>(null);
+  const [rebuildPrompt, setRebuildPrompt] = useState<string>("");
 
   const handleCopyPrompt = () => {
     navigator.clipboard.writeText(EXTRACTOR_PROMPT);
@@ -68,6 +81,57 @@ const SelfExtractorTool = () => {
       toast({
         title: "Downloaded!",
         description: `${uploadedFile.name} has been downloaded`,
+      });
+    }
+  };
+
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const text = await file.text();
+    const isValid = text.includes("AEIOU") || text.includes('"meta"') || text.includes('{');
+
+    if (!isValid) {
+      toast({
+        title: "Invalid File ⚠️",
+        description: "Please upload a valid UAP, UAP-Imp, or JSON file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setImportedFile({ name: file.name, content: text });
+    
+    const prompt = `Rebuild this Lovable app from the following AEIOU submission.
+
+Preserve all routes, components, logic, data, and styling.
+Use AEIOU v3.5 format for lossless application.
+
+Instructions:
+1. Parse the UAP-Imp below
+2. Apply all changes while maintaining existing functionality
+3. Ensure all dependencies and assets are intact
+4. Validate the rebuild against the original UAP structure
+
+──────────────────────────────
+${text}
+──────────────────────────────`;
+
+    setRebuildPrompt(prompt);
+
+    toast({
+      title: "Import Ready! ✅",
+      description: `${file.name} validated. Rebuild prompt generated.`,
+    });
+  };
+
+  const handleCopyRebuildPrompt = () => {
+    if (rebuildPrompt) {
+      navigator.clipboard.writeText(rebuildPrompt);
+      toast({
+        title: "Copied! ✅",
+        description: "Rebuild prompt copied to clipboard",
       });
     }
   };
@@ -182,7 +246,57 @@ const SelfExtractorTool = () => {
           </CardContent>
         </Card>
 
-        {/* Section C - Next Steps */}
+        {/* Section C - Import Improved UAP */}
+        <Card className="bg-[#111826]/80 backdrop-blur-sm border-lime-500/50 max-w-4xl mx-auto">
+          <CardHeader>
+            <CardTitle className="text-white text-2xl">📥 Import Improved UAP</CardTitle>
+            <p className="text-gray-400">
+              Upload your AI-refined UAP to generate a rebuild prompt (credit-free)
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Input
+              type="file"
+              accept=".uap,.uap-imp,.json"
+              onChange={handleImportFile}
+              className="bg-[#0a0e1a] border-lime-500/30 text-gray-300"
+            />
+            
+            {importedFile && (
+              <div className="space-y-4">
+                <div className="p-4 bg-lime-900/20 border border-lime-500/50 rounded-lg">
+                  <p className="text-sm text-lime-400">
+                    ✅ {importedFile.name} validated and ready
+                  </p>
+                </div>
+                
+                {rebuildPrompt && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-white font-semibold">Rebuild Prompt (Ready to Use)</p>
+                      <Button
+                        onClick={handleCopyRebuildPrompt}
+                        className="bg-lime-600 hover:bg-lime-700 gap-2"
+                        size="sm"
+                      >
+                        <Copy className="w-4 h-4" />
+                        Copy Prompt
+                      </Button>
+                    </div>
+                    <pre className="bg-[#0a0e1a] p-4 rounded-lg overflow-auto max-h-64 text-sm text-gray-300 border border-lime-500/30">
+                      {rebuildPrompt}
+                    </pre>
+                    <p className="text-xs text-gray-400">
+                      📋 Paste this prompt into your Lovable app to apply the improvements
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Section D - Next Steps */}
         <Card className="bg-[#111826]/80 backdrop-blur-sm border-purple-500/50 max-w-4xl mx-auto">
           <CardHeader>
             <CardTitle className="text-white text-2xl">🚀 Next Steps</CardTitle>

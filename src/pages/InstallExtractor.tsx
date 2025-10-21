@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const AEIOU_PROMPT = `Create a hidden page at /self-extractor in my app (owner-only).
 
+EXPORT FUNCTIONALITY:
 When the user clicks "Export My App", generate and auto-download three files:
 1. {app-name}-uap-v3.5.uap (Universal App Profile)
 2. {app-name}-schema.json (JSON Schema)
@@ -51,6 +52,20 @@ CRITICAL – Full Soul Capture:
 
 After export, show:
 "✅ Your app has been exported successfully. Three files are ready for download."
+
+IMPORT FUNCTIONALITY:
+When the user clicks "Import Improved UAP":
+1. Open a file picker accepting .uap, .uap-imp, .json files
+2. Read the file content and validate AEIOU header
+3. Generate a rebuild prompt that includes the full file content
+4. Display the prompt with a copy button
+5. Show confirmation: "✅ Ready to apply. Paste this into Lovable AI chat:"
+
+Both Export and Import must be:
+- Credit-free (no AI API calls)
+- Client-side only
+- Owner-only accessible
+- Fully lossless
 
 Use AEIOU v3.5 format with full reversibility.`;
 
