@@ -44,14 +44,10 @@ Rules:
 
 CRITICAL – Full Soul Capture:
 - Do NOT simplify or summarize outputs
-- Ensure each exported file contains the full raw data, even if the app exceeds size limits
-- If any file exceeds size limits, split automatically into sequential parts:
-  * schema_1.json, schema_2.json, schema_3.json, etc.
-  * uap_1.uap, uap_2.uap, uap_3.uap, etc.
-  * export_1.md, export_2.md, export_3.md, etc.
-- Each part must be complete and lossless
-- Include part metadata: "part": 1, "total_parts": 3, "continues_in": "schema_2.json"
+- Ensure each exported file contains the full raw data in a single file
+- No truncation, no pagination, no splitting
 - Capture the whole soul of the app – every line, every config, every detail
+- Modern browsers support files up to 2GB – your app export will work fine
 
 After export, show:
 "✅ Your app has been exported successfully. Three files are ready for download."
