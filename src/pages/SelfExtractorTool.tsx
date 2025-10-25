@@ -8,24 +8,92 @@ import { Home, Copy, Download, Upload } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { saveAs } from "file-saver";
 
-const EXTRACTOR_PROMPT = `Create a hidden page at /self-extractor (owner-only).
+const EXTRACTOR_PROMPT = `Create a hidden page at /self-extractor (owner-only, visible only to workspace owner).
 
-EXPORT FUNCTIONALITY:
-When the user clicks 'Export My App', generate and auto-download three files:
-  1. {app-name}-uap-v3.5.uap
-  2. {app-name}-schema.json
-  3. {app-name}-export.md
+─────────────────────────────
+📤 EXPORT FUNCTIONALITY
+─────────────────────────────
 
-Capture 100% of the app with full fidelity - no summaries, no truncation.
+Add a button: "Export My App"
 
-IMPORT FUNCTIONALITY:
-When the user clicks 'Import Improved UAP', open a file picker accepting .uap, .uap-imp, .json files.
-Validate the AEIOU header, then generate and display a rebuild prompt with a copy button.
+When clicked, generate and auto-download 3 files capturing 100% of the app:
 
-Both features must be credit-free and run locally.
+1. {app-name}-uap-v3.5.uap (Universal App Profile in AEIOU v3.5 format)
+2. {app-name}-schema.json (complete database schema, types, relationships)
+3. {app-name}-export.md (human-readable markdown documentation)
 
-Show confirmation after export:
-  "✅ Your app has been exported. Upload the UAP into NoCodeBridge.xyz to analyze and refine it."`;
+WHAT TO CAPTURE (full fidelity, no truncation):
+✓ All pages, routes, and navigation structure
+✓ All components (with full code, props, state, hooks)
+✓ All logic, functions, workflows, automations
+✓ Database schema, tables, columns, relationships, RLS policies
+✓ All API endpoints, edge functions, integrations
+✓ Complete styling (CSS, Tailwind config, design tokens, theme)
+✓ Environment variables (mask secrets with [REDACTED])
+✓ All dependencies (package.json)
+✓ Assets, images, fonts, media files
+✓ AI prompts, embeddings, vector stores
+✓ User auth configuration
+
+AEIOU v3.5 Format Structure:
+{
+  "meta": {
+    "format": "AEIOU v3.5",
+    "timestamp": "[ISO-8601]",
+    "generator": "NoCodeBridge Self-Extractor",
+    "app_name": "[actual app name]",
+    "owner_id": "[user id]",
+    "checksum": "[CRC32 or SHA256]"
+  },
+  "project": {
+    "name": "...",
+    "pages": [...],
+    "components": [...],
+    "routes": [...],
+    "database": {...},
+    "dependencies": {...},
+    "config": {...},
+    "assets": [...]
+  }
+}
+
+After export, show confirmation:
+"✅ Your app has been exported. Upload the UAP into NoCodeBridge.xyz to analyze and refine it."
+
+─────────────────────────────
+📥 IMPORT FUNCTIONALITY
+─────────────────────────────
+
+Add a button: "Import Improved UAP"
+
+When clicked:
+1. Open file picker accepting: .uap, .uap-imp, .json files
+2. Read the file content client-side (no API calls)
+3. Validate AEIOU header exists (check for "AEIOU" or "meta" field)
+4. If valid, generate a comprehensive rebuild prompt
+5. Display the prompt in a textarea with a "Copy Prompt" button
+
+THE REBUILD PROMPT MUST INCLUDE:
+→ Clear instructions for Lovable AI
+→ The full file content embedded
+→ Step-by-step rebuild instructions
+→ Preservation of existing functionality
+→ Validation checkpoints
+
+Show success message:
+"✅ Ready to apply. Copy the rebuild prompt below and paste it into Lovable AI chat."
+
+─────────────────────────────
+⚡ REQUIREMENTS
+─────────────────────────────
+
+• Both features must run 100% client-side (credit-free)
+• Never truncate or summarize content
+• Always capture the latest app state
+• Generate new checksum on each export
+• Keep the page hidden from non-owners
+• Use clean, modern UI with copy/download buttons
+• Show loading states during file processing`;
 
 const SelfExtractorTool = () => {
   const [uploadedFile, setUploadedFile] = useState<{ name: string; content: string; type: string } | null>(null);
@@ -103,20 +171,85 @@ const SelfExtractorTool = () => {
 
     setImportedFile({ name: file.name, content: text });
     
-    const prompt = `Rebuild this Lovable app from the following AEIOU submission.
+    const prompt = `You are rebuilding a Lovable app from an AEIOU UAP export.
 
-Preserve all routes, components, logic, data, and styling.
-Use AEIOU v3.5 format for lossless application.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 OBJECTIVE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Instructions:
-1. Parse the UAP-Imp below
-2. Apply all changes while maintaining existing functionality
-3. Ensure all dependencies and assets are intact
-4. Validate the rebuild against the original UAP structure
+Reconstruct this application with 100% fidelity based on the AEIOU profile below.
 
-──────────────────────────────
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 REBUILD INSTRUCTIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. PARSE THE UAP
+   → Read the complete AEIOU structure below
+   → Identify all pages, components, routes, and dependencies
+   → Extract database schema, API endpoints, and edge functions
+
+2. RECREATE THE STRUCTURE
+   → Rebuild all pages with exact routes
+   → Recreate all components with full functionality
+   → Restore all hooks, contexts, and state management
+   → Apply all styling (Tailwind config, CSS, design tokens)
+
+3. RESTORE BACKEND
+   → Recreate database tables with exact schema
+   → Apply all RLS policies and triggers
+   → Restore edge functions and API routes
+   → Reconnect integrations (Supabase, Stripe, etc.)
+
+4. PRESERVE LOGIC
+   → Maintain all workflows and automations
+   → Keep all event handlers and functions
+   → Preserve validation rules and business logic
+   → Restore AI prompts and embeddings
+
+5. VERIFY DEPENDENCIES
+   → Install all packages from package.json
+   → Ensure version compatibility
+   → Check for missing imports
+
+6. VALIDATE
+   → Test all routes load correctly
+   → Verify all components render properly
+   → Confirm database operations work
+   → Check authentication flows
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ CRITICAL RULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ DO preserve all existing functionality
+✓ DO maintain exact component structure
+✓ DO keep all styling and design tokens
+✓ DO restore all database relationships
+✓ DO apply security policies (RLS)
+
+✗ DO NOT modify the core architecture
+✗ DO NOT add features not in the UAP
+✗ DO NOT change naming conventions
+✗ DO NOT skip any components or pages
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📦 AEIOU UAP DATA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 ${text}
-──────────────────────────────`;
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ EXPECTED RESULT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+A fully functional Lovable app matching the original export, with:
+→ All pages and routes working
+→ All components rendering correctly
+→ Database and auth configured
+→ Styling preserved
+→ All functionality intact
+
+Begin the rebuild process now.`;
 
     setRebuildPrompt(prompt);
 
