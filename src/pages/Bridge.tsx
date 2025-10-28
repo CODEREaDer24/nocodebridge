@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Download, Upload, ArrowRight, Home } from "lucide-react";
+import Bridge3DScene from "@/components/Bridge3DScene";
 
 export default function Bridge() {
   return (
@@ -36,6 +37,16 @@ export default function Bridge() {
             Connect No-Code apps and AI tools seamlessly
           </p>
         </div>
+
+        {/* 3D Interactive Bridge Visualization */}
+        <Card className="bg-[#111826]/80 backdrop-blur-sm border-blue-500/30">
+          <CardContent className="p-6">
+            <h2 className="text-2xl font-bold text-center text-white mb-4">
+              🌉 Interactive Bridge Map
+            </h2>
+            <Bridge3DScene />
+          </CardContent>
+        </Card>
 
         {/* Main Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
