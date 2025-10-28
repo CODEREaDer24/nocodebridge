@@ -10,6 +10,7 @@ import Bridge from "./pages/Bridge";
 import SelfExport from "./pages/SelfExport";
 import SelfExtractorAdmin from "./pages/SelfExtractorAdmin";
 import SelfExtractorTool from "./pages/SelfExtractorTool";
+import SelfExtractor from "./pages/SelfExtractor";
 import InstallExtractor from "./pages/InstallExtractor";
 import UploadAnalyze from "./pages/UploadAnalyze";
 import ImproveWithAI from "./pages/ImproveWithAI";
@@ -34,7 +35,8 @@ const App = () => (
           <Route path="/bridge" element={<Bridge />} />
           <Route path="/self-export" element={<SelfExport />} />
           <Route path="/self-extractor-admin" element={<SelfExtractorAdmin />} />
-          <Route path="/self-extractor" element={<SelfExtractorTool />} />
+          <Route path="/self-extractor" element={<SelfExtractor />} />
+          <Route path="/self-extractor-tool" element={<SelfExtractorTool />} />
           <Route path="/install-extractor" element={<InstallExtractor />} />
           <Route path="/upload-analyze" element={<UploadAnalyze />} />
           <Route path="/improve-with-ai" element={<ImproveWithAI />} />
