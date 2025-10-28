@@ -378,52 +378,52 @@ A fully functional Lovable app that exactly matches the original export:
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a0e1a] via-[#1a1f3a] to-[#0a0e1a] text-white relative overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-20 left-20 w-96 h-96 border border-blue-400 rounded-full animate-pulse"></div>
-        <div className="absolute bottom-20 right-20 w-96 h-96 border border-cyan-400 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute top-1/2 left-1/2 w-96 h-96 border border-purple-400 rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
-      </div>
+    <div className="min-h-screen bg-[#0f1419] text-white relative">
+      {/* Clean Background Grid */}
+      <div className="absolute inset-0 opacity-[0.03]" style={{
+        backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
+        backgroundSize: '50px 50px'
+      }}></div>
 
       <div className="container mx-auto px-4 py-8 space-y-6 relative z-10 max-w-6xl">
         {/* Header with Navigation */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between border-b border-white/10 pb-6">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent">
-              🛠️ Self-Extractor
+            <h1 className="text-3xl font-bold text-white">
+              🛠️ AEIOU Self-Extractor v3.5
             </h1>
-            <p className="text-gray-400 mt-2">AEIOU v3.5 • Full App Export & Import</p>
+            <p className="text-gray-400 mt-1 text-sm">Owner-Only • Full App Export & Import • Lossless Capture</p>
           </div>
           <Button
             asChild
             variant="outline"
-            className="border-blue-400/50 text-blue-400 hover:bg-blue-400/10"
+            className="border-white/20 text-gray-300 hover:bg-white/5"
           >
             <Link to="/">
               <Home className="w-4 h-4 mr-2" />
-              Home
+              Return Home
             </Link>
           </Button>
         </div>
 
         {/* Quick Navigation */}
-        <Card className="bg-black/40 backdrop-blur-sm border-white/10">
+        <Card className="bg-[#1a1f2e] border-white/10">
           <CardHeader>
-            <CardTitle className="text-white text-lg">📍 Quick Navigation</CardTitle>
+            <CardTitle className="text-white text-base font-semibold">📍 App Routes ({ALL_ROUTES.length})</CardTitle>
+            <p className="text-gray-400 text-xs mt-1">Navigate to any page in your app</p>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              {ALL_ROUTES.slice(0, 12).map(route => (
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+              {ALL_ROUTES.map(route => (
                 <Button
                   key={route}
                   asChild
                   variant="outline"
                   size="sm"
-                  className="border-white/20 text-gray-300 hover:bg-white/10 text-xs"
+                  className="border-white/10 text-gray-300 hover:bg-white/5 hover:text-white text-xs justify-start"
                 >
                   <Link to={route}>
-                    {route === '/' ? 'Home' : route.split('/').pop()}
+                    {route === '/' ? '🏠 Home' : route}
                   </Link>
                 </Button>
               ))}
@@ -432,31 +432,31 @@ A fully functional Lovable app that exactly matches the original export:
         </Card>
 
         {/* Export Section */}
-        <Card className="bg-gradient-to-br from-blue-900/20 to-cyan-900/20 backdrop-blur-sm border-blue-500/50">
+        <Card className="bg-[#1a1f2e] border-blue-500/30">
           <CardHeader>
-            <CardTitle className="text-white text-2xl flex items-center gap-2">
-              <Download className="w-6 h-6" />
-              📤 Export My App
+            <CardTitle className="text-white text-xl font-semibold flex items-center gap-3">
+              <Download className="w-5 h-5 text-blue-400" />
+              Export My App
             </CardTitle>
-            <p className="text-gray-300">
-              Capture 100% of your app structure and download 3 files (UAP, JSON, Markdown)
+            <p className="text-gray-400 text-sm mt-2">
+              Capture 100% of your app structure and download 3 files: <span className="text-blue-400 font-mono">.uap</span>, <span className="text-blue-400 font-mono">.json</span>, <span className="text-blue-400 font-mono">.md</span>
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
             <Button
               onClick={extractAppStructure}
               disabled={isExporting}
-              className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white text-lg py-6"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-6"
             >
               {isExporting ? (
                 <>
                   <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Exporting...
+                  Exporting App...
                 </>
               ) : (
                 <>
                   <Download className="w-5 h-5 mr-2" />
-                  Export My App Now
+                  Start Export
                 </>
               )}
             </Button>
@@ -472,9 +472,9 @@ A fully functional Lovable app that exactly matches the original export:
             )}
 
             {exportLogs.length > 0 && (
-              <div className="bg-black/50 rounded-lg p-4 border border-blue-500/30">
-                <p className="text-xs text-gray-400 mb-2">Export Log:</p>
-                <div className="space-y-1 max-h-48 overflow-y-auto">
+              <div className="bg-black/30 rounded-lg p-4 border border-white/10">
+                <p className="text-xs text-gray-400 mb-2 font-semibold">Export Console:</p>
+                <div className="space-y-0.5 max-h-48 overflow-y-auto">
                   {exportLogs.map((log, i) => (
                     <p key={i} className="text-xs font-mono text-gray-300">{log}</p>
                   ))}
@@ -483,18 +483,18 @@ A fully functional Lovable app that exactly matches the original export:
             )}
 
             {lastExportTime && (
-              <div className="flex items-center justify-between p-3 bg-green-900/20 border border-green-500/50 rounded-lg">
-                <div className="flex items-center gap-2">
+              <div className="flex items-center justify-between p-4 bg-green-950/30 border border-green-500/30 rounded-lg">
+                <div className="flex items-center gap-3">
                   <CheckCircle className="w-5 h-5 text-green-400" />
                   <div>
-                    <p className="text-sm text-green-400 font-semibold">Last Export</p>
+                    <p className="text-sm text-green-400 font-semibold">✅ Export Successful</p>
                     <p className="text-xs text-gray-400">{lastExportTime}</p>
                   </div>
                 </div>
                 {checksum && (
                   <div className="text-right">
-                    <p className="text-xs text-gray-400">Checksum</p>
-                    <p className="text-xs font-mono text-cyan-400">{checksum}</p>
+                    <p className="text-xs text-gray-500 uppercase tracking-wide">Checksum</p>
+                    <p className="text-sm font-mono text-cyan-400">{checksum}</p>
                   </div>
                 )}
               </div>
@@ -503,41 +503,41 @@ A fully functional Lovable app that exactly matches the original export:
         </Card>
 
         {/* Import Section */}
-        <Card className="bg-gradient-to-br from-purple-900/20 to-pink-900/20 backdrop-blur-sm border-purple-500/50">
+        <Card className="bg-[#1a1f2e] border-purple-500/30">
           <CardHeader>
-            <CardTitle className="text-white text-2xl flex items-center gap-2">
-              <Upload className="w-6 h-6" />
-              📥 Import Improved UAP
+            <CardTitle className="text-white text-xl font-semibold flex items-center gap-3">
+              <Upload className="w-5 h-5 text-purple-400" />
+              Import Improved UAP
             </CardTitle>
-            <p className="text-gray-300">
-              Upload a UAP file to generate a rebuild prompt for Lovable AI
+            <p className="text-gray-400 text-sm mt-2">
+              Upload a <span className="text-purple-400 font-mono">.uap</span>, <span className="text-purple-400 font-mono">.uap-imp</span>, or <span className="text-purple-400 font-mono">.json</span> file to generate a rebuild prompt
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <Input
                 type="file"
                 accept=".uap,.uap-imp,.json"
                 onChange={handleImportFile}
-                className="bg-black/50 border-purple-500/30 text-white"
+                className="bg-black/30 border-white/10 text-white"
               />
-              <Upload className="w-6 h-6 text-purple-400" />
+              <FileCode className="w-5 h-5 text-purple-400 flex-shrink-0" />
             </div>
 
             {importValidated && importFile && (
               <div className="space-y-4">
-                <div className="flex items-center gap-2 p-3 bg-green-900/20 border border-green-500/50 rounded-lg">
+                <div className="flex items-center gap-3 p-4 bg-green-950/30 border border-green-500/30 rounded-lg">
                   <CheckCircle className="w-5 h-5 text-green-400" />
                   <div>
-                    <p className="text-sm text-green-400 font-semibold">File Validated ✅</p>
-                    <p className="text-xs text-gray-400">{importFile.name}</p>
+                    <p className="text-sm text-green-400 font-semibold">✅ AEIOU Format Validated</p>
+                    <p className="text-xs text-gray-400 mt-0.5">{importFile.name}</p>
                   </div>
                 </div>
 
                 {rebuildPrompt && (
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <p className="text-white font-semibold">Rebuild Prompt</p>
+                      <p className="text-white font-semibold text-sm">Rebuild Prompt for Lovable AI</p>
                       <Button
                         onClick={handleCopyRebuildPrompt}
                         className="bg-purple-600 hover:bg-purple-700"
@@ -550,11 +550,11 @@ A fully functional Lovable app that exactly matches the original export:
                     <Textarea
                       value={rebuildPrompt}
                       readOnly
-                      className="bg-black/50 border-purple-500/30 text-gray-300 font-mono text-xs min-h-[200px]"
+                      className="bg-black/30 border-white/10 text-gray-300 font-mono text-xs min-h-[240px]"
                     />
-                    <div className="p-3 bg-purple-900/20 border border-purple-500/50 rounded-lg">
-                      <p className="text-xs text-purple-300">
-                        📋 <strong>Next Step:</strong> Copy this prompt and paste it into your Lovable AI chat to rebuild the app
+                    <div className="p-3 bg-blue-950/30 border border-blue-500/30 rounded-lg">
+                      <p className="text-xs text-blue-300">
+                        <strong>✅ Ready to Apply:</strong> Copy this prompt and paste it into your Lovable AI chat to rebuild the app with all improvements.
                       </p>
                     </div>
                   </div>
@@ -565,15 +565,21 @@ A fully functional Lovable app that exactly matches the original export:
         </Card>
 
         {/* Info Footer */}
-        <Card className="bg-black/40 backdrop-blur-sm border-white/10">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between text-sm">
-              <p className="text-gray-400">
-                AEIOU v3.5 • Client-side only • No credits required
-              </p>
-              <p className="text-gray-500 font-mono text-xs">
-                NoCodeBridge Self-Extractor
-              </p>
+        <Card className="bg-[#1a1f2e] border-white/10">
+          <CardContent className="p-5">
+            <div className="grid md:grid-cols-3 gap-4 text-center md:text-left">
+              <div>
+                <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Format</p>
+                <p className="text-sm text-white font-semibold">AEIOU v3.5</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Operation</p>
+                <p className="text-sm text-white font-semibold">Client-side • Credit-free</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Generator</p>
+                <p className="text-sm text-white font-semibold">NoCodeBridge Self-Extractor</p>
+              </div>
             </div>
           </CardContent>
         </Card>
