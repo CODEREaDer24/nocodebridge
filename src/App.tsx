@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { toast } from "@/hooks/use-toast";
+import { initializeAEIOUAutoRepair } from "@/utils/aeiouAutoRepair";
 import Index from "./pages/Index";
 import Import from "./pages/Import";
 import Bridge from "./pages/Bridge";
@@ -23,12 +25,26 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
+const App = () => {
+  useEffect(() => {
+    // Initialize AEIOU v4.3 AutoRepair on app start
+    initializeAEIOUAutoRepair();
+    
+    // Success notification
+    setTimeout(() => {
+      toast({
+        title: "✅ NoCodeBridge tuned up",
+        description: "AEIOU v4.3 stabilized.",
+      });
+    }, 1000);
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/import" element={<Import />} />
@@ -51,6 +67,7 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;
