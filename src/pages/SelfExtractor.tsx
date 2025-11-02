@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { saveAs } from "file-saver";
+import BridgeNavigation from "@/components/BridgeNavigation";
 
 // CRC32 checksum generator
 const generateCRC32 = (str: string): string => {
@@ -379,13 +380,15 @@ A fully functional Lovable app that exactly matches the original export:
 
   return (
     <div className="min-h-screen bg-[#0f1419] text-white relative">
+      <BridgeNavigation />
+      
       {/* Clean Background Grid */}
       <div className="absolute inset-0 opacity-[0.03]" style={{
         backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
         backgroundSize: '50px 50px'
       }}></div>
 
-      <div className="container mx-auto px-4 py-8 space-y-6 relative z-10 max-w-6xl">
+      <div className="container mx-auto px-4 py-8 space-y-6 relative z-10 max-w-6xl">{/* Header with Navigation */}
         {/* Header with Navigation */}
         <div className="flex items-center justify-between border-b border-white/10 pb-6">
           <div>

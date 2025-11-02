@@ -3,10 +3,13 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Download, Upload, Sparkles, ArrowRight } from "lucide-react";
+import BridgeNavigation from "@/components/BridgeNavigation";
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-[#0a0e1a] text-white relative overflow-hidden">
+      <BridgeNavigation />
+      
       {/* Animated UFO Background */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 left-20 w-64 h-64 border border-lime-400 rounded-full animate-pulse"></div>
@@ -14,7 +17,7 @@ const Index = () => {
         <div className="absolute top-1/2 left-1/2 w-96 h-96 border border-violet-400 rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
       </div>
 
-      <div className="container mx-auto px-4 py-16 space-y-12 relative z-10">
+      <div className="container mx-auto px-4 py-16 space-y-12 relative z-10">{/* Header */}
         {/* Header */}
         <div className="text-center space-y-6">
           <div className="inline-block px-4 py-2 bg-lime-500/20 border border-lime-500/50 rounded-full mb-4">
