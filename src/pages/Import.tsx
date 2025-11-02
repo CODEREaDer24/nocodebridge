@@ -8,8 +8,6 @@ import { Download, Copy, Upload, ArrowLeft, FileCode, FileText, GitMerge } from 
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import "@/utils/rebuilder"; // Load rebuilder hook
-import BridgeNavigation from "@/components/BridgeNavigation";
-import BridgeFooter from "@/components/BridgeFooter";
 
 // Universal parser - auto-detects and normalizes any format
 function parseAnything(text: string, filename: string) {
@@ -172,15 +170,13 @@ export default function Import() {
 
   return (
     <div className="min-h-screen bg-[#0a0e1a] text-white p-6 relative overflow-hidden">
-      <BridgeNavigation />
-      
       {/* Animated Background */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 left-20 w-64 h-64 border border-cyan-400 rounded-full animate-pulse"></div>
         <div className="absolute bottom-20 right-20 w-80 h-80 border border-blue-400 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
       </div>
 
-      <div className="max-w-5xl mx-auto relative z-10">{/* Navigation */}
+      <div className="max-w-5xl mx-auto relative z-10">
         {/* Navigation */}
         <div className="mb-8">
           <Link to="/bridge">
@@ -383,8 +379,10 @@ export default function Import() {
         )}
 
         {/* Footer */}
-        <div className="mt-8">
-          <BridgeFooter />
+        <div className="text-center py-8 border-t border-white/10 mt-8">
+          <p className="text-gray-400 text-sm">
+            🧩 NoCodeBridge AEIOU v3.0 | Teleportation Loop Ready
+          </p>
         </div>
       </div>
     </div>

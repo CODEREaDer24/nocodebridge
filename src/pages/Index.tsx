@@ -3,14 +3,10 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Download, Upload, Sparkles, ArrowRight } from "lucide-react";
-import BridgeNavigation from "@/components/BridgeNavigation";
-import BridgeFooter from "@/components/BridgeFooter";
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-[#0a0e1a] text-white relative overflow-hidden">
-      <BridgeNavigation />
-      
       {/* Animated UFO Background */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 left-20 w-64 h-64 border border-lime-400 rounded-full animate-pulse"></div>
@@ -18,11 +14,11 @@ const Index = () => {
         <div className="absolute top-1/2 left-1/2 w-96 h-96 border border-violet-400 rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
       </div>
 
-      <div className="container mx-auto px-4 py-16 space-y-12 relative z-10">{/* Header */}
+      <div className="container mx-auto px-4 py-16 space-y-12 relative z-10">
         {/* Header */}
         <div className="text-center space-y-6">
           <div className="inline-block px-4 py-2 bg-lime-500/20 border border-lime-500/50 rounded-full mb-4">
-            <span className="text-lime-400 font-semibold text-sm">AEIOU Framework v3.7</span>
+            <span className="text-lime-400 font-semibold text-sm">AEIOU Framework v3.5</span>
           </div>
           <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-lime-400 via-cyan-400 to-violet-400 bg-clip-text text-transparent">
             NoCodeBridge 2.0
@@ -131,7 +127,14 @@ const Index = () => {
         </div>
 
         {/* Footer */}
-        <BridgeFooter />
+        <div className="text-center py-8 border-t border-white/10">
+          <p className="text-gray-400 text-sm">
+            NoCodeBridge 2.0 · AEIOU v3.5 · Save Credits. Bridge Better.
+          </p>
+          <p className="text-gray-500 text-xs mt-2">
+            Built by Go No Code Mode Co.
+          </p>
+        </div>
       </div>
     </div>
   );

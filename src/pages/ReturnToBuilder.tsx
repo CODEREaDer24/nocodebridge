@@ -5,8 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Copy, Check, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import BridgeNavigation from "@/components/BridgeNavigation";
-import BridgeFooter from "@/components/BridgeFooter";
 
 const ReturnToBuilder = () => {
   const [improvedUAP, setImprovedUAP] = useState("");
@@ -65,15 +63,13 @@ After applying changes, confirm: "✅ Improvements merged successfully via NoCod
 
   return (
     <div className="min-h-screen bg-[#0a0e1a] text-white relative overflow-hidden">
-      <BridgeNavigation />
-      
       {/* Background */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 left-20 w-64 h-64 border border-blue-400 rounded-full animate-pulse"></div>
         <div className="absolute bottom-20 right-20 w-80 h-80 border border-violet-400 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
       </div>
 
-      <div className="container mx-auto px-4 py-16 space-y-8 relative z-10 max-w-5xl">{/* Header */}
+      <div className="container mx-auto px-4 py-16 space-y-8 relative z-10 max-w-5xl">
         {/* Header */}
         <div className="flex items-center justify-between">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">
@@ -184,9 +180,6 @@ After applying changes, confirm: "✅ Improvements merged successfully via NoCod
             </ol>
           </CardContent>
         </Card>
-        
-        {/* Footer */}
-        <BridgeFooter />
       </div>
     </div>
   );
