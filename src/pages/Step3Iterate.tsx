@@ -68,22 +68,81 @@ const Step3Iterate = () => {
   const [reimportPrompt, setReimportPrompt] = useState("");
   const [copied, setCopied] = useState(false);
   const [promptCopied, setPromptCopied] = useState(false);
+  const [uploadedApp, setUploadedApp] = useState<any>(null);
+  const [uploadedFileName, setUploadedFileName] = useState<string>("");
   const { toast } = useToast();
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      setUploadedFileName(file.name);
+
+      // Parse JSON if possible
+      let parsed = null;
+      try {
+        parsed = JSON.parse(text);
+      } catch {
+        // Not JSON, treat as plain text
+        parsed = { content: text };
+      }
+
+      // Check if it's NoCodeBridge itself
+      if (parsed?.meta?.name === "NoCodeBridge" || parsed?.meta?.app_name === "NoCodeBridge" || text.includes('"name": "NoCodeBridge"')) {
+        toast({
+          title: "⚠️ Wrong App Detected",
+          description: "Please upload your exported app (.uap, .json, or .md) before iterating, not NoCodeBridge itself.",
+          variant: "destructive",
+        });
+        setUploadedApp(null);
+        setUploadedFileName("");
+        return;
+      }
+
+      setUploadedApp(parsed);
+      setFeedback(text);
+      toast({
+        title: "✅ App Uploaded",
+        description: `Loaded: ${parsed?.meta?.app_name || parsed?.meta?.name || file.name}`,
+      });
+    } catch (error) {
+      toast({
+        title: "Upload failed",
+        description: "Could not read the file",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleGeneratePrompt = () => {
-    if (!feedback.trim()) {
+    if (!uploadedApp && !feedback.trim()) {
       toast({
         title: "No content",
-        description: "Please paste AI feedback or UAP-Imp content first",
+        description: "Please upload a file or paste AI feedback first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Use uploaded app content or pasted feedback
+    const content = uploadedApp ? JSON.stringify(uploadedApp, null, 2) : feedback;
+
+    // Double-check not analyzing NoCodeBridge
+    if (content.includes('"name": "NoCodeBridge"') || content.includes('"app_name": "NoCodeBridge"')) {
+      toast({
+        title: "⚠️ Cannot Analyze Bridge",
+        description: "Please upload your exported app, not NoCodeBridge itself.",
         variant: "destructive",
       });
       return;
     }
 
     // Validate content
-    const hasAEIOUHeader = feedback.includes("AEIOU") || feedback.includes("meta");
-    const hasJSON = feedback.trim().startsWith("{");
-    const hasMD = feedback.includes("#") || feedback.includes("##");
+    const hasAEIOUHeader = content.includes("AEIOU") || content.includes("meta");
+    const hasJSON = content.trim().startsWith("{");
+    const hasMD = content.includes("#") || content.includes("##");
 
     let status = "";
     if (hasAEIOUHeader) {
@@ -98,7 +157,7 @@ const Step3Iterate = () => {
 
     const prompt = REIMPORT_PROMPT_TEMPLATE.replace(
       "[PASTE YOUR UAP-IMP OR AI FEEDBACK HERE]",
-      feedback
+      content
     );
 
     setReimportPrompt(prompt);
@@ -227,14 +286,39 @@ const Step3Iterate = () => {
           </CardContent>
         </Card>
 
-        {/* Feedback Input */}
-        <Card className="bg-[#111826]/80 backdrop-blur-sm border-lime-500/50 rounded-2xl">
+        {/* App Upload & Analysis Status */}
+        <Card className="bg-[#111826]/80 backdrop-blur-sm border-cyan-500/50 rounded-2xl">
           <CardHeader>
-            <CardTitle className="text-white">AI Feedback or UAP-Imp</CardTitle>
+            <CardTitle className="text-white flex items-center justify-between">
+              <span>Upload Your Exported App</span>
+              <span className="text-sm font-normal text-cyan-400">
+                Analyzing → {uploadedApp?.meta?.app_name || uploadedApp?.meta?.name || uploadedFileName || "None Uploaded"}
+              </span>
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-gray-400">
-              Paste the AI response from Step 2, or paste your UAP-Imp file content here.
+              Upload your .uap, .json, or .md file from Step 2, or paste AI feedback below.
+            </p>
+            <div className="flex items-center gap-4">
+              <input
+                type="file"
+                accept=".uap,.json,.md,.uap-imp"
+                onChange={handleFileUpload}
+                className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-violet-600 file:text-white hover:file:bg-violet-700 cursor-pointer"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Feedback Input */}
+        <Card className="bg-[#111826]/80 backdrop-blur-sm border-lime-500/50 rounded-2xl">
+          <CardHeader>
+            <CardTitle className="text-white">AI Feedback or Manual Paste</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-gray-400">
+              Or paste AI feedback, UAP-Imp content, or patch plan directly here.
             </p>
             <Textarea
               value={feedback}
