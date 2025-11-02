@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Download, Upload, Sparkles, ArrowRight } from "lucide-react";
 import BridgeNavigation from "@/components/BridgeNavigation";
+import BridgeFooter from "@/components/BridgeFooter";
 
 const Index = () => {
   return (
@@ -21,7 +22,7 @@ const Index = () => {
         {/* Header */}
         <div className="text-center space-y-6">
           <div className="inline-block px-4 py-2 bg-lime-500/20 border border-lime-500/50 rounded-full mb-4">
-            <span className="text-lime-400 font-semibold text-sm">AEIOU Framework v3.5</span>
+            <span className="text-lime-400 font-semibold text-sm">AEIOU Framework v3.7</span>
           </div>
           <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-lime-400 via-cyan-400 to-violet-400 bg-clip-text text-transparent">
             NoCodeBridge 2.0
@@ -130,14 +131,7 @@ const Index = () => {
         </div>
 
         {/* Footer */}
-        <div className="text-center py-8 border-t border-white/10">
-          <p className="text-gray-400 text-sm">
-            NoCodeBridge 2.0 · AEIOU v3.5 · Save Credits. Bridge Better.
-          </p>
-          <p className="text-gray-500 text-xs mt-2">
-            Built by Go No Code Mode Co.
-          </p>
-        </div>
+        <BridgeFooter />
       </div>
     </div>
   );

@@ -8,10 +8,10 @@ export default function BridgeNavigation() {
   const navItems = [
     { path: "/", label: "Home", icon: Home },
     { path: "/bridge", label: "Bridge", icon: GitBranch },
-    { path: "/self-extractor", label: "Export", icon: Download },
+    { path: "/export", label: "Export", icon: Download },
     { path: "/import", label: "Import", icon: Upload },
-    { path: "/return-to-builder", label: "Return", icon: ArrowLeft },
-    { path: "/admin", label: "Docs", icon: FileText }
+    { path: "/return", label: "Return", icon: ArrowLeft },
+    { path: "/docs", label: "Docs", icon: FileText }
   ];
 
   return (

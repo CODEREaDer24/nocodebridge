@@ -3,24 +3,15 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import { initializeAEIOUAutoRepair } from "@/utils/aeiouAutoRepair";
 import Index from "./pages/Index";
 import Import from "./pages/Import";
 import Bridge from "./pages/Bridge";
-import SelfExport from "./pages/SelfExport";
-import SelfExtractorAdmin from "./pages/SelfExtractorAdmin";
-import SelfExtractorTool from "./pages/SelfExtractorTool";
 import SelfExtractor from "./pages/SelfExtractor";
-import InstallExtractor from "./pages/InstallExtractor";
-import UploadAnalyze from "./pages/UploadAnalyze";
-import ImproveWithAI from "./pages/ImproveWithAI";
 import ReturnToBuilder from "./pages/ReturnToBuilder";
 import Admin from "./pages/Admin";
-import Step2Import from "./pages/Step2Import";
-import Step3Iterate from "./pages/Step3Iterate";
-import Step4Reimport from "./pages/Step4Reimport";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,8 +24,8 @@ const App = () => {
     // Success notification
     setTimeout(() => {
       toast({
-        title: "✅ NoCodeBridge tuned up",
-        description: "AEIOU v4.3 stabilized.",
+        title: "✅ AEIOU Bridge v3.7 Ready",
+        description: "Clean Build initialized.",
       });
     }, 1000);
   }, []);
@@ -46,22 +37,29 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
         <Routes>
+          {/* Core Routes v3.7 */}
           <Route path="/" element={<Index />} />
-          <Route path="/import" element={<Import />} />
           <Route path="/bridge" element={<Bridge />} />
-          <Route path="/self-export" element={<SelfExport />} />
-          <Route path="/self-extractor-admin" element={<SelfExtractorAdmin />} />
-          <Route path="/self-extractor" element={<SelfExtractor />} />
-          <Route path="/self-extractor-tool" element={<SelfExtractorTool />} />
-          <Route path="/install-extractor" element={<InstallExtractor />} />
-          <Route path="/upload-analyze" element={<UploadAnalyze />} />
-          <Route path="/improve-with-ai" element={<ImproveWithAI />} />
-          <Route path="/return-to-builder" element={<ReturnToBuilder />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/step2-import" element={<Step2Import />} />
-          <Route path="/step3-iterate" element={<Step3Iterate />} />
-          <Route path="/step4-reimport" element={<Step4Reimport />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/export" element={<SelfExtractor />} />
+          <Route path="/import" element={<Import />} />
+          <Route path="/return" element={<ReturnToBuilder />} />
+          <Route path="/docs" element={<Admin />} />
+          
+          {/* Legacy Route Redirects */}
+          <Route path="/self-export" element={<Navigate to="/bridge" replace />} />
+          <Route path="/self-extractor-admin" element={<Navigate to="/bridge" replace />} />
+          <Route path="/self-extractor" element={<Navigate to="/export" replace />} />
+          <Route path="/self-extractor-tool" element={<Navigate to="/export" replace />} />
+          <Route path="/install-extractor" element={<Navigate to="/bridge" replace />} />
+          <Route path="/upload-analyze" element={<Navigate to="/bridge" replace />} />
+          <Route path="/improve-with-ai" element={<Navigate to="/bridge" replace />} />
+          <Route path="/return-to-builder" element={<Navigate to="/return" replace />} />
+          <Route path="/admin" element={<Navigate to="/docs" replace />} />
+          <Route path="/step2-import" element={<Navigate to="/import" replace />} />
+          <Route path="/step3-iterate" element={<Navigate to="/bridge" replace />} />
+          <Route path="/step4-reimport" element={<Navigate to="/return" replace />} />
+          
+          {/* Catch-all */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

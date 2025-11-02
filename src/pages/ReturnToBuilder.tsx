@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Copy, Check, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import BridgeNavigation from "@/components/BridgeNavigation";
+import BridgeFooter from "@/components/BridgeFooter";
 
 const ReturnToBuilder = () => {
   const [improvedUAP, setImprovedUAP] = useState("");
@@ -183,6 +184,9 @@ After applying changes, confirm: "✅ Improvements merged successfully via NoCod
             </ol>
           </CardContent>
         </Card>
+        
+        {/* Footer */}
+        <BridgeFooter />
       </div>
     </div>
   );

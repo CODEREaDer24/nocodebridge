@@ -21,6 +21,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { saveAs } from "file-saver";
 import BridgeNavigation from "@/components/BridgeNavigation";
+import BridgeFooter from "@/components/BridgeFooter";
 
 // CRC32 checksum generator
 const generateCRC32 = (str: string): string => {
@@ -586,6 +587,9 @@ A fully functional Lovable app that exactly matches the original export:
             </div>
           </CardContent>
         </Card>
+        
+        {/* Footer */}
+        <BridgeFooter />
       </div>
     </div>
   );

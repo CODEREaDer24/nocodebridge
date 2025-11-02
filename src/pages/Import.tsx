@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import "@/utils/rebuilder"; // Load rebuilder hook
 import BridgeNavigation from "@/components/BridgeNavigation";
+import BridgeFooter from "@/components/BridgeFooter";
 
 // Universal parser - auto-detects and normalizes any format
 function parseAnything(text: string, filename: string) {
@@ -382,10 +383,8 @@ export default function Import() {
         )}
 
         {/* Footer */}
-        <div className="text-center py-8 border-t border-white/10 mt-8">
-          <p className="text-gray-400 text-sm">
-            🧩 NoCodeBridge AEIOU v3.0 | Teleportation Loop Ready
-          </p>
+        <div className="mt-8">
+          <BridgeFooter />
         </div>
       </div>
     </div>

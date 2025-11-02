@@ -6,6 +6,7 @@ import { Download, Upload, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { saveAs } from "file-saver";
 import BridgeNavigation from "@/components/BridgeNavigation";
+import BridgeFooter from "@/components/BridgeFooter";
 
 // CRC32 checksum generator
 const generateCRC32 = (str: string): string => {
@@ -82,9 +83,9 @@ export default function Bridge() {
       // Build AEIOU structure
       const aeiouData = {
         meta: {
-          format: "AEIOU v3.6",
+          format: "AEIOU v3.7",
           timestamp,
-          generator: "NoCodeBridge Auto-Bridge v3.6",
+          generator: "NoCodeBridge Auto-Bridge v3.7",
           app_name: appName,
           owner_id: "current-user",
           checksum: ""
@@ -128,7 +129,7 @@ export default function Bridge() {
       const jsonSchema = JSON.stringify(aeiouData, null, 2);
 
       // Generate Markdown
-      const markdown = `# ${appName} - AEIOU v3.6 Export
+      const markdown = `# ${appName} - AEIOU v3.7 Export
 
 **Generated:** ${timestamp}
 **Checksum:** ${calculatedChecksum}
@@ -146,7 +147,7 @@ ${components.map(c => `- ${c.name} (${c.type})`).join('\n')}
 - Supabase integrated
 
 ## Export Details
-This is a complete snapshot of the application structure, captured using the NoCodeBridge Auto-Bridge v3.6.
+This is a complete snapshot of the application structure, captured using the NoCodeBridge Auto-Bridge v3.7.
 `;
 
       // Download files
@@ -154,7 +155,7 @@ This is a complete snapshot of the application structure, captured using the NoC
       const schemaBlob = new Blob([jsonSchema], { type: 'application/json' });
       const mdBlob = new Blob([markdown], { type: 'text/markdown' });
 
-      saveAs(uapBlob, `${appName}-uap-v3.6.uap`);
+      saveAs(uapBlob, `${appName}-uap-v3.7.uap`);
       saveAs(schemaBlob, `${appName}-schema.json`);
       saveAs(mdBlob, `${appName}-export.md`);
 
@@ -187,10 +188,10 @@ This is a complete snapshot of the application structure, captured using the NoC
           {/* Header */}
           <div className="text-center space-y-4">
             <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-              🌉 AEIOU Bridge v3.6
+              🌉 AEIOU Bridge v3.7
             </h1>
             <p className="text-xl text-muted-foreground">
-              Automatic Export & Rebuild Cycle
+              Clean Build - Automatic Export & Rebuild Cycle
             </p>
           </div>
 
@@ -282,14 +283,7 @@ This is a complete snapshot of the application structure, captured using the NoC
           </Card>
 
           {/* Footer */}
-          <div className="text-center py-6 border-t">
-            <p className="text-muted-foreground text-sm">
-              🚀 AEIOU Bridge v3.6 | Auto-Cycle Ready
-            </p>
-            <p className="text-muted-foreground text-xs mt-2">
-              Supabase in read-only sandbox mode
-            </p>
-          </div>
+          <BridgeFooter />
         </div>
       </div>
     </div>
